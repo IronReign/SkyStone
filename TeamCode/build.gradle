@@ -13,3 +13,10 @@
 
 // Include common definitions from above.
 apply from: '../build.common.gradle'
+<<<<<<< HEAD
+=======
+
+android {
+    buildToolsVersion '28.0.3'
+}
+>>>>>>> ee3ceebf6b132a178700d8d89dcc1236f6cff306
