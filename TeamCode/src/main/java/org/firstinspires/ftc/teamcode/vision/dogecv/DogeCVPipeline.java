@@ -13,6 +13,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -179,7 +180,7 @@ public class DogeCVPipeline {
             Imgproc.putText(displayMat,
                     "Gold: " + String.format("%.2f X=%.2f", chosenYellowScore, (double)chosenYellowRect.x),
                     new Point(chosenYellowRect.x - 5, chosenYellowRect.y - 10),
-                    Core.FONT_HERSHEY_PLAIN,
+                    Imgproc.FONT_HERSHEY_PLAIN,
                     1.3,
                     new Scalar(0, 255, 255),
                     2);
@@ -197,7 +198,7 @@ public class DogeCVPipeline {
                 Imgproc.putText(displayMat,
                         "Silver: " + String.format("Score %.2f ", score) ,
                         new Point(rect.x - 5, rect.y - 10),
-                        Core.FONT_HERSHEY_PLAIN,
+                        Imgproc.FONT_HERSHEY_PLAIN,
                         1.3,
                         new Scalar(255, 255, 255),
                         2);

@@ -1124,7 +1124,9 @@ public void BalanceArgos(double Kp, double Ki, double Kd, double pwr, double cur
         mRgba = bitmapToMat(bm, CvType.CV_8UC3);
         Mat overlay = bitmapToMat(bm, CvType.CV_8UC3); //overlay should really be an empty Mat of the same size as bm
 
-        Scalar targetHue = RC.a().getTargetBlobColor();
+        //Scalar targetHue = RC.a().getTargetBlobColor();
+        Scalar targetHue = new Scalar(1); //just to kill the error
+
 
 
         if (mIsColorSelected) {

@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -60,6 +61,32 @@ public class MiniMech extends LinearOpMode {
     private DcMotor leftBack   = null;
     private DcMotor rightFront = null;
     private DcMotor rightBack  = null;
+    private DcMotor elbow = null;
+    private Crane pos = null;
+    private DcMotor extender = null;
+    private Servo gate = null;
+    private Servo hook = null;
+
+    private boolean[] buttonSavedStates = new boolean[16];
+    private int a = 0; //lower glyph lift
+    private int b = 1; //toggle grip/release on glyph
+    private int x = 2; //no function
+    private int y = 3; //raise glyph lift
+    private int dpad_down = 4; //enable/disable ftcdash telemetry
+    private int dpad_up = 5; //vision init/de-init
+    private int dpad_left = 6; //vision provider switch
+    private int dpad_right = 7; //switch viewpoint
+    private int left_bumper = 8; //increment state down (always)
+    private int right_bumper = 9; //increment state up (always)
+    private int startBtn = 10; //toggle active (always)
+    private int left_trigger = 11; //vision detection
+    private int right_trigger = 12;
+    private int back_button = 13;
+    private int left_stick_button = 14;
+    private int right_stick_button = 15; //sound player
+
+
+
 
     @Override
     public void runOpMode() {
@@ -69,10 +96,15 @@ public class MiniMech extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFront = hardwareMap.get(DcMotor.class, "left_front");
-        leftBack = hardwareMap.get(DcMotor.class, "left_back");
-        rightFront = hardwareMap.get(DcMotor.class, "right_front");
-        rightBack = hardwareMap.get(DcMotor.class, "right_back");
+        leftFront = hardwareMap.get(DcMotor.class, "motorFrontLeft");
+        leftBack = hardwareMap.get(DcMotor.class, "motorBackLeft");
+        rightFront = hardwareMap.get(DcMotor.class, "motorFrontRight");
+        rightBack = hardwareMap.get(DcMotor.class, "motorBackRight");
+        elbow = hardwareMap.get(DcMotor.class, "elbow");
+        extender = hardwareMap.get(DcMotor.class, "extender");
+        hook = hardwareMap.get(Servo.class, "hook");
+        gate = hardwareMap.get(Servo.class, "gate");
+        pos = new Crane(elbow, extender, hook, gate);
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -80,6 +112,8 @@ public class MiniMech extends LinearOpMode {
         leftBack.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.REVERSE);
+        elbow.setDirection(DcMotor.Direction.REVERSE);
+        extender.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -93,6 +127,8 @@ public class MiniMech extends LinearOpMode {
             double leftBackPower;
             double rightFrontPower;
             double rightBackPower;
+            double elbowSetPose;
+
 
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
@@ -100,8 +136,8 @@ public class MiniMech extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight
 
-            double drive = gamepad1.left_stick_y;
-            double turn = gamepad1.right_stick_x;
+            double drive = -gamepad1.left_stick_y;
+            double turn = -gamepad1.right_stick_x;
             double strafe = gamepad1.left_stick_x;
 
             leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
@@ -110,11 +146,36 @@ public class MiniMech extends LinearOpMode {
             rightBackPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
 
 
+
             // Send calculated power to wheels
             leftFront.setPower(leftFrontPower);
             leftBack.setPower(leftBackPower);
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
+
+            //elbow code
+            if (gamepad1.dpad_right) {
+                //pos.articulate(PoseBigWheel.Articulation.manual);
+                pos.increaseElbowAngle();
+            }
+            if (gamepad1.dpad_left) {
+                //robot.articulate(PoseBigWheel.Articulation.manual);
+                pos.decreaseElbowAngle();
+            }
+            if (gamepad1.dpad_up) {
+                //robot.articulate(PoseBigWheel.Articulation.manual);
+                pos.extendBelt();
+            }
+            if (gamepad1.dpad_left) {
+                //robot.articulate(PoseBigWheel.Articulation.manual);
+                pos.retractBelt();
+            }
+            if(toggleAllowed(gamepad1.a,a)){
+                pos.hookToggle();
+            }
+            if(toggleAllowed(gamepad1.y,y)){
+                pos.gateToggle();
+            }
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -122,5 +183,21 @@ public class MiniMech extends LinearOpMode {
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
             telemetry.update();
         }
+    }
+    //checks to see if a specific button should allow a toggle at any given time; needs a rework
+    private boolean toggleAllowed(boolean button, int buttonIndex) {
+        if (button) {
+            if (!buttonSavedStates[buttonIndex]) { //we just pushed the button, and when we last looked at it, it was not pressed
+                buttonSavedStates[buttonIndex] = true;
+                return true;
+            } else { //the button is pressed, but it was last time too - so ignore
+
+                return false;
+            }
+        }
+
+        buttonSavedStates[buttonIndex] = false; //not pressed, so remember that it is not
+        return false; //not pressed
+
     }
 }

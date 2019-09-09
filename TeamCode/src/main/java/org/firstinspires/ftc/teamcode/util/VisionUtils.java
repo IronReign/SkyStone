@@ -6,7 +6,8 @@ package org.firstinspires.ftc.teamcode.util;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.support.annotation.Nullable;
+//import android.support.annotation.Nullable;
+
 import android.util.Log;
 import android.view.View;
 
@@ -302,7 +303,7 @@ public class VisionUtils {
         return NOT_VISIBLE;
     }//isBlueOrRed
 
-    @Nullable
+    //@Nullable
     public static Image getImageFromFrame(VuforiaLocalizer.CloseableFrame frame, int format) {
 
         long numImgs = frame.getNumImages();
