@@ -26,7 +26,7 @@ public class Crane {
 
     int elbowPosInternal = 0;
     int elbowPos = 0;
-    double elbowPwr = 0;
+    double elbowPwr = 1;
 
     int extendABobPosInternal = 0;
     int extendABobPos = 0;
@@ -87,14 +87,16 @@ public class Crane {
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeGate){
 
+        elbow.setTargetPosition(elbow.getCurrentPosition());
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
         //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        intakeLeft.setDirection(Servo.Direction.REVERSE);
+        //intakeGate.setDirection(Servo.Direction.REVERSE);
 
         this.elbow = elbow;
         this.extendABob = extendABob;
@@ -123,11 +125,11 @@ public class Crane {
         pos_latched = 2764;
         pos_postlatch = 1240;
 
-        servoGateOpen = 900;
-        servoGateClosed = 1495;
+        servoGateOpen = 1700;
+        servoGateClosed = 900;
 
-        servoHooked = 1600;
-        servoUnhooked = 1100;
+        servoHooked = 1800;
+        servoUnhooked = 1300;
 
         //belt extension encoder values
         extendDeposit = 1489;
@@ -393,14 +395,15 @@ public class Crane {
         setElbowTargetPos(Math.min(getElbowCurrentPos() + 100, pos_Intake));
     }
     public void decreaseElbowAngle(){
-        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() - 250, extendMin));
+        setElbowTargetPos(Math.max(getElbowCurrentPos() - 100, 0));
+
     }
 
     public void extendBelt(){
         setExtendABobTargetPos(Math.min(getExtendABobCurrentPos() + 250, extendMax));
     }
     public void retractBelt(){
-        setElbowTargetPos(Math.max(getElbowCurrentPos() - 250, 0));
+        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() - 250, extendMin));
     }
 
     public void runToAngle(double angle){

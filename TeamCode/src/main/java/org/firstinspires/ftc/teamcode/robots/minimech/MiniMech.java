@@ -166,7 +166,7 @@ public class MiniMech extends LinearOpMode {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.extendBelt();
             }
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpad_down) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.retractBelt();
             }
@@ -176,7 +176,8 @@ public class MiniMech extends LinearOpMode {
             if(toggleAllowed(gamepad1.y,y)){
                 pos.gateToggle();
             }
-
+            //call the update method in crane
+            pos.update();
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f) (%.2f), right (%.2f) (%.2f)",
