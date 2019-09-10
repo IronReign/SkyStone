@@ -136,8 +136,8 @@ public class MiniMech extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight
 
-            double drive = -gamepad1.left_stick_y;
-            double turn = -gamepad1.right_stick_x;
+            double drive = -gamepad1.left_stick_y *.3;
+            double turn = gamepad1.right_stick_x *.3;
             double strafe = gamepad1.left_stick_x;
 
             leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
@@ -154,19 +154,19 @@ public class MiniMech extends LinearOpMode {
             rightBack.setPower(rightBackPower);
 
             //elbow code
-            if (gamepad1.dpad_right) {
+            if (gamepad1.dpad_up) {
                 //pos.articulate(PoseBigWheel.Articulation.manual);
                 pos.increaseElbowAngle();
             }
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpad_down) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.decreaseElbowAngle();
             }
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_left) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.extendBelt();
             }
-            if (gamepad1.dpad_down) {
+            if (gamepad1.dpad_right) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.retractBelt();
             }

@@ -87,10 +87,12 @@ public class Crane {
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeGate){
 
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -400,10 +402,10 @@ public class Crane {
     }
 
     public void extendBelt(){
-        setExtendABobTargetPos(Math.min(getExtendABobCurrentPos() + 250, extendMax));
+        setExtendABobTargetPos(Math.min(getExtendABobCurrentPos() + 100, extendMax));
     }
     public void retractBelt(){
-        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() - 250, extendMin));
+        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() - 100, extendMin));
     }
 
     public void runToAngle(double angle){
