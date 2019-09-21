@@ -170,6 +170,14 @@ public class MiniMech extends LinearOpMode {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.retractBelt();
             }
+            if (gamepad1.right_stick_y < -.1){
+                //robot.articulate(PoseBigWheel.Articulation.manual);
+                pos.extendBelt();
+            }
+            if (gamepad1.right_stick_y > .1) {
+                //robot.articulate(PoseBigWheel.Articulation.manual);
+                pos.retractBelt();
+            }
             if(toggleAllowed(gamepad1.a,a)){
                 pos.hookToggle();
             }
