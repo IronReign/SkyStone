@@ -15,11 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.teamcode.PIDController;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.RC;
-import org.firstinspires.ftc.teamcode.robots.kraken.GlyphSystem2;
-import org.firstinspires.ftc.teamcode.robots.kraken.JewelArm;
-import org.firstinspires.ftc.teamcode.robots.kraken.RelicArm;
 
 
 /**

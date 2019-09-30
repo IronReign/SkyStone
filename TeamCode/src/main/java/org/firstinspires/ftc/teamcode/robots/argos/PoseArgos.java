@@ -1,13 +1,7 @@
 package org.firstinspires.ftc.teamcode.robots.argos;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.util.Log;
 
 import com.qualcomm.ftccommon.SoundPlayer;
@@ -30,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.teamcode.util.CsvLogKeeper;
-import org.firstinspires.ftc.teamcode.PIDController;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.vision.colorblob.ColorBlobDetector;
 import org.opencv.core.CvType;
