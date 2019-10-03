@@ -51,7 +51,7 @@ import static org.firstinspires.ftc.teamcode.PoseBigWheel.servoNormalize;
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
  */
 
-@TeleOp(name = "Game_6832", group = "Challenge")  // @Autonomous(...) is the other common choice
+@TeleOp(name = "Icarus_6832", group = "Challenge")  // @Autonomous(...) is the other common choice
 //  @Autonomous
 public class Game_6832 extends LinearOpMode {
 
