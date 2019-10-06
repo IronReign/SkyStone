@@ -154,30 +154,30 @@ public class MiniMech extends LinearOpMode {
             rightBack.setPower(rightBackPower);
 
             //elbow code
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_right) {
                 //pos.articulate(PoseBigWheel.Articulation.manual);
                 pos.increaseElbowAngle();
             }
-            if (gamepad1.dpad_down) {
+            if (gamepad1.dpad_left) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.decreaseElbowAngle();
             }
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpad_up) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.extendBelt();
             }
-            if (gamepad1.dpad_right) {
+            if (gamepad1.dpad_down) {
                 //robot.articulate(PoseBigWheel.Articulation.manual);
                 pos.retractBelt();
             }
-            if (gamepad1.right_stick_y < -.1){
-                //robot.articulate(PoseBigWheel.Articulation.manual);
-                pos.extendBelt();
-            }
-            if (gamepad1.right_stick_y > .1) {
-                //robot.articulate(PoseBigWheel.Articulation.manual);
-                pos.retractBelt();
-            }
+//            if (gamepad1.right_stick_y < -.1){
+//                //robot.articulate(PoseBigWheel.Articulation.manual);
+//                pos.extendBelt();
+//            }
+//            if (gamepad1.right_stick_y > .1) {
+//                //robot.articulate(PoseBigWheel.Articulation.manual);
+//                pos.retractBelt();
+//            }
             if(toggleAllowed(gamepad1.a,a)){
                 pos.hookToggle();
             }
