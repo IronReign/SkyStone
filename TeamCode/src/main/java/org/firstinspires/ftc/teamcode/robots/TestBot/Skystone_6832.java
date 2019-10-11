@@ -38,6 +38,7 @@ import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -169,9 +170,6 @@ public class Skystone_6832 extends LinearOpMode {
         // functions that waitForStart() normally does, but needed to customize it.
 
         robot.resetMotors(true);
-        robot.crane.hookOn();
-        robot.crane.closeGate();
-
         auto.visionProviderFinalized = false;
 
 
@@ -310,7 +308,7 @@ public class Skystone_6832 extends LinearOpMode {
 
                         break;
                     case 7:
-                        //balance();
+                        tpmtuning();
                         break;
                     case 8: //turn to IMU
                         robot.setAutonSingleStep(true);
@@ -353,8 +351,8 @@ public class Skystone_6832 extends LinearOpMode {
 
         switch (tpmtuningstage){
             case 0: //todo - this probably needs work to setup the basic articulation for odometer distance tuning
-                if(robot.goToPosition(0,robot.crane.pos_reverseSafeDrive,.75,.3)){
-                }
+//                if(robot.goToPosition(0,robot.crane.pos_reverseSafeDrive,.75,.3)){
+//                }
 
                 if(toggleAllowed(gamepad1.y,y)){
                     robot.resetMotors(true);
@@ -365,8 +363,9 @@ public class Skystone_6832 extends LinearOpMode {
                 }
                 break;
             case 1:
-                if(robot.driveForward(true,.2,1)){
+                if(robot.driveForward(true,2,.35)){
                     tpmtuningstage = 0;
+                    robot.resetMotors(true);
                 }
                 break;
         }
@@ -449,100 +448,65 @@ public class Skystone_6832 extends LinearOpMode {
 
 
 
-        switch (gameMode) {
-            case 0: //regular (reverse) mode
-                joystickDriveRegularModeReverse();
-                break;
-            case 1: //endgame mode
-                joystickDriveEndgameMode();
-                break;
-            case 2: //pre-game = testing auton deploying functions
-                joystickDrivePregameMode();
-                break;
-            case 3: //regular mode
-                joystickDriveRegularMode();
-                break;
-        }
+        double leftFrontPower;
+        double leftBackPower;
+        double rightFrontPower;
+        double rightBackPower;
+        double elbowSetPose;
 
-        //manual control
-        if (gamepad1.dpad_down) {
-            robot.articulate(PoseSkystone.Articulation.manual);
+
+        // Choose to drive using either Tank Mode, or POV Mode
+        // Comment out the method that's not used.  The default below is POV.
+
+        // POV Mode uses left stick to go forward, and right stick to turn.
+        // - This uses basic math to combine motions and is easier to drive straight
+
+        double drive = -gamepad1.left_stick_y *.3;
+        double turn = gamepad1.right_stick_x *.3;
+        double strafe = gamepad1.left_stick_x * 3;
+
+        leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
+        leftBackPower = Range.clip(drive + turn - strafe, -1.0, 1.0);
+        rightFrontPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
+        rightBackPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
+
+
+
+        robot.driveMixerMec(drive, strafe, turn);
+
+        //elbow code
+        if (gamepad1.dpad_right) {
+            //pos.articulate(PoseBigWheel.Articulation.manual);
+            robot.crane.increaseElbowAngle();
+        }
+        if (gamepad1.dpad_left) {
+            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.decreaseElbowAngle();
         }
         if (gamepad1.dpad_up) {
-            robot.articulate(PoseSkystone.Articulation.manual);
-            robot.crane.increaseElbowAngle();
-        }
-
-        if (gamepad1.right_stick_y > 0.5) {
-            robot.articulate(PoseSkystone.Articulation.manual);
-            robot.crane.retractBelt();
-        }
-        if (gamepad1.right_stick_y < -0.5) {
-            robot.articulate(PoseSkystone.Articulation.manual);
+            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.extendBelt();
         }
-
-        if (gamepad1.dpad_right) {
-            robot.articulate(PoseSkystone.Articulation.manual);
+        if (gamepad1.dpad_down) {
+            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.retractBelt();
         }
-        if (gamepad1.dpad_left) {
-            robot.articulate(PoseSkystone.Articulation.manual);
-            robot.crane.extendBelt();
-        }
-
-
-
-
+//            if (gamepad1.right_stick_y < -.1){
+//                //robot.articulate(PoseBigWheel.Articulation.manual);
+//                pos.extendBelt();
+//            }
+//            if (gamepad1.right_stick_y > .1) {
+//                //robot.articulate(PoseBigWheel.Articulation.manual);
+//                pos.retractBelt();
+//            }
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
         }
         if(toggleAllowed(gamepad1.y,y)){
             robot.crane.gateToggle();
         }
-
-
-        //elbow control
-        currTarget = robot.crane.getExtendABobTargetPos();
-        if (toggleAllowed(gamepad1.left_bumper, left_bumper)) {
-            if (currTarget == robot.crane.extendMid) {
-                currTarget = robot.crane.extendMax;
-                //robot.crane.setElbowTargetPos(robot.beltToElbow(robot.crane.getExtendABobCurrentPos(),0));
-            } else {
-                currTarget = robot.crane.extendMid;
-                //robot.crane.setElbowTargetPos(robot.beltToElbow(robot.crane.getExtendABobCurrentPos(),0));
-            }
-
-        }
-        if (currTarget >= 10) {
-            robot.crane.setExtendABobTargetPos(currTarget);
-        }
-
-
-        //endgame mode
-        if (toggleAllowed(gamepad1.right_bumper, right_bumper)) {
-            gameMode = (gameMode + 1) % NUM_MODES;
-        }
-
-
-        //intake code
-        double triggers = gamepad1.left_trigger - gamepad1.right_trigger;
-        if(false){//robot.getArticulation() == PoseSkystone.Articulation.reverseIntake || robot.getArticulation() == PoseSkystone.Articulation.reverseDeposit){
-           // robot.crane.collect();
-        }else {
-            if (triggers > 0.1)
-                robot.crane.collect();
-            else if (triggers < -0.1)
-                robot.crane.eject();
-            else
-                robot.crane.stopIntake();
-        }
-        //Gracious Professionalism!
-        if (soundState == 1 && toggleAllowed(gamepad1.right_stick_button, right_stick_button)) {
-            SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, soundID);
-        }
-
+        //call the update method in crane
+        robot.crane.update();
     }
 
     private void joystickDrivePregameMode() {
@@ -853,10 +817,10 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("status", () -> robot.imu.getSystemStatus().toShortString())
                 .addData("mineralState", () -> auto.mineralState)
-                .addData("distForward", () -> robot.distForward.getDistance(DistanceUnit.METER))
-                .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
-                .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
-                .addData("depositDriveDistance", () -> robot.depositDriveDistance);
+//                .addData("distForward", () -> robot.distForward.getDistance(DistanceUnit.METER))
+//                .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
+//                .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
+                .addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
 
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)

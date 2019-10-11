@@ -286,6 +286,23 @@ public class PoseSkystone
         this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
         this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
 
+        motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
+        motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
+        motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
+        motorBackRight = hwMap.get(DcMotor.class, "motorBackRight");
+
+        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
+        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elbow.setDirection(DcMotor.Direction.REVERSE);
+        extender.setDirection(DcMotor.Direction.REVERSE);
+
+
         //behaviors of motors
 /*
         driveLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
