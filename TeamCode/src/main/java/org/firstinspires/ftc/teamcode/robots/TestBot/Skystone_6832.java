@@ -363,6 +363,8 @@ public class Skystone_6832 extends LinearOpMode {
                 }
                 break;
             case 1:
+                if(robot.driveForward(true,2,.35)){ //calibrate forward/backward
+                //if(robot.driveStrafe(true,2,.35)){ //calibrate strafe if capable - uncomment only one of these at a time
                     tpmtuningstage = 0;
                     robot.resetMotors(true);
                 }
