@@ -82,8 +82,8 @@ public class PoseSkystone
 
 
     //PID values
-    public static int forwardTPM = 1060; //todo - fix value this was based on icarus - measurement was for the original 42 tooth driven sprocket, since replaced by a 32 tooth sprocket
-    private int strafeTPM = (int) (3145f * .75); //todo - fix value high priority this current value is based on Kraken - minimech will be different
+    public static int forwardTPM = 1621; //todo - fix value this was based on icarus - measurement was for the original 42 tooth driven sprocket, since replaced by a 32 tooth sprocket
+    private int strafeTPM = 1909; //todo - fix value high priority this current value is based on Kraken - minimech will be different
     private double poseX;
     private double poseY;
     private double poseHeading; //current heading in degrees. Might be rotated by 90 degrees from imu's heading when strafing

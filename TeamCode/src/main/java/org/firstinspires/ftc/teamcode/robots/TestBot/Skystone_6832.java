@@ -363,7 +363,6 @@ public class Skystone_6832 extends LinearOpMode {
                 }
                 break;
             case 1:
-                if(robot.driveForward(true,2,.35)){
                     tpmtuningstage = 0;
                     robot.resetMotors(true);
                 }
