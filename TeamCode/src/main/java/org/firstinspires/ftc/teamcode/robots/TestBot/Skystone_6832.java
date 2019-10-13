@@ -282,7 +282,7 @@ public class Skystone_6832 extends LinearOpMode {
                         joystickDrive();
                         break;
                     case 1: //autonomous that goes to opponent's crater
-                        if (auto.depotSide_worlds.execute()) active = false;
+                        if (auto.primaryBlueMec.execute()) active = false;
                         break;
                     case 2: //autonomous that only samples
                         if (auto.craterSide_worlds.execute()) active = false;
@@ -810,7 +810,8 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("roll", () -> robot.getRoll())
                 .addData("pitch", () -> robot.getPitch())
-                .addData("yaw", () -> robot.getHeading());
+                .addData("yaw", () -> robot.getHeading())
+                .addData("yawraw", () -> robot.getHeading());
         telemetry.addLine()
                 .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         telemetry.addLine()

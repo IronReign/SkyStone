@@ -60,6 +60,24 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.PURPLE)) //purple color
             .addState(() -> robot.rotateIMU(0, 1)) //turn back to center
             .build();
+    public StateMachine primaryBlueMec = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
+            .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
+            .addState(() -> (robot.driveForward(true, .5, .80))) //forward to wall - todo: change to stop with distance sensor insteasd of odometry
+            .addState(() -> (robot.rotateIMU(0, 4))) //rotate back toward facing quarry
+            //pick up skystone
+            .addState(() -> (robot.rotateIMU(270, 4))) //rotate back toward building zone - stay in 2nd column
+            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
+            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
+            .addState(() ->robot.crane.setElbowTargetPos(1500,1.0)) //todo: should be an articulation to raise crane to current tower level - for now just raising a fair bit
+            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until proximity from back wall detected
+            .addState(() -> (robot.rotateIMU(0, 3))) //turn back to foundation
+            //deposit stones
+            .addState(() -> (robot.rotateIMU(90, 3)))
+            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
+            .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
+            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
+            .build();
 
     public StateMachine depotSide_worlds = getStateMachine(autoStage)
             .addNestedStateMachine(autoSetupReverse)

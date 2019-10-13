@@ -36,7 +36,7 @@ public class PoseSkystone
     //setup
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
-    public double kpDrive = 0.010; //proportional constant multiplier
+    public double kpDrive = 0.01; //proportional constant multiplier
     public double kiDrive = 0.000; //integral constant multiplier
     public double kdDrive = 0.001; //derivative constant multiplier
 
@@ -336,7 +336,7 @@ public class PoseSkystone
         parametersIMULift.loggingEnabled = true;
         parametersIMULift.loggingTag = "IMULift";
 
-        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu = hwMap.get(BNO055IMU.class, "imu 1");
         imu.initialize(parametersIMU);
 
     }
@@ -381,12 +381,12 @@ public class PoseSkystone
             //first time in - we assume that the robot has not started moving and that orientation values are set to the current absolute orientation
             //so first set of imu readings are effectively offsets
 
-            offsetHeading = wrapAngleMinus(poseHeading, imuAngles.firstAngle);
+            offsetHeading = wrapAngleMinus(360-imuAngles.firstAngle, poseHeading);
             offsetRoll = wrapAngleMinus(imuAngles.secondAngle, poseRoll);
             offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, posePitch);
             initialized = true;
         }
-        poseHeading = wrapAngle(imuAngles.firstAngle, offsetHeading);
+        poseHeading = wrapAngle(360-imuAngles.firstAngle, offsetHeading);
         posePitch = wrapAngle(imuAngles.thirdAngle, offsetPitch);
         poseRoll = wrapAngle(imuAngles.secondAngle, offsetRoll);
 
@@ -1475,6 +1475,7 @@ public class PoseSkystone
         return poseHeading;
     }
 
+    public double getHeadingRaw() {return imuAngles.firstAngle;}
     /**
      * Returns the speed of the robot
      *
