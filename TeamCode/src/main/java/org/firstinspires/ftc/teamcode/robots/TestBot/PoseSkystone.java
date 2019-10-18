@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.robots.TestBot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,9 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.CenterOfGravityCalculator;
 import org.firstinspires.ftc.teamcode.RC;
-import org.firstinspires.ftc.teamcode.Superman;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
 
@@ -55,7 +52,8 @@ public class PoseSkystone
     private DcMotor motorBackRight  = null;
     private DcMotor elbow = null;
     private DcMotor extender = null;
-    private Servo gate = null;
+    private Servo intakeServoFront= null;
+    private Servo intakeServoBack= null;
     private Servo hook = null;
     Servo blinkin = null;
 
@@ -277,7 +275,8 @@ public class PoseSkystone
 
 
 
-        this.gate         = this.hwMap.servo.get("gate");
+        this.intakeServoFront         = this.hwMap.servo.get("intakeServoFront");
+        this.intakeServoBack         = this.hwMap.servo.get("intakeServoBack");
 
         this.hook               = this.hwMap.servo.get("hook");
 
@@ -318,7 +317,7 @@ public class PoseSkystone
            }
 */
         //setup subsystems
-        crane = new Crane(elbow,extender,hook, gate);
+        crane = new Crane(elbow,extender,hook, intakeServoFront, intakeServoBack);
         ledSystem = new LEDSystem(blinkin);
 
         moveMode = MoveMode.still;
@@ -336,7 +335,7 @@ public class PoseSkystone
         parametersIMULift.loggingEnabled = true;
         parametersIMULift.loggingTag = "IMULift";
 
-        imu = hwMap.get(BNO055IMU.class, "imu 1");
+        imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersIMU);
 
     }
@@ -742,7 +741,7 @@ public class PoseSkystone
                //goToPreIntake();
                break;
            case intake: //todo - grab a stone
-               crane.closeGate();
+               ////crane.closeGate();
                //goToIntake();
                break;
 
@@ -773,7 +772,7 @@ public class PoseSkystone
 
                        driveForward(true,.4, 1); //drive toward lander - helps pre-position  for deposit and slightly counters the robots tendency to over-rotate toward the lander because of all of the other moves
                        if (crane.extendToMax(1,15)) {
-                           crane.openGate(); //experimental - auto increaseElbowAngle gate requires that we are on-target side to side and in depth - not really ready for this but wanting to try it out
+                           crane.grabStone(); //experimental - auto increaseElbowAngle gate requires that we are on-target side to side and in depth - not really ready for this but wanting to try it out
                            miniState = 0; //just being a good citizen for next user of miniState
                            articulation = Articulation.manual; //force end of articulation by switching to manual
                            return Articulation.manual;
@@ -821,7 +820,7 @@ public class PoseSkystone
 
         crane.setElbowTargetPos(crane.pos_SafeDrive);
         crane.extendToLow(); //set arm extension to preset for intake which helps move COG over drive wheels a bit
-        crane.closeGate();
+        //crane.closeGate();
 
         return crane.nearTarget();
     }

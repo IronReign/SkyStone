@@ -5,7 +5,8 @@
             <NeveRest20Gearmotor name="extender" port="2" />
             <NeveRest20Gearmotor name="elbow" port="3" />
             <Servo name="hook" port="4" />
-            <Servo name="gate" port="5" />
+            <Servo name="intakeServoFront" port="5" />
+            <Servo name="intakeServoBack" port="3" />
             <Servo name="blinkin" port="0" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
             <REV_VL53L0X_RANGE_SENSOR name="distRight" port="0" bus="2"/>

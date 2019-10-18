@@ -97,9 +97,9 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> {robot.crane.stopIntake(); return robot.crane.extendToMid(1,10);})
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.PURPLE))
@@ -130,9 +130,9 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> {robot.crane.stopIntake(); return robot.crane.extendToMid(1,10);})
             //.addState(() -> robot.articulate(PoseSkystone.Articulation.reverseDriving,true))
@@ -194,9 +194,9 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1350, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+900, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1350, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+900, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> robot.crane.extendToMid(1,10))
             .addSingleState(() -> robot.crane.stopIntake())
@@ -207,7 +207,7 @@ public class Autonomous {
             .addState(() -> robot.getArticulation() == PoseSkystone.Articulation.manual)
 
             .addTimedState(1,
-                    () -> robot.crane.eject(),
+                    () -> robot.crane.ejectStone(),
                     () -> robot.crane.stopIntake())
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.PURPLE))
             .addSingleState(() -> robot.crane.extendToMin(1,10))
@@ -234,15 +234,15 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> robot.crane.extendToMid(1,10))
             .addSingleState(() -> robot.crane.stopIntake())
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.PURPLE))
             .addState(() -> robot.rotateIMU(0, 1)) //turn to crater
-            .addSingleState(() -> robot.crane.eject())
+            .addSingleState(() -> robot.crane.ejectStone())
             .addState(() -> robot.driveForward(true, .1, DRIVE_POWER))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.reverseIntake))
             .addState(() -> robot.getArticulation() == PoseSkystone.Articulation.manual)
@@ -254,7 +254,7 @@ public class Autonomous {
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.reverseDeposit))
             .addState(() -> robot.getArticulation() == PoseSkystone.Articulation.manual)
             .addTimedState(2,
-                    () -> robot.crane.eject(),
+                    () -> robot.crane.ejectStone(),
                     () -> robot.crane.stopIntake())
             .addState(() -> robot.rotateIMU(0, 1)) //turn to crater
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.reverseDriving))
@@ -310,9 +310,9 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> {robot.crane.stopIntake(); return robot.crane.extendToMid(1,10);})
             //.addState(() -> robot.articulate(PoseSkystone.Articulation.reverseDriving,true))
@@ -346,9 +346,9 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.GOLD))
             .addSingleState(() -> robot.crane.setBeltToElbowModeEnabled())
             .addMineralState(mineralStateProvider,
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
-                    () -> { robot.crane.eject(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+800, 1, 10);},
+                    () -> { robot.crane.ejectStone(); return robot.crane.extendToPosition(robot.crane.extendMid+1300, 1, 10);})
             .addSingleState(() -> robot.crane.setBeltToElbowModeDisabled())
             .addState(() -> {robot.crane.stopIntake(); return robot.crane.extendToMid(1,10);})
             //.addState(() -> robot.articulate(PoseSkystone.Articulation.reverseDriving,true))
@@ -496,7 +496,7 @@ public class Autonomous {
             .addState(() -> robot.crane.setElbowTargetPos(618, 1))
             .addState(() -> robot.crane.extendToMid(1, 15))
             .addTimedState(DUCKY_TIME, //yeet ducky
-                    () -> robot.crane.eject(),
+                    () -> robot.crane.ejectStone(),
                     () -> robot.crane.stopIntake())
             .build();
 
@@ -524,7 +524,7 @@ public class Autonomous {
             .addState(() -> robot.articulate(PoseSkystone.Articulation.manual, true))
             .addState(() -> robot.crane.extendToMax(1,10))
             .addTimedState(DUCKY_TIME, //yeet ducky
-                    () -> robot.crane.eject(),
+                    () -> robot.crane.ejectStone(),
                     () -> robot.crane.stopIntake())
             .addState(() -> robot.crane.extendToMid(1,10))
             .addState(() -> robot.articulate(PoseSkystone.Articulation.driving, true))
@@ -578,7 +578,7 @@ public class Autonomous {
             .addState(() -> robot.crane.setElbowTargetPos(618, 1))
             .addState(() -> robot.crane.extendToMid(1, 15))
             .addTimedState(DUCKY_TIME, //yeet ducky
-                    () -> robot.crane.eject(),
+                    () -> robot.crane.ejectStone(),
                     () -> robot.crane.stopIntake())
             .addState(() -> robot.driveForward(false, 2, DRIVE_POWER))
             .addSingleState(() -> robot.crane.setElbowTargetPos(robot.crane.pos_AutoPark)) //extendBelt elbow to park

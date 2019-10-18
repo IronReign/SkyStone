@@ -19,7 +19,8 @@ public class Crane {
     Servo intakeRight = null;
     Servo intakeLeft = null;
     Servo hook = null;
-    Servo intakeGate = null;
+    Servo intakeServoFront = null;
+    Servo intakeServoBack = null;
 
     int elbowPosInternal = 0;
     int elbowPos = 0;
@@ -75,14 +76,14 @@ public class Crane {
 
 
     private boolean hookUp = true;
-    private boolean gateOpen  = true;
+    private int gripperState = 0;
 
     //filler value; needs to be updated to reflect actual ratio
     public double ticksPerDegree = 22.3296703;
 
     public boolean active = true;
 
-    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeGate){
+    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront, Servo intakeServoBack){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
@@ -100,8 +101,9 @@ public class Crane {
         this.elbow = elbow;
         this.extendABob = extendABob;
         this.hook = hook;
-        this.intakeGate = intakeGate;
-
+        this.intakeServoFront = intakeServoFront;
+        this.intakeServoBack = intakeServoBack;
+        intakeServoBack.setDirection(Servo.Direction.REVERSE);
 
         intakePwr = .3; //.35;
         //normal Teleop encoder values
@@ -124,7 +126,7 @@ public class Crane {
         pos_latched = 2764;
         pos_postlatch = 1240;
 
-        servoGateOpen = 1700;
+        servoGateOpen = 2200;
         servoGateClosed = 900;
 
         servoHooked = 1800;
@@ -179,13 +181,13 @@ public class Crane {
     public void updateIntake() {
         switch(intakeState) {
             case 0:
-                stopIntake();
+                //stopIntake();
                 break;
             case 1:
                 collect();
                 break;
             case 2:
-                eject();
+                ejectStone();
                 break;
             case 3:
             default:
@@ -227,21 +229,38 @@ public class Crane {
 
 
 
-    public void openGate(){
-        intakeGate.setPosition(servoNormalize(servoGateOpen));
-        gateOpen = true;
+    public void grabStone(){
+        intakeServoFront.setPosition(servoNormalize(servoGateOpen));
+        intakeServoBack.setPosition(servoNormalize(servoGateOpen));
+        gripperState = 1;
     }
-    public void closeGate(){
-        intakeGate.setPosition(servoNormalize(servoGateClosed));
-        gateOpen = false;
+    public void ejectStone(){
+        intakeServoFront.setPosition(servoNormalize(servoGateClosed));
+        intakeServoBack.setPosition(servoNormalize(servoGateClosed));
+        gripperState = 2;
+    }
+    public void stopGripper() {
+        intakeServoFront.setPosition(servoNormalize(1500));
+        intakeServoBack.setPosition(servoNormalize(1500));
+        gripperState = 0;
+    }
+    public void stopIntake(){
+
     }
 
-    public void gateToggle(){
-        if(gateOpen)
-            closeGate();
+    public void toggleGripper(boolean open) {
+        if (open)
+            if (gripperState == 0)
+                grabStone();
+            else
+                stopGripper();
+        else if (gripperState == 0)
+            ejectStone();
         else
-            openGate();
+            stopGripper();
     }
+
+
 
 
 
@@ -249,13 +268,13 @@ public class Crane {
         intakeLeft.setPosition(.5 + intakePwr);
         intakeRight.setPosition(.5 + intakePwr);
     }
-    public void eject(){
-        intakeRight.setPosition(.5 - intakePwr);
-        intakeLeft.setPosition(.5 - intakePwr);}
-    public void stopIntake(){
-        intakeRight.setPosition(.5);
-        intakeLeft.setPosition(.5);
-    }
+//    public void eject(){
+//        intakeRight.setPosition(.5 - intakePwr);
+//        intakeLeft.setPosition(.5 - intakePwr);}
+//    public void stopIntake(){
+//        intakeRight.setPosition(.5);
+//        intakeLeft.setPosition(.5);
+//    }
 
     public boolean isActive(){
         return active;

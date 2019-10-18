@@ -32,8 +32,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode.robots.TestBot;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -504,7 +502,10 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.hookToggle();
         }
         if(toggleAllowed(gamepad1.y,y)){
-            robot.crane.gateToggle();
+            robot.crane.toggleGripper(true);
+        }
+        if(toggleAllowed(gamepad1.x,x)){
+            robot.crane.toggleGripper(false);
         }
         //call the update method in crane
         robot.crane.update();
@@ -614,18 +615,21 @@ public class Skystone_6832 extends LinearOpMode {
         robot.driveMixerDiffSteer(pwrFwd, pwrRot);
 
         if (gamepad1.y) {
-            robot.goToSafeDrive();
-            isIntakeClosed = true;
+//            robot.goToSafeDrive();
+//            isIntakeClosed = true;
+            robot.crane.grabStone();
         }
         if (toggleAllowed(gamepad1.a, a)) {
-            isIntakeClosed = !isIntakeClosed;
+            //isIntakeClosed = !isIntakeClosed;
+            robot.crane.ejectStone();
         }
 
 
         if (toggleAllowed(gamepad1.b, b)) {
-            stateIntake++;
-            if (stateIntake > 3) stateIntake = 0;
-            doIntake = true;
+//            stateIntake++;
+//            if (stateIntake > 3) stateIntake = 0;
+//            doIntake = true;
+            robot.crane.stopGripper();
         }
 
         if (toggleAllowed(gamepad1.x, x)) {
@@ -654,11 +658,11 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
 
-        if (isIntakeClosed) {
+        /*if (isIntakeClosed) {
             robot.crane.closeGate();
         } else {
-            robot.crane.openGate();
-        }
+            robot.crane.grabStone();
+        }*/
     }
 
     private void joystickDriveRegularModeReverse() {
@@ -717,11 +721,11 @@ public class Skystone_6832 extends LinearOpMode {
         }
         robot.driveMixerDiffSteer(pwrFwd, pwrRot);
 
-        if (isIntakeClosed) {
+        /*if (isIntakeClosed) {
             robot.crane.closeGate();
         } else {
-            robot.crane.openGate();
-        }
+            robot.crane.grabStone();
+        }*/
     }
 
 
