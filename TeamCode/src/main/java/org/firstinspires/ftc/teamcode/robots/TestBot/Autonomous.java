@@ -60,6 +60,7 @@ public class Autonomous {
             .addSingleState(() -> robot.ledSystem.setColor(LEDSystem.Color.PURPLE)) //purple color
             .addState(() -> robot.rotateIMU(0, 1)) //turn back to center
             .build();
+
     public StateMachine primaryBlueMec = getStateMachine(autoStage)
             .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
             .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
@@ -78,6 +79,14 @@ public class Autonomous {
             .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
             .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
             .build();
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                            //
+    //                                  Old Autonomous Routines                                   //
+    //                                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     public StateMachine depotSide_worlds = getStateMachine(autoStage)
             .addNestedStateMachine(autoSetupReverse)
@@ -216,12 +225,6 @@ public class Autonomous {
             .addState(() -> robot.rotateIMU(135, 2)) //turn to crater
             .addState(() -> robot.crane.extendToMax(1,10))
             .build();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //                                                                                            //
-    //                                  Old Autonomous Routines                                   //
-    //                                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public StateMachine craterSide_cycle = getStateMachine(autoStage)
             .addNestedStateMachine(autoSetupReverse)
