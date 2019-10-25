@@ -283,7 +283,7 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.primaryBlueMec.execute()) active = false;
                         break;
                     case 2: //autonomous that only samples
-                        if (auto.craterSide_worlds.execute()) active = false;
+                        if (auto.theWalkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
                         if (auto.depotSample_worlds.execute()) active = false;

@@ -210,14 +210,16 @@ public class Crane {
     }
 
 
-    public void hookOn(){
+    public boolean hookOn(){
 
         hook.setPosition(servoNormalize(servoHooked));
         hookUp = false;
+        return true;
     }
-    public void hookOff(){
+    public boolean hookOff(){
         hook.setPosition(servoNormalize(servoUnhooked));
         hookUp = true;
+        return true;
     }
 
     public void hookToggle(){
@@ -229,20 +231,23 @@ public class Crane {
 
 
 
-    public void grabStone(){
+    public boolean grabStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateOpen));
         intakeServoBack.setPosition(servoNormalize(servoGateOpen));
         gripperState = 1;
+        return false;
     }
-    public void ejectStone(){
+    public boolean ejectStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateClosed));
         intakeServoBack.setPosition(servoNormalize(servoGateClosed));
         gripperState = 2;
+        return false;
     }
-    public void stopGripper() {
+    public boolean stopGripper() {
         intakeServoFront.setPosition(servoNormalize(1500));
         intakeServoBack.setPosition(servoNormalize(1500));
         gripperState = 0;
+        return false;
     }
     public void stopIntake(){
 
