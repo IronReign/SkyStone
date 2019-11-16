@@ -476,7 +476,7 @@ public class Skystone_6832 extends LinearOpMode {
 
 
 
-        robot.driveMixerDiffTank(drive, turn);
+        robot.driveMixerDiffSteer(drive, turn);
 
         //elbow code
         if (gamepad1.dpad_right) {

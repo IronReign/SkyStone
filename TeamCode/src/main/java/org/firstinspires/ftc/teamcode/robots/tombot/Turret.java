@@ -28,6 +28,7 @@ public class Turret{
     private int a360degrees;
 
     public Turret(DcMotor turnTable) {
+
         turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turnTable.setTargetPosition(turnTable.getCurrentPosition());
         turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -37,11 +38,11 @@ public class Turret{
         currentRotation= 0;
         currentRotationInternal= 0;
         degreesSinceBegin= 0;
-        ticksPerDegree= 0;
-        a90degreesleft= 0;
-        a90degreesright= 0;
-        a180degrees= 0;
-        a360degrees= 0;
+        ticksPerDegree= 360;
+        a90degreesleft= 90;
+        a90degreesright= 90;
+        a180degrees= 180;
+        a360degrees= 360;
     }
 
     public void update(){

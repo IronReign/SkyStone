@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robots.TestBot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -52,6 +53,7 @@ public class PoseSkystone
     private DcMotor motorFrontLeft = null;
     private DcMotor motorBackRight  = null;
     private DcMotor elbow = null;
+    private DcMotor turnTable = null;
     private DcMotor extender = null;
     private Servo intakeServoFront= null;
     private Servo intakeServoBack= null;
@@ -270,7 +272,7 @@ public class PoseSkystone
         //this.driveLeft          = this.hwMap.dcMotor.get("driveLeft");
         //this.driveRight         = this.hwMap.dcMotor.get("driveRight");
         this.elbow          = this.hwMap.dcMotor.get("elbow");
-
+        this.turnTable      = this.hwMap.dcMotor.get("turnTable");
 
 
         this.extender     = this.hwMap.dcMotor.get("extender");
@@ -292,14 +294,15 @@ public class PoseSkystone
         motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
         motorBackRight = hwMap.get(DcMotor.class, "motorBackRight");
 
-        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        //motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
-        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turnTable.setDirection(DcMotor.Direction.FORWARD);
         elbow.setDirection(DcMotor.Direction.REVERSE);
         extender.setDirection(DcMotor.Direction.REVERSE);
 

@@ -284,23 +284,24 @@ public class PoseSkystone
 
         this.hook               = this.hwMap.servo.get("hook");
 
-        //this.blinkin            = this.hwMap.servo.get("blinkin");
-        //this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
-        //this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
-        //this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
+        this.blinkin            = this.hwMap.servo.get("blinkin");
+        this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
+        this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
+        this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
 
-        //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
+        motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
         motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
-        //motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
+        motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
         motorBackRight = hwMap.get(DcMotor.class, "motorBackRight");
+        turnTable = hwMap.get(DcMotor.class, "turnTable");
 
-        //motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
-        //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        //motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setDirection(DcMotor.Direction.REVERSE);
         extender.setDirection(DcMotor.Direction.REVERSE);
@@ -878,11 +879,11 @@ public class PoseSkystone
 
         long targetPos = (long)(targetMeters * forwardTPM);
         if(Math.abs(targetPos) > Math.abs(getAverageTicks())){//we've not arrived yet
-            driveMixerMec(power, 0, 0);
+            driveMixerDiffTank(power, 0);
             return false;
         }
         else { //destination achieved
-            driveMixerMec(0, 0, 0);
+            driveMixerDiffTank(0, 0);
             return true;
         }
     }
@@ -1092,10 +1093,14 @@ public class PoseSkystone
         powerBackRight = right;
 
         //provide power to the motors
-        motorFrontLeft.setPower(clampMotor(powerFrontLeft));
-        motorBackLeft.setPower(clampMotor(powerBackLeft));
-        motorFrontRight.setPower(clampMotor(powerFrontRight));
-        motorBackRight.setPower(clampMotor(powerBackRight));
+        if(left > 0){
+        motorBackLeft.setPower(clampMotor(left));
+        motorBackRight.setPower(clampMotor((left)));
+        }
+        if(right > 0){
+            motorBackRight.setPower(clampMotor(right));
+            motorBackLeft.setPower(clampMotor(right));
+        }
 
     }
 
