@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.robots.TestBot;
+package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.robots.tombot.LEDSystem;
+import org.firstinspires.ftc.teamcode.robots.tombot.PoseSkystone;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
@@ -701,7 +703,7 @@ public class Autonomous {
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
             vp = visionProviders[visionProviderState].newInstance();
-            vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
+            //vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
@@ -714,7 +716,7 @@ public class Autonomous {
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
             vp = VisionProviders.defaultProvider.newInstance();
-            vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
+            //vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }

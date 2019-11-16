@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robots.TestBot;
+package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.RC;
+import org.firstinspires.ftc.teamcode.robots.tombot.Crane;
+import org.firstinspires.ftc.teamcode.robots.tombot.LEDSystem;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
 
@@ -52,6 +54,7 @@ public class PoseSkystone
     private DcMotor motorBackRight  = null;
     private DcMotor elbow = null;
     private DcMotor extender = null;
+    private DcMotor turnTable  = null;
     private Servo intakeServoFront= null;
     private Servo intakeServoBack= null;
     private Servo hook = null;
@@ -61,6 +64,7 @@ public class PoseSkystone
     //All Subsystems
     public Crane crane = null;
     public LEDSystem ledSystem = null;
+    public Turret turret = null;
 
 
     //All sensors
@@ -152,8 +156,7 @@ public class PoseSkystone
         BigWheel,
         Icarus,
         Minimech,
-        TomBot
-        ;
+        TomBot;
     }
 
     public RobotType currentBot;
@@ -281,23 +284,23 @@ public class PoseSkystone
 
         this.hook               = this.hwMap.servo.get("hook");
 
-        this.blinkin            = this.hwMap.servo.get("blinkin");
-        this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
-        this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
-        this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
+        //this.blinkin            = this.hwMap.servo.get("blinkin");
+        //this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
+        //this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
+        //this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
 
-        motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
+        //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
         motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
-        motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
+        //motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
         motorBackRight = hwMap.get(DcMotor.class, "motorBackRight");
 
-        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        //motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
-        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setDirection(DcMotor.Direction.REVERSE);
         extender.setDirection(DcMotor.Direction.REVERSE);
@@ -319,6 +322,7 @@ public class PoseSkystone
 */
         //setup subsystems
         crane = new Crane(elbow,extender,hook, intakeServoFront, intakeServoBack);
+        turret = new Turret(turnTable);
         ledSystem = new LEDSystem(blinkin);
 
         moveMode = MoveMode.still;
@@ -353,8 +357,9 @@ public class PoseSkystone
 
     public void resetEncoders(){
 
-        crane.resetEncoders();
+    crane.resetEncoders();
     }
+
 
     /**
      * update the current location of the robot. This implementation gets heading and orientation
@@ -428,7 +433,7 @@ public class PoseSkystone
 
         articulate(articulation); //call the most recently requested articulation
         crane.update();
-
+        turret.update();
 
         // we haven't worked out the trig of calculating displacement from any driveMixer combination, so
         // for now we are just restricting ourselves to cardinal relative directions of pure forward, backward, left and right
@@ -962,6 +967,25 @@ public class PoseSkystone
 
     }
 
+    public void driveMixerTank(double forward, double rotate){
+
+        //reset the power of all motors
+        powerRight = 0;
+        powerLeft = 0;
+
+        //set power in the forward direction
+        powerLeft = forward;
+        powerRight = forward;
+
+        //set power in the clockwise rotational direction
+        powerLeft += rotate;
+        powerRight += -rotate;
+        //provide power to the motors
+        motorBackLeft.setPower(clampMotor(powerBackLeft));
+        motorBackRight.setPower(clampMotor(powerBackRight));
+
+
+    }
 
     /**
      * drive method for a mecanum drive with field oriented drive

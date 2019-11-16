@@ -30,7 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.teamcode.robots.TestBot;
+package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -42,22 +42,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.vision.GoldPos;
+import org.firstinspires.ftc.teamcode.robots.tombot.Autonomous;
+import org.firstinspires.ftc.teamcode.robots.tombot.LEDSystem;
+import org.firstinspires.ftc.teamcode.robots.tombot.PoseSkystone;
 import org.firstinspires.ftc.teamcode.util.Conversions;
+import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
 
 /**
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
  */
 
-@TeleOp(name = "Skystone_6832_old", group = "Challenge")  // @Autonomous(...) is the other common choice
+@TeleOp(name = "Skystone_6832", group = "Challenge")  // @Autonomous(...) is the other common choice
 //  @Autonomous
 public class Skystone_6832 extends LinearOpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
 
-    private PoseSkystone.RobotType currentBot = PoseSkystone.RobotType.Icarus;
+    private PoseSkystone.RobotType currentBot = PoseSkystone.RobotType.TomBot;
 
     private PoseSkystone robot;
 
@@ -211,9 +214,9 @@ public class Skystone_6832 extends LinearOpMode {
             if (toggleAllowed(gamepad1.left_stick_button, left_stick_button))
                 enableHookSensors = !enableHookSensors;
 
-            if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
+            //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
                 robot.crane.hookOn();
-            if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
+            //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
                 robot.crane.hookOff();
 
             if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left)) {
@@ -249,6 +252,8 @@ public class Skystone_6832 extends LinearOpMode {
             telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
             telemetry.addData("Status", "Side: " + getAlliance());
             telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
+            telemetry.addData("Turret", "Turret internal Position: " + robot.turret.currentRotationInternal);
+            telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
             telemetry.update();
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
@@ -462,16 +467,16 @@ public class Skystone_6832 extends LinearOpMode {
 
         double drive = -gamepad1.left_stick_y *.3;
         double turn = gamepad1.right_stick_x *.3;
-        double strafe = gamepad1.left_stick_x * 3;
+        //double strafe = gamepad1.left_stick_x * 3;
 
-        leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
-        leftBackPower = Range.clip(drive + turn - strafe, -1.0, 1.0);
-        rightFrontPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
-        rightBackPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
+        leftFrontPower = Range.clip(drive + turn, -1.0, 1.0);
+        leftBackPower = Range.clip(drive + turn, -1.0, 1.0);
+        rightFrontPower = Range.clip(drive - turn, -1.0, 1.0);
+        rightBackPower = Range.clip(drive - turn, -1.0, 1.0);
 
 
 
-        robot.driveMixerMec(drive, strafe, turn);
+        robot.driveMixerDiffTank(drive, turn);
 
         //elbow code
         if (gamepad1.dpad_right) {
@@ -498,6 +503,24 @@ public class Skystone_6832 extends LinearOpMode {
 //                //robot.articulate(PoseBigWheel.Articulation.manual);
 //                pos.retractBelt();
 //            }
+        if(right_trigger > 0){
+            robot.turret.rotateRight(right_trigger);
+        }
+        if(left_trigger > 0){
+            robot.turret.rotateLeft(left_trigger);
+        }
+        if(left_bumper > 0){
+            robot.turret.setToFront();
+        }
+        if(right_bumper > 0){
+            robot.turret.setRotation180();
+        }
+        if(toggleAllowed(gamepad1.a,a)){
+            robot.crane.hookToggle();
+        }
+        if(toggleAllowed(gamepad1.a,a)){
+            robot.crane.hookToggle();
+        }
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
         }
@@ -791,13 +814,13 @@ public class Skystone_6832 extends LinearOpMode {
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
-        telemetry.addAction(() ->
+        //telemetry.addAction(() ->
                 // Acquiring the angles is relatively expensive; we don't want
                 // to do that in each of the three items that need that info, as that's
                 // three times the necessary expense.
-                angles = robot.imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX)
+                //angles = robot.imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX)
 
-        );
+       // );
 
         telemetry.addLine()
                 .addData("active", () -> active)
@@ -806,7 +829,7 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
                 .addData("Articulation", () -> robot.getArticulation());
         telemetry.addLine()
-                .addData("elbowA", () -> robot.crane.isActive())
+                //.addData("elbowA", () -> robot.crane.isActive())
                 .addData("elbowC", () -> robot.crane.getElbowCurrentPos())
                 .addData("elbowT", () -> robot.crane.getElbowTargetPos());
         telemetry.addLine()
@@ -816,17 +839,17 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("pitch", () -> robot.getPitch())
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
-        telemetry.addLine()
-                .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
-        telemetry.addLine()
-                .addData("drivedistance", () -> robot.getAverageAbsTicks());
-        telemetry.addLine()
-                .addData("status", () -> robot.imu.getSystemStatus().toShortString())
-                .addData("mineralState", () -> auto.mineralState)
+        //telemetry.addLine()
+               // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
+        //telemetry.addLine()
+                //.addData("drivedistance", () -> robot.getAverageAbsTicks());
+        //telemetry.addLine()
+                //.addData("status", () -> robot.imu.getSystemStatus().toShortString())
+                //.addData("mineralState", () -> auto.mineralState)
 //                .addData("distForward", () -> robot.distForward.getDistance(DistanceUnit.METER))
 //                .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
 //                .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
-                .addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
+                //.addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
 
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
@@ -851,7 +874,7 @@ public class Skystone_6832 extends LinearOpMode {
     private int servoTest = 1005;
 
     private void servoTest() {
-        robot.ledSystem.movement.setPosition(Conversions.servoNormalize(servoTest));
+        //robot.ledSystem.movement.setPosition(Conversions.servoNormalize(servoTest));
         if (toggleAllowed(gamepad1.a, a))
             servoTest -= 10;
         else if (toggleAllowed(gamepad1.y, y))
