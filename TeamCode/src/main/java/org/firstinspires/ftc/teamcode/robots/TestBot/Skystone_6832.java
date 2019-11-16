@@ -283,10 +283,10 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.primaryBlue.execute()) active = false;
                         break;
                     case 2: //autonomous that only samples
-                        if (auto.craterSide_worlds.execute()) active = false;
+                        if (auto.theWalkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
-                        if (auto.depotSample_worlds.execute()) active = false;
+                        if (auto.primaryRedMec.execute()) active = false;
                         break;
                     case 4:
                         if (auto.craterSide_cycle.execute()) active = false;
@@ -459,11 +459,15 @@ public class Skystone_6832 extends LinearOpMode {
 
         // POV Mode uses left stick to go forward, and right stick to turn.
         // - This uses basic math to combine motions and is easier to drive straight
-
-        double drive = -gamepad1.left_stick_y *.3;
-        double turn = gamepad1.right_stick_x *.3;
-        double strafe = gamepad1.left_stick_x * 3;
-
+        double strafe = 0.0;
+        if(gamepad1.left_stick_x >=  .2 || gamepad1.left_stick_x <= -.2)
+        {
+            strafe = -gamepad1.left_stick_x * .3;
+        }
+        else
+            strafe = 0.0;
+        double drive = -gamepad1.left_stick_y * .3;
+        double turn = gamepad1.right_stick_x * .3;
         leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
         leftBackPower = Range.clip(drive + turn - strafe, -1.0, 1.0);
         rightFrontPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
@@ -507,6 +511,9 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.x,x)){
             robot.crane.toggleGripper(false);
         }
+        if(toggleAllowed(gamepad1.b,b)){
+            robot.crane.togglePickCraneState();
+        }
         //call the update method in crane
         robot.crane.update();
     }
@@ -524,6 +531,11 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad1.x, x)) {
+            stateDelatch--;
+            if (stateDelatch < 0) stateDelatch = 2;
+            doDelatch = true;
+        }
+        if (toggleAllowed(gamepad1.b, b)) {
             stateDelatch--;
             if (stateDelatch < 0) stateDelatch = 2;
             doDelatch = true;

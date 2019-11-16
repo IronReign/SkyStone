@@ -77,7 +77,7 @@ public class Crane {
 
     private boolean hookUp = true;
     private int gripperState = 0;
-
+    private boolean armUpState = true;
     //filler value; needs to be updated to reflect actual ratio
     public double ticksPerDegree = 22.3296703;
 
@@ -85,15 +85,7 @@ public class Crane {
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront, Servo intakeServoBack){
 
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setTargetPosition(elbow.getCurrentPosition());
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extendABob.setTargetPosition(extendABob.getCurrentPosition());
-        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
         //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //intakeGate.setDirection(Servo.Direction.REVERSE);
@@ -138,6 +130,18 @@ public class Crane {
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
         extendMin = 300;  //prevent crunching collector tray
+    }
+    public boolean resetCraneEncoders() {
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setTargetPosition(elbow.getCurrentPosition());
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extendABob.setTargetPosition(extendABob.getCurrentPosition());
+        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
+        return false;
     }
 
 
@@ -210,14 +214,16 @@ public class Crane {
     }
 
 
-    public void hookOn(){
+    public boolean hookOn(){
 
         hook.setPosition(servoNormalize(servoHooked));
         hookUp = false;
+        return true;
     }
-    public void hookOff(){
+    public boolean hookOff(){
         hook.setPosition(servoNormalize(servoUnhooked));
         hookUp = true;
+        return true;
     }
 
     public void hookToggle(){
@@ -229,23 +235,43 @@ public class Crane {
 
 
 
-    public void grabStone(){
+    public boolean grabStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateOpen));
         intakeServoBack.setPosition(servoNormalize(servoGateOpen));
         gripperState = 1;
+        return false;
     }
-    public void ejectStone(){
-        intakeServoFront.setPosition(servoNormalize(servoGateClosed));
+    public boolean ejectStone(){
+        intakeServoFront.setPosition(servoNormalize(1300));
         intakeServoBack.setPosition(servoNormalize(servoGateClosed));
         gripperState = 2;
+        return false;
     }
-    public void stopGripper() {
+    public boolean stopGripper() {
         intakeServoFront.setPosition(servoNormalize(1500));
         intakeServoBack.setPosition(servoNormalize(1500));
         gripperState = 0;
+        return false;
     }
     public void stopIntake(){
 
+    }
+
+    public void togglePickCraneState() {
+
+        if(elbowPos > 1500)
+            if(armUpState == true) {
+                setElbowTargetPos(3100, 1.0);
+                setExtendABobTargetPos(0);
+                armUpState = false;
+            }
+            else {
+                setElbowTargetPos(1525, 1.0);
+                setExtendABobTargetPos(0);
+                armUpState = true;
+            }
+        else
+            setElbowTargetPos(0,1.0);
     }
 
     public void toggleGripper(boolean open) {

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -527,6 +528,18 @@ public class PoseSkystone
             stopAll();
             return true;
         }
+    }
+
+    /**
+     * drives to a certain distance based off the value of the distance sensor that it is passed.
+     * @param dista if true, increase PWM being sent to the servo tester by a large amount
+     * @param targetDis if true, increase PWM being sent to the servo tester by a small amount
+     */
+    public boolean driveDistSensor(DistanceSensor dista, int targetDis) {
+        if(dista.getDistance(DistanceUnit.METER) <= targetDis)
+            return true;
+        driveForward(true,.2,.65);
+        return false;
     }
 
 

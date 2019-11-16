@@ -83,28 +83,71 @@ public class Autonomous {
     public StateMachine primaryBlue = getStateMachine(autoStage)
             .addState(() -> sample())
             .build();
-
-
-
-    public StateMachine left = getStateMachine(autoStage)
-            .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
-            .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
-            .addState(() -> (robot.driveForward(true, .5, .80))) //forward to wall - todo: change to stop with distance sensor insteasd of odometry
-            .addState(() -> (robot.rotateIMU(0, 4))) //rotate back toward facing quarry
-            //pick up skystone
-            .addState(() -> (robot.rotateIMU(270, 4))) //rotate back toward building zone - stay in 2nd column
-            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
-            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
-            .addState(() ->robot.crane.setElbowTargetPos(1500,1.0)) //todo: should be an articulation to raise crane to current tower level - for now just raising a fair bit
-            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until proximity from back wall detected
-            .addState(() -> (robot.rotateIMU(0, 3))) //turn back to foundation
-            //deposit stones
-            .addState(() -> (robot.rotateIMU(90, 3)))
-            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
-            .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
-            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
+    public StateMachine theWalkOfShame = getStateMachine(autoStage)//auto for an "in case all else fails"
+            .addState(() -> (robot.driveForward(true, .7, .60)))//moves up
+            .build();
+    public StateMachine primaryBlueMec = getStateMachine(autoStage)
+            .addState(() -> (robot.crane.setElbowTargetPos(2715,1.0)))//sets the gripper on the block
+            .addState(() -> (robot.driveForward(true, .463, .60)))//moves to quarry line
+            .addState(() -> (robot.crane.setElbowTargetPos(3200,1.0)))//sets the gripper on the block
+            .addTimedState(3,//starts the gripper and pciks up the block
+                    () -> robot.crane.grabStone(),
+                    () -> robot.crane.stopGripper())
+            .addState(() -> (robot.crane.setElbowTargetPos(3100,1.0)))//goes back up
+            .addState(() -> (robot.rotateIMU(270, 12))) //rotate back toward building zone - stay in 2nd column
+            .addState(() -> (robot.driveForward(true, 1.3, .60))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
+            .addState(() ->robot.crane.setElbowTargetPos(2700,1.0)) //todo: should be an articulation to raise crane to current tower level - for now just raising a fair bit
+            .addState(() -> (robot.driveForward(true, .6, .60))) //todo: should continue until proximity from back wall detected
+            .addState(() -> (robot.rotateIMU(0, 9))) //turn to foundation
+            .addState(() -> (robot.driveForward(true, .11, .60)))//goes towards the foundation
+            .addTimedState(3,//starts the gripper and pciks up the block
+                    () -> robot.crane.ejectStone(),
+                    () -> robot.crane.stopGripper())
+            .addState(() -> (robot.driveForward(false, .11, .60)))
+            .addState(() -> (robot.rotateIMU(90, 9)))
+            .addState(() -> (robot.crane.setElbowTargetPos(0,1.0)))//goes back up
+            .addState(() -> (robot.driveForward(true, .9, .60)))
+            //.addState(() -> (robot.rotateIMU(0, 9)))
+            //.addState(() -> (robot.crane.setElbowTargetPos(2715,1.0)))//sets the gripper on the block
+            //.addState(() -> (robot.driveForward(true, .463, .60)))//moves to quarry line
+            //.addState(() -> (robot.crane.setElbowTargetPos(3200,1.0)))//sets the gripper on the block
+            //.addTimedState(3,//starts the gripper and pciks up the block
+                    //() -> robot.crane.grabStone(),
+                    //() -> robot.crane.stopGripper())
+            //.addState(() -> (robot.crane.setElbowTargetPos(3100,1.0)))
             .build();
 
+    public StateMachine primaryRedMec = getStateMachine(autoStage)
+            .addState(() -> (robot.crane.resetCraneEncoders()))
+            .addState(() -> (robot.crane.setElbowTargetPos(2715,1.0)))//sets the gripper on the block
+            .addState(() -> (robot.driveForward(true, .463, .60)))//moves to quarry line
+            .addState(() -> (robot.crane.setElbowTargetPos(3200,1.0)))//sets the gripper on the block
+            .addTimedState(3,//starts the gripper and pciks up the block
+                    () -> robot.crane.grabStone(),
+                    () -> robot.crane.stopGripper())
+            .addState(() -> (robot.crane.setElbowTargetPos(3100,1.0)))//goes back up
+            .addState(() -> (robot.rotateIMU(90, 12))) //rotate back toward building zone - stay in 2nd column
+            .addState(() -> (robot.driveForward(true, 1.3, .60))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
+            .addState(() ->robot.crane.setElbowTargetPos(2700,1.0)) //todo: should be an articulation to raise crane to current tower level - for now just raising a fair bit
+            .addState(() -> (robot.driveForward(true, .6, .60))) //todo: should continue until proximity from back wall detected
+            .addState(() -> (robot.rotateIMU(0, 9))) //turn to foundation
+            .addState(() -> (robot.driveForward(true, .11, .60)))//goes towards the foundation
+            .addTimedState(3,//starts the gripper and pciks up the block
+                    () -> robot.crane.ejectStone(),
+                    () -> robot.crane.stopGripper())
+            .addState(() -> (robot.driveForward(false, .11, .60)))
+            .addState(() -> (robot.rotateIMU(270, 9)))
+            .addState(() -> (robot.crane.setElbowTargetPos(0,1.0)))//goes back up
+            .addState(() -> (robot.driveForward(true, .9, .60)))
+            //.addState(() -> (robot.rotateIMU(0, 9)))
+            //.addState(() -> (robot.crane.setElbowTargetPos(2715,1.0)))//sets the gripper on the block
+            //.addState(() -> (robot.driveForward(true, .463, .60)))//moves to quarry line
+            //.addState(() -> (robot.crane.setElbowTargetPos(3200,1.0)))//sets the gripper on the block
+            //.addTimedState(3,//starts the gripper and pciks up the block
+            //() -> robot.crane.grabStone(),
+            //() -> robot.crane.stopGripper())
+            //.addState(() -> (robot.crane.setElbowTargetPos(3100,1.0)))
+            .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                            //
