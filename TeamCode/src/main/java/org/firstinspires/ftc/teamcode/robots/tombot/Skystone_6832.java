@@ -252,8 +252,6 @@ public class Skystone_6832 extends LinearOpMode {
             telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
             telemetry.addData("Status", "Side: " + getAlliance());
             telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-            telemetry.addData("Turret", "Turret internal Position: " + robot.turret.currentRotationInternal);
-            telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
             telemetry.update();
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
@@ -503,7 +501,7 @@ public class Skystone_6832 extends LinearOpMode {
 //                //robot.articulate(PoseBigWheel.Articulation.manual);
 //                pos.retractBelt();
 //            }
-        if(right_trigger > 0){
+        if(right_trigger < 1){
             robot.turret.rotateRight(right_trigger);
         }
         if(left_trigger > 0){
@@ -839,7 +837,9 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("pitch", () -> robot.getPitch())
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
-        //telemetry.addLine()
+        telemetry.addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal());
+        telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
+        //telemetry.addLine()w
                // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
                 //.addData("drivedistance", () -> robot.getAverageAbsTicks());
@@ -854,6 +854,8 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);
+
+
     }
 
     private void configureDashboardMatch() {
@@ -868,6 +870,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);
+
     }
 
 

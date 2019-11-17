@@ -32,13 +32,12 @@ public class Turret{
         turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turnTable.setTargetPosition(turnTable.getCurrentPosition());
         turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turnTable.setDirection(DcMotorSimple.Direction.REVERSE);
         this.turnTable = turnTable;
         currentDegrees= 0;
         currentRotation= 0;
         currentRotationInternal= 0;
         degreesSinceBegin= 0;
-        ticksPerDegree= 360;
+        ticksPerDegree= 1;
         a90degreesleft= 90;
         a90degreesright= 90;
         a180degrees= 180;
@@ -46,9 +45,9 @@ public class Turret{
     }
 
     public void update(){
-        if(active && currentRotationInternal!= currentRotation) { //don't keep updating if we are retractBelt to target position
-            currentRotationInternal = currentRotation;
-            turnTable.setTargetPosition(currentRotationInternal);
+        if(active) { //don't keep updating if we are retractBelt to target position
+            currentRotation = currentRotationInternal;
+            turnTable.setTargetPosition(currentRotation);
             turnTable.setPower(turntablePow);
         }
     }
@@ -107,6 +106,10 @@ public class Turret{
             turntablePow = safeTurn;
         }
 
+    }
+
+    public int getCurrentRotationInternal(){
+        return turnTable.getCurrentPosition();
     }
 
     public void returnToZero() {
