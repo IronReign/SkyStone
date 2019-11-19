@@ -27,6 +27,9 @@ public class Turret{
     private int a180degrees;
     private int a360degrees;
 
+    //team members
+    boolean BhanaviyaIsOn = false;
+
     public Turret(DcMotor turnTable) {
 
         turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -37,7 +40,7 @@ public class Turret{
         currentRotation= 0;
         currentRotationInternal= 0;
         degreesSinceBegin= 0;
-        ticksPerDegree= 1;
+        ticksPerDegree= 90;
         a90degreesleft= 90;
         a90degreesright= 90;
         a180degrees= 180;
@@ -45,17 +48,19 @@ public class Turret{
     }
 
     public void update(){
-        if(active) { //don't keep updating if we are retractBelt to target position
-
-            currentRotation = currentRotationInternal;
-            turnTable.setTargetPosition(currentRotation);
+        if(active && currentRotationInternal != currentRotation) { //don't keep updating if we are retractBelt to target position
+            currentRotationInternal =currentRotation;
+            turnTable.setTargetPosition(currentRotationInternal);
             turnTable.setPower(turntablePow);
         }
+        else
+            turnTable.setPower(0);
     }
 
     public boolean isActive(){
         return active;
     }
+    public void setActive(boolean active){this.active = active;}
 
     public void rotateRight(double power){
         currentRotationInternal += ticksPerDegree;
