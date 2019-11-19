@@ -11,7 +11,7 @@ public class Turret{
     //motor
     private DcMotor turnTable  = null;
     private double turntablePow = 1;
-    private double safeTurn;
+    private double safeTurn = .5;
 
     //Position variables
     private int currentDegrees;
@@ -46,6 +46,7 @@ public class Turret{
 
     public void update(){
         if(active) { //don't keep updating if we are retractBelt to target position
+
             currentRotation = currentRotationInternal;
             turnTable.setTargetPosition(currentRotation);
             turnTable.setPower(turntablePow);
@@ -59,13 +60,13 @@ public class Turret{
     public void rotateRight(double power){
         currentRotationInternal += ticksPerDegree;
         degreesSinceBegin += ticksPerDegree;
-        turntablePow = power;
+        turntablePow = power* .1;
     }
 
     public void rotateLeft(double power){
         currentRotationInternal -= ticksPerDegree;
         degreesSinceBegin -= ticksPerDegree;
-        turntablePow = power;
+        turntablePow = power * .1;
     }
 
     public void setTurntablePosition(int position, double power) {

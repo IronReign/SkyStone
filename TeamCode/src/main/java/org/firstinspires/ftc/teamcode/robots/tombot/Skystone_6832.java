@@ -252,6 +252,8 @@ public class Skystone_6832 extends LinearOpMode {
             telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
             telemetry.addData("Status", "Side: " + getAlliance());
             telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
+            telemetry.addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal());
+            telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
             telemetry.update();
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
@@ -501,7 +503,7 @@ public class Skystone_6832 extends LinearOpMode {
 //                //robot.articulate(PoseBigWheel.Articulation.manual);
 //                pos.retractBelt();
 //            }
-        if(right_trigger < 1){
+        if(right_trigger > 0){
             robot.turret.rotateRight(right_trigger);
         }
         if(left_trigger > 0){
@@ -516,8 +518,8 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
         }
-        if(toggleAllowed(gamepad1.a,a)){
-            robot.crane.hookToggle();
+        if(toggleAllowed(gamepad1.b,b)){
+            robot.turret.rotateLeft(left_trigger);
         }
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
@@ -837,8 +839,6 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("pitch", () -> robot.getPitch())
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
-        telemetry.addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal());
-        telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
         //telemetry.addLine()w
                // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
@@ -851,6 +851,8 @@ public class Skystone_6832 extends LinearOpMode {
 //                .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
                 //.addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
 
+        telemetry.addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal());
+        telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);
