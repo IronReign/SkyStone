@@ -126,7 +126,7 @@ public class Crane {
         pos_latched = 2764;
         pos_postlatch = 1240;
 
-        servoGateOpen = 2200;
+        servoGateOpen = 1394;
         servoGateClosed = 900;
 
         servoHooked = 1800;
@@ -286,12 +286,12 @@ public class Crane {
 
 
     public void grabStone(){
-        intakeServoFront.setPosition(servoNormalize(servoGateOpen));
+        intakeServoFront.setPosition(servoNormalize(servoGateClosed));
         //intakeServoBack.setPosition(servoNormalize(servoGateOpen));
         gripperState = 1;
     }
     public void ejectStone(){
-        intakeServoFront.setPosition(servoNormalize(servoGateClosed));
+        intakeServoFront.setPosition(servoNormalize(servoGateOpen));
         //intakeServoBack.setPosition(servoNormalize(servoGateClosed));
         gripperState = 2;
     }
@@ -306,14 +306,9 @@ public class Crane {
 
     public void toggleGripper(boolean open) {
         if (open)
-            if (gripperState == 0)
-                grabStone();
-            else
-                stopGripper();
-        else if (gripperState == 0)
-            ejectStone();
+            grabStone();
         else
-            stopGripper();
+            ejectStone();
     }
 
 

@@ -252,8 +252,8 @@ public class Skystone_6832 extends LinearOpMode {
             telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
             telemetry.addData("Status", "Side: " + getAlliance());
             telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-            telemetry.addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal());
-            telemetry.addData("Turret", "Turret Position: " + robot.turret.currentRotation);
+            telemetry.addData("Turret", "Turret Position: " + robot.turret.getCurrentRotation());
+            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
             telemetry.update();
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
@@ -503,17 +503,17 @@ public class Skystone_6832 extends LinearOpMode {
 //                //robot.articulate(PoseBigWheel.Articulation.manual);
 //                pos.retractBelt();
 //            }
-        //if(right_trigger > 0){
-        //    robot.turret.rotateRight(right_trigger);
-        //}
-        //if(left_trigger > 0){
-        //    robot.turret.rotateLeft(left_trigger);
-        //}
-        if(left_bumper > 0){
-            robot.turret.setToFront();
+        if(gamepad1.right_trigger > 0){
+            robot.turret.rotateRight(right_trigger*.01);
         }
-        if(right_bumper > 0){
-            robot.turret.setRotation180();
+        if(gamepad1.left_trigger > 0){
+            robot.turret.rotateLeft(left_trigger*.01);
+        }
+        //if(left_bumper > 0){
+        //    robot.turret.setToFront();
+        //}
+        if(gamepad1.right_bumper == true){
+            robot.turret.rotateLeft(.1);
         }
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
@@ -840,8 +840,8 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
         telemetry.addLine()
-                .addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal())
-                .addData("Turret", "Turret Position: " + robot.turret.currentRotation);
+                .addData("Turret", "Turret : " + robot.turret.getCurrentRotation())
+                .addData("Turret", "Turret raw: " + robot.turret.getCurrentRotationEncoderRaw());
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);        //telemetry.addLine()w
@@ -870,7 +870,7 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
                 .addData("Articulation", () -> robot.getArticulation());
         telemetry.addLine()
-                .addData("Turret", "Turret internal Position: " + robot.turret.getCurrentRotationInternal())
+                .addData("Turret", "Turret Position: " + robot.turret.getCurrentRotationEncoderRaw())
                 .addData("Turret", "Turret Position: " + robot.turret.currentRotation);
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)

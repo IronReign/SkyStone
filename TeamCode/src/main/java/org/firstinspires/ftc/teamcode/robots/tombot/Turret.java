@@ -35,6 +35,7 @@ public class Turret{
         turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turnTable.setTargetPosition(turnTable.getCurrentPosition());
         turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         this.turnTable = turnTable;
         currentDegrees= 0;
         currentRotation= 0;
@@ -50,7 +51,7 @@ public class Turret{
     public void update(){
         if(active && currentRotationInternal != currentRotation) { //don't keep updating if we are retractBelt to target position
             currentRotationInternal =currentRotation;
-            turnTable.setTargetPosition(currentRotationInternal);
+            turnTable.setTargetPosition(currentRotation);
             turnTable.setPower(turntablePow);
         }
         else
@@ -63,19 +64,17 @@ public class Turret{
     public void setActive(boolean active){this.active = active;}
 
     public void rotateRight(double power){
-        currentRotationInternal += ticksPerDegree;
-        degreesSinceBegin += ticksPerDegree;
-        turntablePow = power* .1;
+        setTurntablePosition(getCurrentRotation() + 20, power);
+        degreesSinceBegin += 20;
     }
 
     public void rotateLeft(double power){
-        currentRotationInternal -= ticksPerDegree;
-        degreesSinceBegin -= ticksPerDegree;
-        turntablePow = power * .1;
+        setTurntablePosition(getCurrentRotation() - 20, power);
+        degreesSinceBegin -= 20;
     }
 
     public void setTurntablePosition(int position, double power) {
-        currentRotationInternal = position;
+        currentRotation = position;
         turntablePow = power;
     }
 
@@ -114,8 +113,11 @@ public class Turret{
 
     }
 
-    public int getCurrentRotationInternal(){
+    public int getCurrentRotationEncoderRaw(){
         return turnTable.getCurrentPosition();
+    }
+    public int getCurrentRotation(){
+        return currentRotation;
     }
 
     public void returnToZero() {
