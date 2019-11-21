@@ -64,12 +64,12 @@ public class Turret{
     public void setActive(boolean active){this.active = active;}
 
     public void rotateRight(double power){
-        setTurntablePosition(getCurrentRotation() + 20, power);
+        setTurntablePosition(getCurrentRotation() + 2, power);
         degreesSinceBegin += 20;
     }
 
     public void rotateLeft(double power){
-        setTurntablePosition(getCurrentRotation() - 20, power);
+        setTurntablePosition(getCurrentRotation() - 2, power);
         degreesSinceBegin -= 20;
     }
 
