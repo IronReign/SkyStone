@@ -80,11 +80,11 @@ public class Turret{
 
     public void setRotation90(boolean right) {
         if(right == true) {
-            currentRotationInternal += currentRotationInternal%a90degreesright;
+            currentRotation += turnTable.getCurrentPosition()%a90degreesright;
             turntablePow = safeTurn;
         }
         else {
-            currentRotationInternal -= currentRotationInternal%a90degreesleft;
+            currentRotationInternal -= turnTable.getCurrentPosition()%a90degreesleft;
             turntablePow = safeTurn;
         }
     }
@@ -100,15 +100,13 @@ public class Turret{
     }
 
     public void setToFront(){
-        if(currentRotationInternal < a360degrees ||  currentRotationInternal > -a360degrees)
-            currentRotationInternal = 0;
-        else if(currentRotationInternal < 0) {
-            currentRotationInternal += currentRotationInternal %a360degrees;
-            turntablePow = safeTurn;
+        if(getCurrentRotation() < a360degrees ||  currentRotationInternal > -a360degrees)
+             setTurntablePosition(0,safeTurn);
+        else if(getCurrentRotation() < 0) {
+            setTurntablePosition(getCurrentRotation() + getCurrentRotation() %a360degrees, .5);
         }
         else {
-            currentRotationInternal -= currentRotationInternal % a360degrees;
-            turntablePow = safeTurn;
+            setTurntablePosition(getCurrentRotation() - getCurrentRotation() %a360degrees, .5);
         }
 
     }

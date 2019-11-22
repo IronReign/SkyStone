@@ -91,10 +91,9 @@ public class Crane {
         elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
         extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extendABob.setTargetPosition(extendABob.getCurrentPosition());
-        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
-        //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        extendABob.setTargetPosition(extendABob.getCurrentPosition());
+
 
         //intakeGate.setDirection(Servo.Direction.REVERSE);
 
@@ -108,7 +107,7 @@ public class Crane {
         intakePwr = .3; //.35;
         //normal Teleop encoder values
         pos_preIntake = 3600;
-        pos_Intake   = 3900;
+        pos_Intake   = 2660;
         pos_Deposit  = 1520;
         pos_reverseIntake = 1407;
         pos_reversePreDeposit=1408;
@@ -137,7 +136,7 @@ public class Crane {
         extendMax = 2960;
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
-        extendMin = 300;  //prevent crunching collector tray
+        extendMin = 100;  //prevent crunching collector tray
     }
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
@@ -148,8 +147,8 @@ public class Crane {
         elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
         extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
         //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
 

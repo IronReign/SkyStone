@@ -504,10 +504,10 @@ public class Skystone_6832 extends LinearOpMode {
 //                pos.retractBelt();
 //            }
         if(gamepad1.right_trigger > 0){
-            robot.turret.rotateRight(right_trigger*.01);
+            robot.turret.rotateRight(right_trigger);
         }
         if(gamepad1.left_trigger > 0){
-            robot.turret.rotateLeft(left_trigger*.01);
+            robot.turret.rotateLeft(left_trigger);
         }
         //if(left_bumper > 0){
         //    robot.turret.setToFront();
@@ -519,7 +519,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.hookToggle();
         }
         if(toggleAllowed(gamepad1.b,b)){
-            robot.turret.rotateLeft(1);
+            robot.turret.setToFront();
         }
         if(toggleAllowed(gamepad1.a,a)){
             robot.crane.hookToggle();
