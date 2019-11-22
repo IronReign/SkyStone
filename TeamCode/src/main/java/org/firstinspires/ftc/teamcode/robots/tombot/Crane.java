@@ -93,6 +93,7 @@ public class Crane {
         extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         //intakeGate.setDirection(Servo.Direction.REVERSE);

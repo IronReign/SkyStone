@@ -3,7 +3,7 @@
 	<LynxUsbDevice name="Control Hub Portal 1" serialNumber="(embedded)" parentModuleAddress="1">
 		<LynxModule name="Expansion Hub 1" port="1">
 			<RevRobotics40HDHexMotor name="elbow" port="1" />
-			<NeveRest20Gearmotor name="extender" port="2" />
+			<RevRobotics40HDHexMotor name="extender" port="2" />
 			<RevRobotics40HDHexMotor name="turnTable" port="0" />
 
 			<Servo name="intakeServoFront" port="0" />
