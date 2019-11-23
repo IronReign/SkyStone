@@ -15,12 +15,14 @@ public class Crane {
 
     DcMotor elbow = null;
     DcMotor extendABob = null;
+    DcMotor hook = null;
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
-    Servo hook = null;
     Servo intakeServoFront = null;
     Servo intakeServoBack = null;
+
+    double hookPwr = 1;
 
     int elbowPosInternal = 0;
     int elbowPos = 0;
@@ -33,8 +35,9 @@ public class Crane {
     int intakeState = 3;
     boolean beltToElbowEnabled;
 
-    public int servoHooked;
-    public int servoUnhooked;
+    public int motorHooked;
+    public int motorUnhooked;
+    public int motorMidHooked;
 
     int servoGateOpen;
     int servoGateClosed;
@@ -83,20 +86,22 @@ public class Crane {
 
     public boolean active = true;
 
-    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront, Servo intakeServoBack){
+    public Crane(DcMotor elbow, DcMotor extendABob, DcMotor hook, Servo intakeServoFront, Servo intakeServoBack){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
+        //elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
         extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
-        //intakeGate.setDirection(Servo.Direction.REVERSE);
+        hook.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hook.setTargetPosition(extendABob.getCurrentPosition());
+        hook.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hook.setPower(0);
+        //hook.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.elbow = elbow;
         this.extendABob = extendABob;
@@ -126,75 +131,77 @@ public class Crane {
         pos_latched = 2764;
         pos_postlatch = 1240;
 
-        servoGateOpen = 1394;
-        servoGateClosed = 900;
+        servoGateOpen = 1350;
+        servoGateClosed = 800;
 
-        servoHooked = 1800;
-        servoUnhooked = 1300;
+        motorHooked = 120;
+        motorUnhooked = 5;
+        motorMidHooked = 80;
 
-        //belt extension encoder values
-        extendDeposit = 1489;
-        extendMax = 2960;
-        extendMid= 980;
-        extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
-        extendMin = 100;  //prevent crunching collector tray
-    }
-
-    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
-
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setTargetPosition(elbow.getCurrentPosition());
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        extendABob.setTargetPosition(extendABob.getCurrentPosition());
-        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
-        //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        //intakeGate.setDirection(Servo.Direction.REVERSE);
-
-        this.elbow = elbow;
-        this.extendABob = extendABob;
-        this.hook = hook;
-        this.intakeServoFront = intakeServoFront;
-        intakeServoBack.setDirection(Servo.Direction.REVERSE);
-
-        intakePwr = .3; //.35;
-        //normal Teleop encoder values
-        pos_preIntake = 3600;
-        pos_Intake   = 3900;
-        pos_Deposit  = 1520;
-        pos_reverseIntake = 1407;
-        pos_reversePreDeposit=1408;
-        pos_reverseDeposit = 3400;
-        pos_reverseSafeDrive = 1000;
-        pos_PartialDeposit = 1700;
-        pos_SafeDrive = 800;
-
-        //autonomous encoder values
-        pos_AutoPark = pos_SafeDrive + 500;
-        pos_autonPrelatch = 2950;
-
-        //end game encoder values
-        pos_prelatch = 2000;
-        pos_latched = 2764;
-        pos_postlatch = 1240;
-
-        servoGateOpen = 2200;
-        servoGateClosed = 900;
-
-        servoHooked = 1800;
-        servoUnhooked = 1300;
-
-        //belt extension encoder values
+        //bel
+        // t extension encoder values
         extendDeposit = 1489;
         extendMax = 2960;
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
         extendMin = 300;  //prevent crunching collector tray
     }
+//
+//    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
+//
+//        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        elbow.setTargetPosition(elbow.getCurrentPosition());
+//        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
+//
+//        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        extendABob.setTargetPosition(extendABob.getCurrentPosition());
+//        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
+//        //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
+//
+//        //intakeGate.setDirection(Servo.Direction.REVERSE);
+//
+//        this.elbow = elbow;
+//        this.extendABob = extendABob;
+//        this.hook = hook;
+//        this.intakeServoFront = intakeServoFront;
+//        intakeServoBack.setDirection(Servo.Direction.REVERSE);
+//
+//        intakePwr = .3; //.35;
+//        //normal Teleop encoder values
+//        pos_preIntake = 3600;
+//        pos_Intake   = 3900;
+//        pos_Deposit  = 1520;
+//        pos_reverseIntake = 1407;
+//        pos_reversePreDeposit=1408;
+//        pos_reverseDeposit = 3400;
+//        pos_reverseSafeDrive = 1000;
+//        pos_PartialDeposit = 1700;
+//        pos_SafeDrive = 800;
+//
+//        //autonomous encoder values
+//        pos_AutoPark = pos_SafeDrive + 500;
+//        pos_autonPrelatch = 2950;
+//
+//        //end game encoder values
+//        pos_prelatch = 2000;
+//        pos_latched = 2764;
+//        pos_postlatch = 1240;
+//
+//        servoGateOpen = 2200;
+//        servoGateClosed = 900;
+//
+//        motorHooked = 1800;
+//        motorUnhooked = 1300;
+//
+//        //belt extension encoder values
+//        extendDeposit = 1489;
+//        extendMax = 2960;
+//        extendMid= 980;
+//        extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
+//        extendMin = 300;  //prevent crunching collector tray
+//    }
 
 
     public void update(){
@@ -268,11 +275,13 @@ public class Crane {
 
     public void hookOn(){
 
-        hook.setPosition(servoNormalize(servoHooked));
+        hook.setTargetPosition(motorHooked);
+        hook.setPower(0);
         hookUp = false;
     }
     public void hookOff(){
-        hook.setPosition(servoNormalize(servoUnhooked));
+        hook.setTargetPosition(motorMidHooked);
+        hook.setPower(0);
         hookUp = true;
     }
 
@@ -310,9 +319,6 @@ public class Crane {
         else
             ejectStone();
     }
-
-
-
 
 
     public void collect(){

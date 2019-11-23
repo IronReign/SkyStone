@@ -252,7 +252,7 @@ public class Skystone_6832 extends LinearOpMode {
             telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
             telemetry.addData("Status", "Side: " + getAlliance());
             telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-            telemetry.addData("Turret", "Turret Position: " + robot.turret.getCurrentRotation());
+            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
             telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
             telemetry.update();
 
@@ -394,11 +394,6 @@ public class Skystone_6832 extends LinearOpMode {
     private void demo() {
         if (gamepad1.x)
             robot.maintainHeading(gamepad1.x);
-
-        if (gamepad1.dpad_down) {
-            robot.articulate(PoseSkystone.Articulation.manual);
-            robot.crane.decreaseElbowAngle();
-        }
         if (gamepad1.dpad_up) {
             robot.articulate(PoseSkystone.Articulation.manual);
             robot.crane.increaseElbowAngle();

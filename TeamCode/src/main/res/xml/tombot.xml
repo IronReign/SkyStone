@@ -6,9 +6,10 @@
 			<RevRobotics40HDHexMotor name="extender" port="2" />
 			<RevRobotics40HDHexMotor name="turnTable" port="0" />
 
+
 			<Servo name="intakeServoFront" port="0" />
 			<Servo name="intakeServoBack" port="2" />
-			<Servo name="hook" port="3" />
+
 			<Servo name="blinkin" port="4" />
 
 			<LynxEmbeddedIMU name="imu" port="0" bus="0" />
@@ -18,8 +19,7 @@
 		<LynxModule name="Expansion Hub 2" port="2">
 			<NeveRest20Gearmotor name="motorBackRight" port="0" />
 			<NeveRest20Gearmotor name="motorBackLeft" port="1" />
-			<NeveRest20Gearmotor name="motorFrontRight" port="2" />
-			<NeveRest20Gearmotor name="motorFrontLeft" port="3" />
+            <RevRoboticsCoreHexMotor name="hook" port="2" />
 
 
 			<LynxEmbeddedIMU name="imu 1" port="0" bus="0" />

@@ -28,7 +28,8 @@ public class Turret{
     private int a360degrees;
 
     //team members
-    boolean BhanaviyaIsOn = false;
+    boolean BruhnaviyaIsOn = false;
+    String Bruhnaviya = "canceled";
 
     public Turret(DcMotor turnTable) {
 
@@ -39,13 +40,15 @@ public class Turret{
         this.turnTable = turnTable;
         currentDegrees= 0;
         currentRotation= 0;
+        ticksPerDegree = 170/90;
         currentRotationInternal= 0;
         degreesSinceBegin= 0;
-        ticksPerDegree= 90;
-        a90degreesleft= 90;
-        a90degreesright= 90;
-        a180degrees= 180;
-        a360degrees= 360;
+        ticksPerDegree= 2;
+        a90degreesleft= -170;
+        a90degreesright= 170;
+        a180degrees= 340;
+        a360degrees= 680;
+        turnTable.setPower(turntablePow);
     }
 
     public void update(){
@@ -64,13 +67,13 @@ public class Turret{
     public void setActive(boolean active){this.active = active;}
 
     public void rotateRight(double power){
-        setTurntablePosition(getCurrentRotation() + 2, power);
-        degreesSinceBegin += 20;
+        setTurntablePosition(getCurrentRotation() + 1, power);
+        degreesSinceBegin += 1;
     }
 
     public void rotateLeft(double power){
-        setTurntablePosition(getCurrentRotation() - 2, power);
-        degreesSinceBegin -= 20;
+        setTurntablePosition(getCurrentRotation() - 1, power);
+        degreesSinceBegin -= 1;
     }
 
     public void setTurntablePosition(int position, double power) {

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -57,7 +58,7 @@ public class PoseSkystone
     private DcMotor turnTable  = null;
     private Servo intakeServoFront= null;
     private Servo intakeServoBack= null;
-    private Servo hook = null;
+    private DcMotor hook = null;
     Servo blinkin = null;
 
 
@@ -282,28 +283,30 @@ public class PoseSkystone
         this.intakeServoFront         = this.hwMap.servo.get("intakeServoFront");
         this.intakeServoBack         = this.hwMap.servo.get("intakeServoBack");
 
-        this.hook               = this.hwMap.servo.get("hook");
+        this.hook               = this.hwMap.dcMotor.get("hook");
 
         this.blinkin            = this.hwMap.servo.get("blinkin");
         this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
         this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
         this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
 
-        motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
+        //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
         motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
-        motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
+        //motorFrontRight = hwMap.get(DcMotor.class, "motorFrontRight");
         motorBackRight = hwMap.get(DcMotor.class, "motorBackRight");
         turnTable = hwMap.get(DcMotor.class, "turnTable");
+        //elbow.setDirection(DcMotor.Direction.REVERSE);
 
-        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        //motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
-        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elbow.setDirection(DcMotor.Direction.REVERSE);
+        hook.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         extender.setDirection(DcMotor.Direction.REVERSE);
 
 
@@ -961,9 +964,9 @@ public class PoseSkystone
         powerBackRight += -rotate;
 
         //provide power to the motors
-        motorFrontLeft.setPower(clampMotor(powerFrontLeft));
+        //motorFrontLeft.setPower(clampMotor(powerFrontLeft));
         motorBackLeft.setPower(clampMotor(powerBackLeft));
-        motorFrontRight.setPower(clampMotor(powerFrontRight));
+        //motorFrontRight.setPower(clampMotor(powerFrontRight));
         motorBackRight.setPower(clampMotor(powerBackRight));
 
     }
@@ -1110,20 +1113,20 @@ public class PoseSkystone
      * @param enableEncoders if true, the motors will continue to have encoders active after reset
      */
     public void resetMotors(boolean enableEncoders){
-        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         if (enableEncoders) {
-            motorFrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //motorFrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motorFrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //motorFrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorBackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
         else {
-            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            //motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            //motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
@@ -1372,8 +1375,8 @@ public class PoseSkystone
                 poseSavedHeading = poseHeading;
                 maintainHeadingInit = true;
             }
-            //hold the saved heading with PID
-            driveIMU(kpDrive, kiDrive, kdDrive, 0, poseSavedHeading, false);
+            //hold the saved heading with PIDposeSavedHeading
+            turret.setTurntablePosition((int)(poseSavedHeading),1);
         }
 
         //if the button is not down, set to make sure the correct heading will be saved on the next button press
