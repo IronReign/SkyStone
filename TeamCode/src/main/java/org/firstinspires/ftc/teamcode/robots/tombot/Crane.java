@@ -276,12 +276,12 @@ public class Crane {
     public void hookOn(){
 
         hook.setTargetPosition(motorHooked);
-        hook.setPower(0);
+        hook.setPower(hookPwr);
         hookUp = false;
     }
     public void hookOff(){
         hook.setTargetPosition(motorMidHooked);
-        hook.setPower(0);
+        hook.setPower(hookPwr);
         hookUp = true;
     }
 
@@ -294,15 +294,17 @@ public class Crane {
 
 
 
-    public void grabStone(){
+    public boolean grabStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateClosed));
         //intakeServoBack.setPosition(servoNormalize(servoGateOpen));
         gripperState = 1;
+        return true;
     }
-    public void ejectStone(){
+    public boolean ejectStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateOpen));
         //intakeServoBack.setPosition(servoNormalize(servoGateClosed));
         gripperState = 2;
+        return true;
     }
     public void stopGripper() {
         intakeServoFront.setPosition(servoNormalize(1500));

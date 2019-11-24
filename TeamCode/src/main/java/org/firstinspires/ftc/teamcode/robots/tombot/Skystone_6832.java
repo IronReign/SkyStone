@@ -215,9 +215,9 @@ public class Skystone_6832 extends LinearOpMode {
                 enableHookSensors = !enableHookSensors;
 
             //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
-                robot.crane.hookOn();
+                //robot.crane.hookOn();
             //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
-                robot.crane.hookOff();
+                //robot.crane.hookOff();
 
             if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left)) {
                 auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; //switch vision provider
@@ -285,10 +285,10 @@ public class Skystone_6832 extends LinearOpMode {
                         joystickDrive();
                         break;
                     case 1: //autonomous that goes to opponent's crater
-                        if (auto.primaryBlue.execute()) active = false;
+                        if (auto.primaryRed.execute()) active = false;
                         break;
                     case 2: //autonomous that only samples
-                        if (auto.craterSide_worlds.execute()) active = false;
+                        if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
                         if (auto.depotSample_worlds.execute()) active = false;
@@ -314,7 +314,6 @@ public class Skystone_6832 extends LinearOpMode {
                         tpmtuning();
                         break;
                     case 8: //turn to IMU
-                        robot.setAutonSingleStep(true);
                         demo();
                         break;
                     case 9:
@@ -411,7 +410,7 @@ public class Skystone_6832 extends LinearOpMode {
 
 
     int reverse = 1;
-
+    boolean switcha = false;
     private void joystickDrive() {
 
         if (!joystickDriveStarted) {
@@ -460,8 +459,8 @@ public class Skystone_6832 extends LinearOpMode {
         // POV Mode uses left stick to go forward, and right stick to turn.
         // - This uses basic math to combine motions and is easier to drive straight
 
-        double drive = -gamepad1.left_stick_y *.3;
-        double turn = gamepad1.right_stick_x *.3;
+        double drive = -gamepad1.left_stick_y *.5;
+        double turn = gamepad1.right_stick_x *.5;
         //double strafe = gamepad1.left_stick_x * 3;
 
         leftFrontPower = Range.clip(drive + turn, -1.0, 1.0);
@@ -499,31 +498,42 @@ public class Skystone_6832 extends LinearOpMode {
 //                pos.retractBelt();
 //            }
         if(gamepad1.right_trigger > 0){
+            if(robot.crane.getExtendABobCurrentPos() > 500);
+                robot.turret.rotateRight(right_trigger *.1);
             robot.turret.rotateRight(right_trigger);
+
         }
         if(gamepad1.left_trigger > 0){
+            if(robot.crane.getExtendABobCurrentPos() > 500);
+                robot.turret.rotateRight(right_trigger *.1);
             robot.turret.rotateLeft(left_trigger);
         }
         //if(left_bumper > 0){
         //    robot.turret.setToFront();
         //}
         if(gamepad1.right_bumper == true){
-            robot.turret.rotateLeft(.1);
         }
-        if(toggleAllowed(gamepad1.a,a)){
+        if(toggleAllowed(gamepad1.x,x)){
             robot.crane.hookToggle();
         }
         if(toggleAllowed(gamepad1.b,b)){
-            robot.turret.setToFront();
+            robot.crane.extendToPosition(1500,1.0,20);
         }
         if(toggleAllowed(gamepad1.a,a)){
-            robot.crane.hookToggle();
+            robot.crane.extendToPosition(100,1.0,20);
+            robot.crane.setElbowTargetPos(340, 1);
         }
         if(toggleAllowed(gamepad1.y,y)){
-            robot.crane.toggleGripper(true);
+            if(switcha == false) {
+                robot.crane.toggleGripper(true);
+                switcha=true;
+            }
+            else {
+                robot.crane.toggleGripper(false);
+                switcha = false;
+            }
         }
         if(toggleAllowed(gamepad1.x,x)){
-            robot.crane.toggleGripper(false);
         }
         //call the update method in crane
         robot.crane.update();
@@ -605,11 +615,11 @@ public class Skystone_6832 extends LinearOpMode {
             isHooked = !isHooked;
         }
 
-        if (isHooked) {
-            robot.crane.hookOn();
-        } else {
-            robot.crane.hookOff();
-        }
+//        if (isHooked) {
+//            robot.crane.hookOn();
+//        } else {
+//            robot.crane.hookOff();
+//        }
     }
 
     private void turnTest() {

@@ -82,13 +82,37 @@ public class Autonomous {
         }
     }
 
-    public StateMachine primaryBlue = getStateMachine(autoStage)
-            .addState(() -> sample())
+    public StateMachine primaryRed = getStateMachine(autoStage)
+            //pick up stone
+            .addState(() -> (robot.driveForward(true, .106, .80)))
+            .addState(() ->robot.crane.setElbowTargetPos(340,1.0))
+            .addState(() ->{robot.crane.extendToPosition(2000,1,8); return robot.crane.ejectStone();})
+            .addState(() ->robot.crane.setElbowTargetPos(40,1.0))
+            .addTimedState(5, //yeet ducky
+                    () -> robot.crane.grabStone(),
+                    () -> robot.crane.grabStone())
+            .addState(() ->robot.crane.extendToPosition(100,1,20))
+            .addState(() ->robot.crane.setElbowTargetPos(340,1))
+
+            .addState(() -> (robot.rotateIMU(90, 4))) //rotate back toward building zone - stay in 2nd column
+            .addState(() -> (robot.driveForward(true, .14, .80))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
+            .addState(() -> (robot.rotateIMU(0, 3))) //turn back to foundation
+            //deposit stones
+            .addState(() -> {robot.crane.extendToPosition(100,.8,5); return robot.crane.setElbowTargetPos(100,1.0);})
+            .addState(() ->robot.crane.ejectStone())
+
+//            //park
+//            .addState(() -> (robot.rotateIMU(270, 3)))
+//            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
+//            .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
+//            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
             .build();
 
+    public StateMachine walkOfShame = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true, .8, .80))) //forward to 2nd column of tiles
+            .build();
 
-
-    public StateMachine left = getStateMachine(autoStage)
+    public StateMachine primaryBlue = getStateMachine(autoStage)
             .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
             .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
             .addState(() -> (robot.driveForward(true, .5, .80))) //forward to wall - todo: change to stop with distance sensor insteasd of odometry

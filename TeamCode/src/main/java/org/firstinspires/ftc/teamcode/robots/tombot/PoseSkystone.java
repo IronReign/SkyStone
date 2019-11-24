@@ -85,7 +85,7 @@ public class PoseSkystone
 
 
     //PID values
-    public static int forwardTPM = 1621; //todo - fix value this was based on icarus - measurement was for the original 42 tooth driven sprocket, since replaced by a 32 tooth sprocket
+    public static int forwardTPM = 1060; //todo - fix value this was based on icarus - measurement was for the original 42 tooth driven sprocket, since replaced by a 32 tooth sprocket
     private int strafeTPM = 1909; //todo - fix value high priority this current value is based on Kraken - minimech will be different
     private double poseX;
     private double poseY;
@@ -306,6 +306,7 @@ public class PoseSkystone
         //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hook.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turnTable.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         extender.setDirection(DcMotor.Direction.REVERSE);
 
@@ -880,6 +881,7 @@ public class PoseSkystone
         }
         else moveMode = moveMode.forward;
 
+
         long targetPos = (long)(targetMeters * forwardTPM);
         if(Math.abs(targetPos) > Math.abs(getAverageTicks())){//we've not arrived yet
             driveMixerDiffTank(power, 0);
@@ -1167,7 +1169,7 @@ public class PoseSkystone
      * retrieve the average value of ticks on all motors - differential
      */
     public long getAverageTicks(){
-        long averageTicks = (motorFrontLeft.getCurrentPosition() + motorBackLeft.getCurrentPosition() + motorFrontRight.getCurrentPosition() +motorBackRight.getCurrentPosition())/4;
+        long averageTicks = (motorBackLeft.getCurrentPosition() + motorBackRight.getCurrentPosition())/2;
         return averageTicks;
     }
 
