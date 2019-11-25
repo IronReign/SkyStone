@@ -58,6 +58,7 @@ public class PoseSkystone
     private DcMotor turnTable  = null;
     private Servo intakeServoFront= null;
     private Servo intakeServoBack= null;
+    private Servo gripperSwivel = null;
     private DcMotor hook = null;
     Servo blinkin = null;
 
@@ -282,6 +283,7 @@ public class PoseSkystone
 
         this.intakeServoFront         = this.hwMap.servo.get("intakeServoFront");
         this.intakeServoBack         = this.hwMap.servo.get("intakeServoBack");
+        this.gripperSwivel         = this.hwMap.servo.get("gripperSwivel");
 
         this.hook               = this.hwMap.dcMotor.get("hook");
 
@@ -326,7 +328,7 @@ public class PoseSkystone
            }
 */
         //setup subsystems
-        crane = new Crane(elbow,extender,hook, intakeServoFront, intakeServoBack);
+        crane = new Crane(elbow,extender,hook, intakeServoFront, intakeServoBack, gripperSwivel);
         turret = new Turret(turnTable);
         ledSystem = new LEDSystem(blinkin);
 

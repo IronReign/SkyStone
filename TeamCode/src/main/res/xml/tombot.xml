@@ -9,7 +9,7 @@
 
 			<Servo name="intakeServoFront" port="0" />
 			<Servo name="intakeServoBack" port="2" />
-
+			<Servo name="gripperSwivel" port="3" />
 			<Servo name="blinkin" port="4" />
 
 			<LynxEmbeddedIMU name="imu" port="0" bus="0" />

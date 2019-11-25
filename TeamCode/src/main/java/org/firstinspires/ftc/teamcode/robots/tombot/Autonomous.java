@@ -82,6 +82,16 @@ public class Autonomous {
         }
     }
 
+    public StateMachine redRedo = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true, .106, .80)))
+            .addState(() ->robot.crane.extendToPosition(1000,1,8))
+            .addState(() ->{robot.rotateIMU(90, 2); return robot.turret.setRotation90(true);})
+            .addState(() ->{robot.rotateIMU(90, 2); return robot.turret.setRotation90(true);})
+            .addState(() ->{robot.crane.extendToPosition(1000,1,8); return robot.crane.ejectStone();})
+            .addState(() ->robot.crane.grabStone())
+
+            .build();
+
     public StateMachine primaryRed = getStateMachine(autoStage)
             //pick up stone
             .addState(() -> (robot.driveForward(true, .106, .80)))

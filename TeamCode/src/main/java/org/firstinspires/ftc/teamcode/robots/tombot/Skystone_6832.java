@@ -528,7 +528,16 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.setTowerHeight(-1);
         }
         if(toggleAllowed(gamepad2.a,a)) {
-            robot.crane.extendToTowerHeight();
+                robot.crane.extendToTowerHeight();
+        }
+        if(toggleAllowed(gamepad2.left_bumper,left_bumper)) {
+            robot.crane.swivelGripper(false);
+        }
+        if(toggleAllowed(gamepad2.right_bumper,right_bumper)) {
+            robot.crane.swivelGripper(true);
+        }
+        if(toggleAllowed(gamepad2.x,x)) {
+            robot.crane.stopSwivel();
         }
     }
 

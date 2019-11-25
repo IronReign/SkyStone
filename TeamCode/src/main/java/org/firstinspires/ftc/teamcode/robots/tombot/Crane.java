@@ -20,6 +20,7 @@ public class Crane {
     Servo intakeLeft = null;
     Servo intakeServoFront = null;
     Servo intakeServoBack = null;
+    Servo gripperSwivel = null;
 
     double hookPwr = 1;
 
@@ -91,7 +92,7 @@ public class Crane {
 
     public boolean active = true;
 
-    public Crane(DcMotor elbow, DcMotor extendABob, DcMotor hook, Servo intakeServoFront, Servo intakeServoBack){
+    public Crane(DcMotor elbow, DcMotor extendABob, DcMotor hook, Servo intakeServoFront, Servo intakeServoBack, Servo gripperSwivel){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
@@ -113,6 +114,7 @@ public class Crane {
         this.hook = hook;
         this.intakeServoFront = intakeServoFront;
         this.intakeServoBack = intakeServoBack;
+        this.gripperSwivel = gripperSwivel;
         intakeServoBack.setDirection(Servo.Direction.REVERSE);
 
         intakePwr = .3; //.35;
@@ -309,7 +311,22 @@ public class Crane {
             hookOff();
     }
 
+    public void swivelGripper(boolean right){
+        if(right == true)
+            gripperSwivel.setPosition(.7);
+        else
+            gripperSwivel.setPosition(.3);
+    }
 
+    public void stopSwivel(){
+        gripperSwivel.setPosition(.5);
+    }
+
+    //This is for auto
+    public boolean setGripperSwivelRotation(int encodedPosition){
+        gripperSwivel.setPosition(servoNormalize(encodedPosition));
+        return true;
+    }
 
     public boolean grabStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateClosed));

@@ -71,14 +71,16 @@ public class Turret{
         turnTableSpeed = power;
     }
 
-    public void setRotation90(boolean right) {
+    public boolean setRotation90(boolean right) {
         if(right == true) {
             targetRotationTicks += turnTable.getCurrentPosition()%a90degrees;
             turnTableSpeed = safeTurn;
+            return true;
         }
         else {
             targetRotationTicks -= turnTable.getCurrentPosition()%-a90degrees;
             turnTableSpeed = safeTurn;
+            return true;
         }
     }
 
