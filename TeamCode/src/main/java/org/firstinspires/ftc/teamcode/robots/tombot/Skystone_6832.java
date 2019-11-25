@@ -410,7 +410,6 @@ public class Skystone_6832 extends LinearOpMode {
 
 
     int reverse = 1;
-    boolean switcha = false;
     private void joystickDrive() {
 
         if (!joystickDriveStarted) {
@@ -474,44 +473,37 @@ public class Skystone_6832 extends LinearOpMode {
 
         //elbow code
         if (gamepad1.dpad_right) {
-            //pos.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.increaseElbowAngle();
         }
         if (gamepad1.dpad_left) {
-            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.decreaseElbowAngle();
         }
         if (gamepad1.dpad_up) {
-            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.extendBelt();
         }
         if (gamepad1.dpad_down) {
-            //robot.articulate(PoseBigWheel.Articulation.manual);
             robot.crane.retractBelt();
         }
-//            if (gamepad1.right_stick_y < -.1){
-//                //robot.articulate(PoseBigWheel.Articulation.manual);
-//                pos.extendBelt();
-//            }
-//            if (gamepad1.right_stick_y > .1) {
-//                //robot.articulate(PoseBigWheel.Articulation.manual);
-//                pos.retractBelt();
-//            }
+
+        //turret code
         if(gamepad1.right_trigger > 0){
             if(robot.crane.getExtendABobCurrentPos() > 500);
                 robot.turret.rotateRight(right_trigger *.1);
             robot.turret.rotateRight(right_trigger);
 
         }
+
+        //other code/ articlations
         if(gamepad1.left_trigger > 0){
             if(robot.crane.getExtendABobCurrentPos() > 500);
                 robot.turret.rotateRight(right_trigger *.1);
             robot.turret.rotateLeft(left_trigger);
         }
-        //if(left_bumper > 0){
-        //    robot.turret.setToFront();
-        //}
-        if(gamepad1.right_bumper == true){
+        if(gamepad1.right_bumper){
+            robot.turret.setToFront();
+        }
+        if(gamepad1.left_bumper){
+            robot.turret.setRotation180();
         }
         if(toggleAllowed(gamepad1.x,x)){
             robot.crane.hookToggle();
@@ -524,19 +516,20 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.setElbowTargetPos(340, 1);
         }
         if(toggleAllowed(gamepad1.y,y)){
-            if(switcha == false) {
-                robot.crane.toggleGripper(true);
-                switcha=true;
-            }
-            else {
-                robot.crane.toggleGripper(false);
-                switcha = false;
-            }
+            robot.crane.toggleGripper();
         }
-        if(toggleAllowed(gamepad1.x,x)){
+        if(toggleAllowed(gamepad2.x,x)) {
+            robot.crane.setTowerHeight(1);
         }
-        //call the update method in crane
-        robot.crane.update();
+        if(toggleAllowed(gamepad2.y,y)) {
+            robot.crane.setTowerHeight(-1);
+        }
+        if(toggleAllowed(gamepad2.y,y)) {
+            robot.crane.setTowerHeight(-1);
+        }
+        if(toggleAllowed(gamepad2.a,a)) {
+            robot.crane.extendToTowerHeight();
+        }
     }
 
     private void joystickDrivePregameMode() {
@@ -845,7 +838,6 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
         telemetry.addLine()
-                .addData("Turret", "Turret : " + robot.turret.getCurrentRotation())
                 .addData("Turret", "Turret raw: " + robot.turret.getCurrentRotationEncoderRaw());
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
@@ -876,7 +868,7 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Articulation", () -> robot.getArticulation());
         telemetry.addLine()
                 .addData("Turret", "Turret Position: " + robot.turret.getCurrentRotationEncoderRaw())
-                .addData("Turret", "Turret Position: " + robot.turret.currentRotation);
+                .addData("Turret", "Turret : " + robot.turret.getTargetRotationTicks());
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);

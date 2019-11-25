@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -77,6 +76,12 @@ public class Crane {
 
     public int stow = 650;
 
+    public int currentTowerHeight;
+    public int blockHeightMeter;
+    public int anglePerBlock;
+
+
+
 
     private boolean hookUp = true;
     private int gripperState = 0;
@@ -121,6 +126,7 @@ public class Crane {
         pos_reverseSafeDrive = 1000;
         pos_PartialDeposit = 1700;
         pos_SafeDrive = 800;
+        currentTowerHeight = 0;
 
         //autonomous encoder values
         pos_AutoPark = pos_SafeDrive + 500;
@@ -272,6 +278,17 @@ public class Crane {
         intakeState = 3;
     }
 
+    public void setTowerHeight(int newHeight){
+        currentTowerHeight += newHeight;
+    }
+
+    int hypotenuse = 0;
+    public void extendToTowerHeight(){
+        hypotenuse = (int)(Math.sqrt(.25 * Math.pow((currentTowerHeight* blockHeightMeter),2)));//in meters
+        setElbowTargetPos((int)(ticksPerDegree*Math.acos(.5/ hypotenuse)),1);
+        setExtendABobTargetPos((int)(hypotenuse *(107.0/2960.0)));
+    }
+
 
     public void hookOn(){
 
@@ -315,11 +332,17 @@ public class Crane {
 
     }
 
-    public void toggleGripper(boolean open) {
-        if (open)
+
+    boolean switcha = false;
+    public void toggleGripper() {
+        if(switcha == false) {
             grabStone();
-        else
+            switcha=true;
+        }
+        else {
             ejectStone();
+            switcha = false;
+        }
     }
 
 

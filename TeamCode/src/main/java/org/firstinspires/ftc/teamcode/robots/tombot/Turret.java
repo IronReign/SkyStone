@@ -4,26 +4,20 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 public class Turret{
     //motor
     private DcMotor turnTable  = null;
-    private double turntablePow = 1;
+    private double turnTableSpeed = 1;
     private double safeTurn = .5;
 
     //Position variables
-    private int currentDegrees;
-    public int currentRotation;
-    public  int currentRotationInternal;
-    public int degreesSinceBegin;
+    public int targetRotationTicks;
     private double ticksPerDegree;
     private boolean active = true;
 
     //positions
-    private int a90degreesleft;
-    private int a90degreesright;
+    private int a90degrees;
     private int a180degrees;
     private int a360degrees;
 
@@ -38,78 +32,74 @@ public class Turret{
         turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turnTable.setDirection(DcMotorSimple.Direction.REVERSE);
 
+
+
         this.turnTable = turnTable;
-        currentDegrees= 0;
-        currentRotation= 0;
+        targetRotationTicks = 0;
         ticksPerDegree = 170/90;
-        currentRotationInternal= 0;
-        degreesSinceBegin= 0;
-        ticksPerDegree= 2;
-        a90degreesleft= -170;
-        a90degreesright= 170;
-        a180degrees= 340;
-        a360degrees= 680;
+        targetRotationTicks= 0;
+        a90degrees= (int) (ticksPerDegree*90);
+        a180degrees= (int) (ticksPerDegree*180);
+        a360degrees= (int) (ticksPerDegree*360);
+        setActive(true);
     }
 
     public void update(){
-        if(active && currentRotationInternal != currentRotation) { //don't keep updating if we are retractBelt to target position
-            currentRotation = currentRotationInternal;
-            turnTable.setTargetPosition(currentRotationInternal);
-            turnTable.setPower(turntablePow);
+        if(active && targetRotationTicks != turnTable.getCurrentPosition()) { //don't keep updating if we are retractBelt to target position
+            turnTable.setTargetPosition(targetRotationTicks);
+            turnTable.setPower(turnTableSpeed);
         }
-        else
-            turnTable.setPower(0);
     }
 
     public boolean isActive(){
         return active;
     }
-    public void setActive(boolean active){this.active = active;}
-
-    public void rotateRight(double power){
-        setTurntablePosition(getCurrentRotation() + 5, power);
-        degreesSinceBegin += 5;
+    public void setActive(boolean active){
+        this.active = active;
+        if(active = true)
+            turnTable.setPower(.5);
+        else
+            turnTable.setPower(0);
     }
 
-    public void rotateLeft(double power){
-        setTurntablePosition(getCurrentRotation() - 5, power);
-        degreesSinceBegin -= 5;
-    }
+    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + 5, power);}
+
+    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - 5, power);}
 
     public void setTurntablePosition(int position, double power) {
-        currentRotationInternal = position;
-        turntablePow = power;
+        targetRotationTicks = position;
+        turnTableSpeed = power;
     }
 
     public void setRotation90(boolean right) {
         if(right == true) {
-            currentRotation += turnTable.getCurrentPosition()%a90degreesright;
-            turntablePow = safeTurn;
+            targetRotationTicks += turnTable.getCurrentPosition()%a90degrees;
+            turnTableSpeed = safeTurn;
         }
         else {
-            currentRotationInternal -= turnTable.getCurrentPosition()%a90degreesleft;
-            turntablePow = safeTurn;
+            targetRotationTicks -= turnTable.getCurrentPosition()%-a90degrees;
+            turnTableSpeed = safeTurn;
         }
     }
 
     public void setRotation180() {
-        if(currentRotation <= 0)
-            currentRotation -= currentRotationInternal%a180degrees;
-        if(currentRotation >= 0)
-            currentRotation += currentRotationInternal%a180degrees;
-        if(currentRotation == 0)
-            currentRotation -= a180degrees;
-        turntablePow = safeTurn;
+        if(getCurrentRotationEncoderRaw() < 0)
+            targetRotationTicks -= getCurrentRotationEncoderRaw()%a180degrees;
+        if(getCurrentRotationEncoderRaw() > 0)
+            targetRotationTicks += getCurrentRotationEncoderRaw()%a180degrees;
+        if(getCurrentRotationEncoderRaw() == 0)
+            targetRotationTicks -= a180degrees;
+        turnTableSpeed = safeTurn;
     }
 
     public void setToFront(){
-        if(getCurrentRotation() < a360degrees ||  currentRotationInternal > -a360degrees)
-             setTurntablePosition(0,safeTurn);
-        else if(getCurrentRotation() < 0) {
-            setTurntablePosition(getCurrentRotation() + getCurrentRotation() %a360degrees, .5);
+        if(getTargetRotationTicks() < a360degrees ||  targetRotationTicks > -a360degrees)
+            setTurntablePosition(0,safeTurn);
+        else if(getTargetRotationTicks() < 0) {
+            setTurntablePosition(getTargetRotationTicks() + getTargetRotationTicks() %a360degrees, .5);
         }
         else {
-            setTurntablePosition(getCurrentRotation() - getCurrentRotation() %a360degrees, .5);
+            setTurntablePosition(getTargetRotationTicks() - getTargetRotationTicks() %a360degrees, .5);
         }
 
     }
@@ -117,13 +107,13 @@ public class Turret{
     public int getCurrentRotationEncoderRaw(){
         return turnTable.getCurrentPosition();
     }
-    public int getCurrentRotation(){
-        return currentRotation;
+    public int getTargetRotationTicks(){
+        return targetRotationTicks;
     }
 
     public void returnToZero() {
-        currentRotationInternal = 0;
-        turntablePow = safeTurn;
+        targetRotationTicks = 0;
+        turnTableSpeed = safeTurn;
     }
 
     public void resetEncoder() {
