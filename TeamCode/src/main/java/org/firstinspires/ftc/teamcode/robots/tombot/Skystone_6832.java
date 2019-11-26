@@ -526,9 +526,6 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad2.y,y)) {
             robot.crane.setTowerHeight(-1);
         }
-        if(toggleAllowed(gamepad2.y,y)) {
-            robot.crane.setTowerHeight(-1);
-        }
         if(toggleAllowed(gamepad2.a,a)) {
                 robot.crane.extendToTowerHeight();
         }
@@ -541,6 +538,7 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad2.x,x)) {
             robot.crane.stopSwivel();
         }
+        robot.crane.update();
     }
 
     private void joystickDrivePregameMode() {
@@ -881,9 +879,11 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Turret", "Turret Position: " + robot.turret.getCurrentRotationEncoderRaw())
                 .addData("Turret", "Turret : " + robot.turret.getTargetRotationTicks());
         telemetry.addLine()
-                .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
-                .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);
-        }
+                .addData("Loop time", "%.0fms", () -> loopAvg / 1000000)
+                .addData("Loop time", "%.0fHz", () -> 1000000000 / loopAvg);
+        telemetry.addLine()
+                .addData("Turret", "Current tower height" + robot.crane.currentTowerHeight);
+    }
 
 
     private int servoTest = 1005;

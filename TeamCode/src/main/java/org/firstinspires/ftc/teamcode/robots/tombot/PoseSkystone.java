@@ -831,6 +831,7 @@ public class PoseSkystone
                 break;
             case 2:
                 craneArticulation=0;
+
                 return true;
         }
         return false;
@@ -890,6 +891,7 @@ public class PoseSkystone
     ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
+
 
 
     /**
@@ -1403,8 +1405,8 @@ public class PoseSkystone
                 poseSavedHeading = poseHeading;
                 maintainHeadingInit = true;
             }
-            //hold the saved heading with PIDposeSavedHeading
-            turret.setTurntablePosition((int)(poseSavedHeading),1);
+            //hold the saved heading with PID
+            driveIMU(kpDrive, kiDrive, kdDrive, 0, poseSavedHeading, false);
         }
 
         //if the button is not down, set to make sure the correct heading will be saved on the next button press
@@ -1412,6 +1414,26 @@ public class PoseSkystone
             maintainHeadingInit = false;
         }
     }
+
+    public void maintainHeadingTurret(boolean buttonState){
+
+        //if the button is currently down, maintain the set heading
+        if(buttonState) {
+            //if this is the first time the button has been down, then save the heading that the robot will hold at and set a variable to tell that the heading has been saved
+            if (!maintainHeadingInit) {
+                poseSavedHeading = poseHeading;
+                maintainHeadingInit = true;
+            }
+            //hold the saved heading with PID
+            driveIMU(kpDrive, kiDrive, kdDrive, 0, poseSavedHeading, false);
+        }
+
+        //if the button is not down, set to make sure the correct heading will be saved on the next button press
+        if(!buttonState){
+            maintainHeadingInit = false;
+        }
+    }
+
 
 
     /**

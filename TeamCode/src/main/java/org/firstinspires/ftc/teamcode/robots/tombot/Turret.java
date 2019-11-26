@@ -62,14 +62,15 @@ public class Turret{
             turnTable.setPower(0);
     }
 
-    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + (int)(ticksPerDegree*5), power);}
+    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + (int)(ticksPerDegree*15), power);}
 
-    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - (int)(ticksPerDegree*5), power);}
+    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - (int)(ticksPerDegree*15), power);}
 
     public void setTurntablePosition(int position, double power) {
         targetRotationTicks = position;
         turnTableSpeed = power;
     }
+
 
     public boolean setRotation90(boolean right) {
         if(right == true) {

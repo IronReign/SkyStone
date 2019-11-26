@@ -78,7 +78,7 @@ public class Crane {
     public int stow = 650;
 
     public int currentTowerHeight;
-    public int blockHeightMeter;
+    public final double blockHeightMeter = 0.127;
     public int anglePerBlock;
 
     public int craneArticulation = 0;
@@ -286,7 +286,7 @@ public class Crane {
 
     int hypotenuse = 0;
     public void extendToTowerHeight(){
-        hypotenuse = (int)(Math.sqrt(.25 * Math.pow((currentTowerHeight* blockHeightMeter),2)));//in meters
+        hypotenuse = (int)(Math.sqrt(.25 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2)));//in meters
         setElbowTargetPos((int)(ticksPerDegree*Math.acos(.5/ hypotenuse)),1);
         setExtendABobTargetPos((int)(hypotenuse *(107.0/2960.0)));
     }
