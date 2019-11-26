@@ -56,15 +56,15 @@ public class Turret{
     }
     public void setActive(boolean active){
         this.active = active;
-        if(active = true)
+        if(active == true)
             turnTable.setPower(.5);
         else
             turnTable.setPower(0);
     }
 
-    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + 5, power);}
+    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + (int)(ticksPerDegree*5), power);}
 
-    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - 5, power);}
+    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - (int)(ticksPerDegree*5), power);}
 
     public void setTurntablePosition(int position, double power) {
         targetRotationTicks = position;

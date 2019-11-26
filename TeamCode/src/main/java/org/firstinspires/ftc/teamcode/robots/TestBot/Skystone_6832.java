@@ -686,7 +686,7 @@ public class Skystone_6832 extends LinearOpMode {
         boolean doIntake = false;
 
 
-        if (gamepad1.y) {
+        if (gamepad1.y) { //toggle grip on/off
             robot.articulate(PoseSkystone.Articulation.reverseDriving);
             isIntakeClosed = true;
         }

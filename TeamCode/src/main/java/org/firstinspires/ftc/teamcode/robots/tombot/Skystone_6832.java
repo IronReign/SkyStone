@@ -143,6 +143,8 @@ public class Skystone_6832 extends LinearOpMode {
     private double dCoeff = 1.31;
     private double targetAngle = 287.25;
 
+    private int craneArticulation = 1;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -194,7 +196,7 @@ public class Skystone_6832 extends LinearOpMode {
                     robot.setZeroHeading();
                     robot.setAutonomousIMUOffset(0); //against lander
                 }
-                robot.articulate(PoseSkystone.Articulation.hanging);
+                robot.articulate(PoseSkystone.Articulation.retrieving);
                 robot.crane.extendToMin();
             }
 
@@ -471,7 +473,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         robot.driveMixerDiffSteer(drive, turn);
 
-        //elbow code
+        //crane controls
         if (gamepad1.dpad_right) {
             robot.crane.increaseElbowAngle();
         }
@@ -487,17 +489,18 @@ public class Skystone_6832 extends LinearOpMode {
 
         //turret code
         if(gamepad1.right_trigger > 0){
-            if(robot.crane.getExtendABobCurrentPos() > 500);
+            if(robot.crane.getExtendABobCurrentPos() > 500)
                 robot.turret.rotateRight(right_trigger *.1);
-            robot.turret.rotateRight(right_trigger);
-
+            else
+                robot.turret.rotateRight(right_trigger);
         }
 
         //other code/ articlations
         if(gamepad1.left_trigger > 0){
-            if(robot.crane.getExtendABobCurrentPos() > 500);
-                robot.turret.rotateRight(right_trigger *.1);
-            robot.turret.rotateLeft(left_trigger);
+            if(robot.crane.getExtendABobCurrentPos() > 500)
+                robot.turret.rotateLeft(right_trigger *.1);
+            else
+                robot.turret.rotateLeft(left_trigger);
         }
         if(gamepad1.right_bumper){
             robot.turret.setToFront();
@@ -512,8 +515,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.extendToPosition(1500,1.0,20);
         }
         if(toggleAllowed(gamepad1.a,a)){
-            robot.crane.extendToPosition(100,1.0,20);
-            robot.crane.setElbowTargetPos(340, 1);
+            robot.articulate(PoseSkystone.Articulation.retrieving);
         }
         if(toggleAllowed(gamepad1.y,y)){
             robot.crane.toggleGripper();
@@ -562,7 +564,7 @@ public class Skystone_6832 extends LinearOpMode {
         if (doDelatch) {
             switch (stateDelatch) {
                 case 0:
-                    robot.articulate(PoseSkystone.Articulation.hanging);
+                    robot.articulate(PoseSkystone.Articulation.retrieving);
                     break;
                 case 1:
                     robot.articulate(PoseSkystone.Articulation.deploying);

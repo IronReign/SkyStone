@@ -4,7 +4,7 @@
 		<LynxModule name="Expansion Hub 1" port="1">
 			<RevRobotics40HDHexMotor name="elbow" port="1" />
 			<RevRobotics40HDHexMotor name="extender" port="2" />
-			<RevRobotics40HDHexMotor name="turnTable" port="0" />
+			<NeveRest3.7v1Gearmotor name="turnTable" port="0" />
 
 
 			<Servo name="intakeServoFront" port="0" />
@@ -12,7 +12,7 @@
 			<Servo name="gripperSwivel" port="3" />
 			<Servo name="blinkin" port="4" />
 
-			<LynxEmbeddedIMU name="imu" port="0" bus="0" />
+			<LynxEmbeddedIMU name="turretIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distRight" port="0" bus="2"/>
 		</LynxModule>
 
@@ -22,9 +22,10 @@
             <RevRoboticsCoreHexMotor name="hook" port="2" />
 
 
-			<LynxEmbeddedIMU name="imu 1" port="0" bus="0" />
+			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="0" bus="2"/>
 			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="0" bus="3"/>
 		</LynxModule>
 	</LynxUsbDevice>
+    <Webcam name="Webcam 1" serialNumber="BFD5985F" />
 </Robot>

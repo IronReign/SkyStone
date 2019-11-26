@@ -81,7 +81,7 @@ public class Crane {
     public int blockHeightMeter;
     public int anglePerBlock;
 
-
+    public int craneArticulation = 0;
 
 
     private boolean hookUp = true;
@@ -345,6 +345,7 @@ public class Crane {
         //intakeServoBack.setPosition(servoNormalize(1500));
         gripperState = 0;
     }
+
     public void stopIntake(){
 
     }

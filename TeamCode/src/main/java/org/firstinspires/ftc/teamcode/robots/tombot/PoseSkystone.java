@@ -120,6 +120,8 @@ public class PoseSkystone
     public double autonomousIMUOffset = 0;
 
 
+    private int craneArticulation = 0;
+
     public enum MoveMode{
         forward,
         backward,
@@ -135,7 +137,7 @@ public class PoseSkystone
         manual, //target positions are all being manually overridden
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
         reverseDriving,
-        hanging, //auton initial hang at the beginning of a match
+        retrieving, //retrieve a stone
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -339,15 +341,15 @@ public class PoseSkystone
         parametersIMU.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parametersIMU.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parametersIMU.loggingEnabled = true;
-        parametersIMU.loggingTag = "IMU";
+        parametersIMU.loggingTag = "baseIMU";
 
         BNO055IMU.Parameters parametersIMULift = new BNO055IMU.Parameters();
         parametersIMULift.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parametersIMULift.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parametersIMULift.loggingEnabled = true;
-        parametersIMULift.loggingTag = "IMULift";
+        parametersIMULift.loggingTag = "turretIMU";
 
-        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu = hwMap.get(BNO055IMU.class, "baseIMU");
         imu.initialize(parametersIMU);
 
     }
@@ -600,10 +602,11 @@ public class PoseSkystone
            case driving:
                 if (goToSafeDrive()) return target;
                break;
-           case hanging: //todo: fixup comments for deploy actions - moved stuff around
+           case retrieving: //todo: fixup comments for deploy actions - moved stuff around
                //auton initial hang at the beginning of a match
-                crane.setExtendABobTargetPos(0);
-                crane.setElbowTargetPos(crane.stow,1);
+                if(retrieveStone()){
+                    articulation = Articulation.manual;
+                }
 
                break;
            case deploying:
@@ -811,6 +814,27 @@ public class PoseSkystone
     //////////////////////////////////////////////////////////////////////////////////////////
 
 //todo these need to be tested - those that are used in articulate() have probably been fixed up by now
+
+    public boolean retrieveStone(){
+        switch(craneArticulation){
+            case 0:
+                if(crane.getElbowCurrentPos()<180) crane.setElbowTargetPos(180, 1);
+                crane.extendToPosition(100,1.0,20);
+                miniTimer = futureTime(1);
+                craneArticulation++;
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    crane.setElbowTargetPos(180, 1);
+                    craneArticulation++;
+                }
+                break;
+            case 2:
+                craneArticulation=0;
+                return true;
+        }
+        return false;
+    }
 
     public boolean Deploy(){
        articulate(Articulation.deploying);
