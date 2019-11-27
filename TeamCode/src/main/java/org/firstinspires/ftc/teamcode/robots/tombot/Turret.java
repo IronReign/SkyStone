@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Turret{
     //motor
-    private DcMotor turnTable  = null;
+    public  DcMotor turnTable  = null;
     private double turnTableSpeed = 1;
     private double safeTurn = .5;
 
@@ -45,7 +45,7 @@ public class Turret{
     }
 
     public void update(){
-        if(active && targetRotationTicks != turnTable.getCurrentPosition()) { //don't keep updating if we are retractBelt to target position
+        if(active) {
             turnTable.setTargetPosition(targetRotationTicks);
             turnTable.setPower(turnTableSpeed);
         }
@@ -57,7 +57,8 @@ public class Turret{
     public void setActive(boolean active){
         this.active = active;
         if(active == true)
-            turnTable.setPower(.5);
+            if(turnTable.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
+                turnTable.setPower(.5);
         else
             turnTable.setPower(0);
     }
@@ -71,6 +72,10 @@ public class Turret{
         turnTableSpeed = power;
     }
 
+    public void setPower(double pwr){
+        turnTableSpeed=pwr;
+        //turnTable.setPower(pwr);
+    }
 
     public boolean setRotation90(boolean right) {
         if(right == true) {

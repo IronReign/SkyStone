@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -12,8 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.RC;
-import org.firstinspires.ftc.teamcode.robots.tombot.Crane;
-import org.firstinspires.ftc.teamcode.robots.tombot.LEDSystem;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
 
@@ -36,9 +33,13 @@ public class PoseSkystone
     //setup
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
+    PIDController turretPID = new PIDController(0,0,0);
     public double kpDrive = 0.01; //proportional constant multiplier
     public double kiDrive = 0.000; //integral constant multiplier
     public double kdDrive = 0.001; //derivative constant multiplier
+    public double kpTurret = 0.1; //proportional constant multiplier
+    public double kiTurret = 0.000; //integral constant multiplier
+    public double kdTurret= 0.00; //derivative constant multiplier
 
     public static double headingP = 0.007;
     public static double headingD = 0;
@@ -71,6 +72,7 @@ public class PoseSkystone
 
     //All sensors
     BNO055IMU imu; //Inertial Measurement Unit: Accelerometer and Gyroscope combination sensor
+    BNO055IMU turretImu;
     DistanceSensor distForward;
     DistanceSensor distLeft;
     DistanceSensor distRight;
@@ -90,7 +92,7 @@ public class PoseSkystone
     private int strafeTPM = 1909; //todo - fix value high priority this current value is based on Kraken - minimech will be different
     private double poseX;
     private double poseY;
-    private double poseHeading; //current heading in degrees. Might be rotated by 90 degrees from imu's heading when strafing
+    private double baseHeading; //current heading in degrees. Might be rotated by 90 degrees from imu's heading when strafing
     private double poseHeadingRad; //current heading converted to radians
     private double poseSpeed;
     private double posePitch;
@@ -100,6 +102,9 @@ public class PoseSkystone
     public  double offsetHeading;
     private double offsetPitch;
     private double offsetRoll;
+    public  double offsetHeadingTurret;
+    private double offsetPitchTurret;
+    private double offsetRollTurret;
     private double displacement;
     private double displacementPrev;
     private double odometer;
@@ -113,8 +118,11 @@ public class PoseSkystone
     private long turnTimer = 0;
     private boolean turnTimerInit = false;
     private double minTurnError = 1.0;
-    public boolean maintainHeadingInit = false;;
+    public boolean maintainHeadingInit = false;
+    public boolean  maintainHeadingInitTurret = false;
     private double poseSavedHeading = 0.0;
+    private double poseturretSavedHeading = 0.0;
+    public double turretHeading = 0;
 
     public int servoTesterPos = 1600;
     public double autonomousIMUOffset = 0;
@@ -173,6 +181,7 @@ public class PoseSkystone
 
     Orientation imuAngles; //pitch, roll and yaw from the IMU
     //roll is in x, pitch is in y, yaw is in z
+    Orientation imuAnglesTurret;
 
     public boolean isAutonSingleStep() {
         return autonSingleStep;
@@ -206,7 +215,7 @@ public class PoseSkystone
 
         poseX     = x;
         poseY     = y;
-        poseHeading = heading;
+        baseHeading = heading;
         poseSpeed = speed;
         posePitch = 0;
         poseRoll = 0;
@@ -225,7 +234,7 @@ public class PoseSkystone
 
         poseX     = x;
         poseY     = y;
-        poseHeading = angle;
+        baseHeading = angle;
         poseSpeed = 0;
 
     }
@@ -239,7 +248,7 @@ public class PoseSkystone
 
         poseX     = 0;
         poseY     = 0;
-        poseHeading = 0;
+        baseHeading = 0;
         poseSpeed = 0;
         posePitch=0;
         poseRoll=0;
@@ -343,14 +352,18 @@ public class PoseSkystone
         parametersIMU.loggingEnabled = true;
         parametersIMU.loggingTag = "baseIMU";
 
-        BNO055IMU.Parameters parametersIMULift = new BNO055IMU.Parameters();
-        parametersIMULift.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parametersIMULift.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parametersIMULift.loggingEnabled = true;
-        parametersIMULift.loggingTag = "turretIMU";
+        BNO055IMU.Parameters parametersIMUTurret = new BNO055IMU.Parameters();
+        parametersIMUTurret.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parametersIMUTurret.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parametersIMUTurret.loggingEnabled = true;
+        parametersIMUTurret.loggingTag = "turretRotateIMU";
 
         imu = hwMap.get(BNO055IMU.class, "baseIMU");
         imu.initialize(parametersIMU);
+
+        turretImu = hwMap.get(BNO055IMU.class, "turretIMU");
+        turretImu.initialize(parametersIMUTurret);
+
 
     }
 
@@ -388,21 +401,28 @@ public class PoseSkystone
      * @param ticksLeft
      * @param ticksRight
      */
-    public void update(BNO055IMU imu, long ticksLeft, long ticksRight){
+    public void update(BNO055IMU imuTurret, BNO055IMU imu, long ticksLeft, long ticksRight){
         long currentTime = System.nanoTime();
+        imuAnglesTurret= imuTurret.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         imuAngles= imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         if (!initialized){
             //first time in - we assume that the robot has not started moving and that orientation values are set to the current absolute orientation
             //so first set of imu readings are effectively offsets
 
-            offsetHeading = wrapAngleMinus(360-imuAngles.firstAngle, poseHeading);
+            offsetHeading = wrapAngleMinus(360-imuAngles.firstAngle, baseHeading);
             offsetRoll = wrapAngleMinus(imuAngles.secondAngle, poseRoll);
             offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, posePitch);
             initialized = true;
+
+            offsetHeadingTurret = wrapAngleMinus(360-imuAnglesTurret.firstAngle, turretHeading);
+//            offsetRollTurret = wrapAngleMinus(imuAnglesTurret.secondAngle, poseRoll);
+//            offsetPitchTurret = wrapAngleMinus(imuAnglesTurret.thirdAngle, posePitch);
         }
-        poseHeading = wrapAngle(360-imuAngles.firstAngle, offsetHeading);
+        baseHeading = wrapAngle(360-imuAngles.firstAngle, offsetHeading);
+        turretHeading = wrapAngle((360-imuAnglesTurret.firstAngle), offsetHeadingTurret);
         posePitch = wrapAngle(imuAngles.thirdAngle, offsetPitch);
         poseRoll = wrapAngle(imuAngles.secondAngle, offsetRoll);
+
 
 
 
@@ -453,7 +473,7 @@ public class PoseSkystone
             case backward:
                 displacement = (getAverageTicks() - displacementPrev) * forwardTPM;
                 odometer += Math.abs(displacement);
-                poseHeadingRad = Math.toRadians(poseHeading);
+                poseHeadingRad = Math.toRadians(baseHeading);
                 break;
             default:
                 displacement=0; //when rotating or in an undefined moveMode, ignore/reset displacement
@@ -480,7 +500,7 @@ public class PoseSkystone
     }
 
     public void updateSensors(){
-        update(imu, 0, 0);
+        update(turretImu,imu, 0, 0);
     }
 
 
@@ -503,7 +523,7 @@ public class PoseSkystone
      * @param targetAngle the heading the robot will try to maintain while driving
     */
     public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle){
-        movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle);
+        movePID(Kp, Ki, Kd, pwr, baseHeading, targetAngle);
     }
 
 
@@ -1301,18 +1321,44 @@ public class PoseSkystone
         */
     }
 
+    public void movePIDTurret(double Kp, double Ki, double Kd, double pwrFwd, double currentAngle, double targetAngle) {
+        //if (pwr>0) PID.setOutputRange(pwr-(1-pwr),1-pwr);
+        //else PID.setOutputRange(pwr - (-1 - pwr),-1-pwr);
 
-    /**
-     * Drive forwards for a set power while maintaining an IMU heading using PID
-     * @param Kp proportional multiplier for PID
-     * @param Ki integral multiplier for PID
-     * @param Kd derivative proportional for PID
-     * @param pwr set the forward power
-     * @param targetAngle the heading the robot will try to maintain while driving
-     */
+        //initialization of the PID calculator's output range, target value and multipliers
+        turretPID.setOutputRange(-.25, .25);
+        turretPID.setPID(Kp, Ki, Kd);
+        turretPID.setSetpoint(targetAngle);
+        turretPID.enable();
+
+        //initialization of the PID calculator's input range and current value
+        turretPID.setInputRange(0, 360);
+        turretPID.setContinuous();
+        turretPID.setInput(currentAngle);
+
+        //calculates the angular correction to apply
+        double correction = turretPID.performPID();
+
+        //performs the turn with the correction applied
+        turret.setPower(correction);
+    }
+
+
+        /**
+         * Drive forwards for a set power while maintaining an IMU heading using PID
+         * @param Kp proportional multiplier for PID
+         * @param Ki integral multiplier for PID
+         * @param Kd derivative proportional for PID
+         * @param pwr set the forward power
+         * @param targetAngle the heading the robot will try to maintain while driving
+         */
     //this version is for omnidirectional robots
     public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle, boolean strafe){
-        movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle, strafe);
+        movePID(Kp, Ki, Kd, pwr, baseHeading, targetAngle, strafe);
+    }
+
+    public void turretRotateIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle){
+        movePIDTurret(Kp, Ki, Kd, pwr, turretHeading, targetAngle);
     }
 
     /**
@@ -1325,7 +1371,7 @@ public class PoseSkystone
      * @param targetAngle the heading the robot will try to maintain while driving
      */
     public void driveIMUMixer(double Kp, double Ki, double Kd, double pwrFwd, double pwrStf, double targetAngle){
-        movePIDMixer(Kp, Ki, Kd, pwrFwd, pwrStf, poseHeading, targetAngle);
+        movePIDMixer(Kp, Ki, Kd, pwrFwd, pwrStf, baseHeading, targetAngle);
     }
 
 
@@ -1378,7 +1424,7 @@ public class PoseSkystone
             turnTimerInit = true;
         }
         driveIMU(kpDrive, kiDrive, kdDrive, 0, targetAngle, false); //check to see if the robot turns within a threshold of the target
-        if(Math.abs(poseHeading - targetAngle) < minTurnError) {
+        if(Math.abs(baseHeading - targetAngle) < minTurnError) {
             turnTimerInit = false;
             driveMixerMec(0,0,0);
             return true;
@@ -1386,6 +1432,30 @@ public class PoseSkystone
         if(turnTimer < System.nanoTime()){ //check to see if the robot takes too long to turn within a threshold of the target (e.g. it gets stuck)
             turnTimerInit = false;
             driveMixerMec(0,0,0);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Rotate to a specific heading with a time cutoff in case the robot gets stuck and cant complete the turn otherwise
+     * @param targetAngle the heading the robot will attempt to turn to
+     * @param maxTime the maximum amount of time allowed to pass before the sequence ends
+     */
+    public boolean rotateIMUTurret(double targetAngle, double maxTime){
+        if(!turnTimerInit){ //intiate the timer that the robot will use to cut of the sequence if it takes too long; only happens on the first cycle
+            turnTimer = System.nanoTime() + (long)(maxTime * (long) 1e9);
+            turnTimerInit = true;
+        }
+        turretRotateIMU(kpDrive, kiDrive, kdDrive, 0, targetAngle); //check to see if the robot turns within a threshold of the target
+        if(Math.abs(baseHeading - targetAngle) < minTurnError) {
+            turnTimerInit = false;
+            turret.setPower(0);
+            return true;
+        }
+        if(turnTimer < System.nanoTime()){ //check to see if the robot takes too long to turn within a threshold of the target (e.g. it gets stuck)
+            turnTimerInit = false;
+            turret.setPower(0);
             return true;
         }
         return false;
@@ -1402,7 +1472,7 @@ public class PoseSkystone
         if(buttonState) {
             //if this is the first time the button has been down, then save the heading that the robot will hold at and set a variable to tell that the heading has been saved
             if (!maintainHeadingInit) {
-                poseSavedHeading = poseHeading;
+                poseSavedHeading = baseHeading;
                 maintainHeadingInit = true;
             }
             //hold the saved heading with PID
@@ -1420,13 +1490,15 @@ public class PoseSkystone
         //if the button is currently down, maintain the set heading
         if(buttonState) {
             //if this is the first time the button has been down, then save the heading that the robot will hold at and set a variable to tell that the heading has been saved
-            if (!maintainHeadingInit) {
-                poseSavedHeading = poseHeading;
+            if (!maintainHeadingInitTurret) {
+                poseturretSavedHeading = turretHeading;
                 maintainHeadingInit = true;
             }
             //hold the saved heading with PID
-            driveIMU(kpDrive, kiDrive, kdDrive, 0, poseSavedHeading, false);
+            turretRotateIMU(kpTurret,kiTurret,kdTurret,0,poseturretSavedHeading);
         }
+
+
 
         //if the button is not down, set to make sure the correct heading will be saved on the next button press
         if(!buttonState){
@@ -1469,7 +1541,7 @@ public class PoseSkystone
      * @param angle the value that the current heading will be assigned to
      */
     public void setHeading(double angle){
-        poseHeading = angle;
+        baseHeading = angle;
         initialized = false; //triggers recalc of heading offset at next IMU update cycle
     }
 
@@ -1503,10 +1575,10 @@ public class PoseSkystone
 
     /**
      * Set the absolute heading (yaw) of the robot _0-360 degrees
-     * @param poseHeading
+     * @param baseHeading
      */
-    public void setPoseHeading(double poseHeading) {
-        this.poseHeading = poseHeading;
+    public void setBaseHeading(double baseHeading) {
+        this.baseHeading = baseHeading;
         initialized = false; //trigger recalc of offset on next update
     }
 
@@ -1554,7 +1626,7 @@ public class PoseSkystone
      */
     public double getHeading()
     {
-        return poseHeading;
+        return baseHeading;
     }
 
     public double getHeadingRaw() {return imuAngles.firstAngle;}

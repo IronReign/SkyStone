@@ -35,17 +35,13 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.robots.tombot.Autonomous;
-import org.firstinspires.ftc.teamcode.robots.tombot.LEDSystem;
-import org.firstinspires.ftc.teamcode.robots.tombot.PoseSkystone;
-import org.firstinspires.ftc.teamcode.util.Conversions;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
 
@@ -121,6 +117,8 @@ public class Skystone_6832 extends LinearOpMode {
     private int left_stick_button = 14;
     private int right_stick_button = 15; //sound player
 
+    boolean debugTelemetry = false;
+
     int stateLatched = -1;
     int stateIntake = -1;
     int stateDelatch = -1;
@@ -145,6 +143,118 @@ public class Skystone_6832 extends LinearOpMode {
 
     private int craneArticulation = 1;
 
+    Telemetry dummyT = new Telemetry() {
+        @Override
+        public Item addData(String caption, String format, Object... args) {
+            return null;
+        }
+
+        @Override
+        public Item addData(String caption, Object value) {
+            return null;
+        }
+
+        @Override
+        public <T> Item addData(String caption, Func<T> valueProducer) {
+            return null;
+        }
+
+        @Override
+        public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+            return null;
+        }
+
+        @Override
+        public boolean removeItem(Item item) {
+            return false;
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public void clearAll() {
+
+        }
+
+        @Override
+        public Object addAction(Runnable action) {
+            return null;
+        }
+
+        @Override
+        public boolean removeAction(Object token) {
+            return false;
+        }
+
+        @Override
+        public boolean update() {
+            return false;
+        }
+
+        @Override
+        public Line addLine() {
+            return null;
+        }
+
+        @Override
+        public Line addLine(String lineCaption) {
+            return null;
+        }
+
+        @Override
+        public boolean removeLine(Line line) {
+            return false;
+        }
+
+        @Override
+        public boolean isAutoClear() {
+            return false;
+        }
+
+        @Override
+        public void setAutoClear(boolean autoClear) {
+
+        }
+
+        @Override
+        public int getMsTransmissionInterval() {
+            return 0;
+        }
+
+        @Override
+        public void setMsTransmissionInterval(int msTransmissionInterval) {
+
+        }
+
+        @Override
+        public String getItemSeparator() {
+            return null;
+        }
+
+        @Override
+        public void setItemSeparator(String itemSeparator) {
+
+        }
+
+        @Override
+        public String getCaptionValueSeparator() {
+            return null;
+        }
+
+        @Override
+        public void setCaptionValueSeparator(String captionValueSeparator) {
+
+        }
+
+        @Override
+        public Log log() {
+            return null;
+        }
+    };
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -155,18 +265,14 @@ public class Skystone_6832 extends LinearOpMode {
         robot = new PoseSkystone(currentBot);
         robot.init(this.hardwareMap, isBlue);
 
-        auto = new Autonomous(robot, telemetry, gamepad1);
+        auto = new Autonomous(robot, dummyT, gamepad1);
 
 
-        if (gamepad1.right_trigger < 0.3) {
-            telemetry.addData("Status", "Initialized " + currentBot+" (debug mode)");
-            telemetry.update();
-            configureDashboard();
-        } else {
-            telemetry.addData("Status", "Initialized " + currentBot);
-            telemetry.update();
-            configureDashboardMatch();
-        }
+        debugTelemetry = gamepad1.right_trigger > .3;
+        debugTelemetry = true;
+        if(debugTelemetry) configureDashboardDebug();
+        else configureDashboardMatch();
+        telemetry.update();
 
         // waitForStart();
         // this is commented out but left here to document that we are still doing the
@@ -244,18 +350,20 @@ public class Skystone_6832 extends LinearOpMode {
                 initialization_initSound();
             }
 
-            telemetry.addData("Vision", "Backend: %s (%s)", auto.visionProviders[auto.visionProviderState].getSimpleName(), auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500 % 2 == 0 ? "**NOT FINALIZED**" : "  NOT FINALIZED  ");
-            telemetry.addData("Vision", "FtcDashboard Telemetry: %s", auto.enableTelemetry ? "Enabled" : "Disabled");
-            telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
 
-            telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" : soundState == 2 ? "file not found" : "other");
+//            telemetry.addData("Vision", "Backend: %s (%s)", auto.visionProviders[auto.visionProviderState].getSimpleName(), auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500 % 2 == 0 ? "**NOT FINALIZED**" : "  NOT FINALIZED  ");
+//            telemetry.addData("Vision", "FtcDashboard Telemetry: %s", auto.enableTelemetry ? "Enabled" : "Disabled");
+//            telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
+//
+//            telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" : soundState == 2 ? "file not found" : "other");
+//
+//            telemetry.addData("Status", "Initialized");
+//            telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
+//            telemetry.addData("Status", "Side: " + getAlliance());
+//            telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
+//            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
+//            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
 
-            telemetry.addData("Status", "Initialized");
-            telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
-            telemetry.addData("Status", "Side: " + getAlliance());
-            telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
-            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
             telemetry.update();
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
@@ -279,7 +387,7 @@ public class Skystone_6832 extends LinearOpMode {
         lastLoopClockTime = System.nanoTime();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            telemetry.update();
+
             stateSwitch();
             if (active) {
                 switch (state) {
@@ -342,6 +450,8 @@ public class Skystone_6832 extends LinearOpMode {
             else
                 loopAvg = loopWeight*loopTime + (1-loopWeight)*loopAvg;
             lastLoopClockTime = loopClockTime;
+
+            telemetry.update();
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
     }
@@ -395,6 +505,10 @@ public class Skystone_6832 extends LinearOpMode {
     private void demo() {
         if (gamepad1.x)
             robot.maintainHeading(gamepad1.x);
+        if (gamepad1.y) {
+            robot.turret.turnTable.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.maintainHeadingTurret(gamepad1.y);
+        }
         if (gamepad1.dpad_up) {
             robot.articulate(PoseSkystone.Articulation.manual);
             robot.crane.increaseElbowAngle();
@@ -816,7 +930,7 @@ public class Skystone_6832 extends LinearOpMode {
     }
 
 
-    private void configureDashboard() {
+    private void configureDashboardDebug() {
         // Configure the dashboard.
 
         // At the beginning of each telemetry update, grab a bunch of data
@@ -847,11 +961,15 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("yaw", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
         telemetry.addLine()
-                .addData("Turret", "Turret raw: " + robot.turret.getCurrentRotationEncoderRaw());
-        telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);        //telemetry.addLine()w
-               // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
+        telemetry.addLine()
+                .addData("Turret Pos", ()-> robot.turret.getCurrentRotationEncoderRaw())
+                .addData("Turret Target",()-> robot.turret.getTargetRotationTicks());
+        telemetry.addLine()
+                .addData("Turret Heading", ()-> + robot.turretHeading)
+                .addData("Turret Power", ()->robot.turret.turnTable.getPower());
+        // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
                 //.addData("drivedistance", () -> robot.getAverageAbsTicks());
         //telemetry.addLine()
@@ -875,9 +993,7 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("state", () -> state)
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
                 .addData("Articulation", () -> robot.getArticulation());
-        telemetry.addLine()
-                .addData("Turret", "Turret Position: " + robot.turret.getCurrentRotationEncoderRaw())
-                .addData("Turret", "Turret : " + robot.turret.getTargetRotationTicks());
+
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg / 1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000 / loopAvg);
