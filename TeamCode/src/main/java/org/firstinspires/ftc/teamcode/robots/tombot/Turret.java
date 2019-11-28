@@ -2,17 +2,29 @@
 //written by Cooper Clem, 2019
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.util.PIDController;
+
+import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
+import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
+
 public class Turret{
     //motor
-    public  DcMotor turnTable  = null;
-    private double turnTableSpeed = 1;
+    private  DcMotor motor = null;
+    private double motorPwr = 1;
     private double safeTurn = .5;
+    long turnTimer;
+    boolean turnTimerInit;
+    private double minTurnError = 1.0;
 
     //Position variables
-    public int targetRotationTicks;
+    private int targetRotationTicks;
     private double ticksPerDegree;
     private boolean active = true;
 
@@ -21,20 +33,34 @@ public class Turret{
     private int a180degrees;
     private int a360degrees;
 
-    //team members
-    boolean BruhnaviyaIsOn = false;
-    String Bruhnaviya = "canceled";
+    //PID
+    PIDController turretPID;
+    private double kpTurret = 0.01; //proportional constant multiplier
+    private double kiTurret = 0.000; //integral constant multiplier
+    private double kdTurret= 0.00; //derivative constant multiplier
+    double correction = 0.00; //correction to apply to turret motor
 
-    public Turret(DcMotor turnTable) {
+    //IMU
+    BNO055IMU turretIMU;
+    double turretRoll;
+    double turretPitch;
+    double turretHeading = 0;
+    boolean initialized = false;
+    private  double offsetHeading;
+    private double offsetPitch;
+    private double offsetRoll;
+    private double turretTargetHeading = 0.0;
+    Orientation imuAngles;
+    boolean maintainHeadingInit;
 
-        turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turnTable.setTargetPosition(turnTable.getCurrentPosition());
-        turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turnTable.setDirection(DcMotorSimple.Direction.REVERSE);
+    public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(motor.getCurrentPosition());
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
-        this.turnTable = turnTable;
+        this.motor = motor;
         targetRotationTicks = 0;
         ticksPerDegree = 170/90;
         targetRotationTicks= 0;
@@ -42,12 +68,46 @@ public class Turret{
         a180degrees= (int) (ticksPerDegree*180);
         a360degrees= (int) (ticksPerDegree*360);
         setActive(true);
+
+        turretPID = new PIDController(0,0,0);
+        initIMU(turretIMU);
+
     }
 
-    public void update(){
-        if(active) {
-            turnTable.setTargetPosition(targetRotationTicks);
-            turnTable.setPower(turnTableSpeed);
+    public void initIMU(BNO055IMU turretIMU){
+
+        //setup Turret IMU
+        BNO055IMU.Parameters parametersIMUTurret = new BNO055IMU.Parameters();
+        parametersIMUTurret.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parametersIMUTurret.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parametersIMUTurret.loggingEnabled = true;
+        parametersIMUTurret.loggingTag = "turretIMU";
+
+
+        turretIMU.initialize(parametersIMUTurret);
+        this.turretIMU=turretIMU;
+
+    }
+
+    public void update(boolean isActive){
+        //IMU Update
+        imuAngles= turretIMU.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
+        if (!initialized) {
+            //first time in - we assume that the robot has not started moving and that orientation values are set to the current absolute orientation
+            //so first set of imu readings are effectively offsets
+
+            offsetHeading = wrapAngleMinus(360 - imuAngles.firstAngle, turretHeading);
+            offsetRoll = wrapAngleMinus(imuAngles.secondAngle, turretRoll);
+            offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, turretPitch);
+            initialized = true;
+        }
+        turretHeading = wrapAngle((360-imuAngles.firstAngle), offsetHeading);
+
+
+//            offsetHeading = wrapAngleMinus(360-imuAngles.firstAngle, turretHeading);
+        if(isActive) {
+            motor.setTargetPosition(targetRotationTicks);
+            motor.setPower(motorPwr);
         }
     }
 
@@ -57,10 +117,10 @@ public class Turret{
     public void setActive(boolean active){
         this.active = active;
         if(active == true)
-            if(turnTable.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
-                turnTable.setPower(.5);
+            if(motor.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
+                motor.setPower(.5);
         else
-            turnTable.setPower(0);
+            motor.setPower(0);
     }
 
     public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + (int)(ticksPerDegree*15), power);}
@@ -69,23 +129,23 @@ public class Turret{
 
     public void setTurntablePosition(int position, double power) {
         targetRotationTicks = position;
-        turnTableSpeed = power;
+        motorPwr = power;
     }
 
     public void setPower(double pwr){
-        turnTableSpeed=pwr;
-        //turnTable.setPower(pwr);
+        motorPwr =pwr;
+        //motor.setPower(pwr);
     }
 
     public boolean setRotation90(boolean right) {
         if(right == true) {
-            targetRotationTicks += turnTable.getCurrentPosition()%a90degrees;
-            turnTableSpeed = safeTurn;
+            targetRotationTicks += motor.getCurrentPosition()%a90degrees;
+            motorPwr = safeTurn;
             return true;
         }
         else {
-            targetRotationTicks -= turnTable.getCurrentPosition()%-a90degrees;
-            turnTableSpeed = safeTurn;
+            targetRotationTicks -= motor.getCurrentPosition()%-a90degrees;
+            motorPwr = safeTurn;
             return true;
         }
     }
@@ -97,7 +157,7 @@ public class Turret{
             targetRotationTicks += getCurrentRotationEncoderRaw()%a180degrees;
         if(getCurrentRotationEncoderRaw() == 0)
             targetRotationTicks -= a180degrees;
-        turnTableSpeed = safeTurn;
+        motorPwr = safeTurn;
     }
 
     public void setToFront(){
@@ -113,7 +173,7 @@ public class Turret{
     }
 
     public int getCurrentRotationEncoderRaw(){
-        return turnTable.getCurrentPosition();
+        return motor.getCurrentPosition();
     }
     public int getTargetRotationTicks(){
         return targetRotationTicks;
@@ -121,13 +181,91 @@ public class Turret{
 
     public void returnToZero() {
         targetRotationTicks = 0;
-        turnTableSpeed = safeTurn;
+        motorPwr = safeTurn;
     }
 
     public void resetEncoder() {
         //just encoders - only safe to call if we know collector is in normal starting position
-        turnTable.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turnTable.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
+
+    public void movePIDTurret(double Kp, double Ki, double Kd, double currentAngle, double targetAngle) {
+        //if (pwr>0) PID.setOutputRange(pwr-(1-pwr),1-pwr);
+        //else PID.setOutputRange(pwr - (-1 - pwr),-1-pwr);
+
+        //initialization of the PID calculator's output range, target value and multipliers
+        turretPID.setOutputRange(-.25, .25);
+        turretPID.setPID(Kp, Ki, Kd);
+        turretPID.setSetpoint(targetAngle);
+        turretPID.enable();
+
+        //initialization of the PID calculator's input range and current value
+        turretPID.setInputRange(0, 360);
+        turretPID.setContinuous();
+        turretPID.setInput(currentAngle);
+
+        //calculates the angular correction to apply
+        correction = turretPID.performPID();
+
+        //performs the turn with the correction applied
+        setPower(correction);
+    }
+
+
+    /**
+     * Rotate to a specific heading with a time cutoff in case the robot gets stuck and cant complete the turn otherwise
+     * @param targetAngle the heading the robot will attempt to turn to
+     * @param maxTime the maximum amount of time allowed to pass before the sequence ends
+     */
+    public boolean rotateIMUTurret(double targetAngle, double maxTime){
+        if(!turnTimerInit){ //intiate the timer that the robot will use to cut of the sequence if it takes too long; only happens on the first cycle
+            turnTimer = System.nanoTime() + (long)(maxTime * (long) 1e9);
+            turnTimerInit = true;
+        }
+        movePIDTurret(kpTurret, kiTurret, kdTurret, turretHeading, targetAngle);
+        //check to see if the robot turns within a threshold of the target
+        if(Math.abs(turretHeading - targetAngle) < minTurnError) {
+            turnTimerInit = false;
+            setPower(0);
+            return true;
+        }
+        if(turnTimer < System.nanoTime()){ //check to see if the robot takes too long to turn within a threshold of the target (e.g. it gets stuck)
+            turnTimerInit = false;
+            setPower(0);
+            return true;
+        }
+        return false;
+    }
+
+    public void maintainHeadingTurret(boolean buttonState){
+
+        //if the button is currently down, maintain the set heading
+        if(buttonState) {
+            //if this is the first time the button has been down, then save the heading that the robot will hold at and set a variable to tell that the heading has been saved
+            if (!maintainHeadingInit) {
+                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+               turretTargetHeading = turretHeading;
+                maintainHeadingInit = true;
+            }
+            //hold the saved heading with PID
+            movePIDTurret(kpTurret,kiTurret,kdTurret,turretHeading,turretTargetHeading);
+        }
+
+
+        //if the button is not down, set to make sure the correct heading will be saved on the next button press
+        if(!buttonState){
+            maintainHeadingInit = false;
+            setPower(0);
+        }
+    }
+
+    public double getHeading(){
+        return turretHeading;
+    }
+
+    public double getCorrection(){return correction;}
+    public double getMotorPwr(){return motorPwr;}
+    public double getMotorPwrActual(){return motor.getPower();}
 
 }

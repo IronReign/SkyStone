@@ -4,7 +4,7 @@
 		<LynxModule name="Expansion Hub 1" port="1">
 			<RevRobotics40HDHexMotor name="elbow" port="1" />
 			<RevRobotics40HDHexMotor name="extender" port="2" />
-			<NeveRest3.7v1Gearmotor name="turnTable" port="0" />
+			<NeveRest3.7v1Gearmotor name="turret" port="0" />
 
 
 			<Servo name="intakeServoFront" port="0" />

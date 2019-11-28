@@ -35,7 +35,6 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -368,7 +367,7 @@ public class Skystone_6832 extends LinearOpMode {
 
             robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
 
-            robot.updateSensors();
+            robot.updateSensors(active);
 
 
 
@@ -438,7 +437,7 @@ public class Skystone_6832 extends LinearOpMode {
                         robot.stopAll();
                         break;
                 }
-                robot.updateSensors();
+                robot.updateSensors(active);
             } else {
                 robot.stopAll();
             }
@@ -505,10 +504,12 @@ public class Skystone_6832 extends LinearOpMode {
     private void demo() {
         if (gamepad1.x)
             robot.maintainHeading(gamepad1.x);
-        if (gamepad1.y) {
-            robot.turret.turnTable.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.maintainHeadingTurret(gamepad1.y);
-        }
+//        if (gamepad1.y) {
+            robot.turret.maintainHeadingTurret(gamepad1.y);
+//        }
+//        if (!gamepad1.y){
+//            robot.turret.setPower(0);
+//        }
         if (gamepad1.dpad_up) {
             robot.articulate(PoseSkystone.Articulation.manual);
             robot.crane.increaseElbowAngle();
@@ -967,8 +968,9 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Turret Pos", ()-> robot.turret.getCurrentRotationEncoderRaw())
                 .addData("Turret Target",()-> robot.turret.getTargetRotationTicks());
         telemetry.addLine()
-                .addData("Turret Heading", ()-> + robot.turretHeading)
-                .addData("Turret Power", ()->robot.turret.turnTable.getPower());
+                .addData("Turret Heading", ()-> robot.turret.getHeading())
+                .addData("Turret Correction", ()->robot.turret.getCorrection())
+                .addData("Turret Power", ()->robot.turret.getMotorPwr());
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
                 //.addData("drivedistance", () -> robot.getAverageAbsTicks());

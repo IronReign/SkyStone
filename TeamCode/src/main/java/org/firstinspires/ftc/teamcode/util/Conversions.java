@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import org.firstinspires.ftc.teamcode.RC;
+
 public class Conversions {
 
     public Conversions(){}
@@ -7,6 +9,77 @@ public class Conversions {
     public static double servoNormalize(int pulse){
         double normalized = (double)pulse;
         return (normalized - 750.0) / 1500.0; //convert mr servo controller pulse width to double on _0 - 1 scale
+    }
+    /**
+     * returns the minimum difference (in absolute terms) between two angles,
+     * preserves the sign of the difference
+     *
+     * @param angle1
+     * @param angle2
+     * @return
+     */
+    public double diffAngle(double angle1, double angle2){
+        return Math.abs(angle1 - angle2) < Math.abs(angle2-angle1) ? Math.abs(angle1 - angle2) : Math.abs(angle2-angle1);
+    }
+
+    public double diffAngle2(double angle1, double angle2){
+
+        double diff = angle1 - angle2;
+
+        //allow wrap around
+
+        if (Math.abs(diff) > 180)
+        {
+            if (diff > 0) {
+                diff -= 360;
+            } else {
+                diff += 360;
+            }
+        }
+        return diff;
+    }
+
+
+    /**
+     * Apply and angular adjustment to a base angle with result wrapping around at 360 degress
+     *
+     * @param angle1
+     * @param angle2
+     * @return
+     */
+    public static double wrapAngle(double angle1, double angle2){
+        return (angle1 + angle2) % 360;
+    }
+    public static double wrapAngleMinus(double angle1, double angle2){
+        return 360-((angle1 + angle2) % 360);
+    }
+
+    public double getBearingTo(double x, double y, double poseX, double poseY){
+        double diffx = x-poseX;
+        double diffy = y-poseY;
+        return ( Math.toDegrees(Math.atan2( diffy, diffx)) - 90  + 360 ) % 360;
+    }
+
+    public double getBearingOpposite(double x, double y, double poseX, double poseY){
+        double diffx = x-poseX;
+        double diffy = y-poseY;
+        return ( Math.toDegrees(Math.atan2( diffy, diffx)) + 90 + 360 ) % 360;
+    }
+
+    public double getDistanceTo(double x, double y, double poseX, double poseY){
+
+        double dx = x - poseX;
+        double dy = y - poseY;
+        return Math.sqrt(dx*dx + dy*dy);
+
+    }
+
+    public static double getBatteryVoltage(){
+        return RC.h.voltageSensor.get("Motor Controller 1").getVoltage();
+    }
+
+    public static long futureTime(float seconds){
+        return System.nanoTime() + (long) (seconds * 1e9);
     }
 
 }
