@@ -143,6 +143,8 @@ public class PoseSkystone
         reverseDriving,
         retrieving, //retrieve a stone
         bridgeTransit,
+        extendToTowerHeightArticulation,
+        retractFromTower,
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -612,10 +614,12 @@ public class PoseSkystone
                 }
                break;
            case bridgeTransit:
-               if(bridgeTransit()){
-                   articulation = Articulation.manual;
-               }
+               bridgeTransit();
                break;
+           case extendToTowerHeightArticulation:
+               extendToTowerHeightArticulation();
+           case retractFromTower:
+               retractFromTower();
            case deploying:
                //auton unfolding after initial hang - should only be called from the hanging position during auton
                // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -850,6 +854,22 @@ public class PoseSkystone
         crane.extendToPosition(crane.getExtendABobCurrentPos()+50,1,5);
         crane.setElbowTargetPos(elbow.getCurrentPosition()-50, 1);
         return true;
+    }
+
+    public boolean extendToTowerHeightArticulation(){
+       crane.extendToTowerHeight();
+        return true;
+    }
+
+    public boolean retractFromTower(){
+       crane.ejectStone();
+       if(crane.getCurrentAngle() < 45) {
+           crane.setElbowTargetPos(elbow.getCurrentPosition() + 50, 1);
+       }
+       else
+           crane.setElbowTargetPos(1150);
+       retrieveStone();
+       return true;
     }
 
     public boolean Deploy(){

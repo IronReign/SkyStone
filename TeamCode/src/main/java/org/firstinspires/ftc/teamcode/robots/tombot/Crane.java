@@ -307,6 +307,7 @@ public class Crane {
     }
 
 
+
     public void hookOn(){
 
         hook.setTargetPosition(motorHooked);

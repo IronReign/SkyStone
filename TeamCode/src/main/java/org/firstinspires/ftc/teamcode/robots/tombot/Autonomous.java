@@ -103,7 +103,15 @@ public class Autonomous {
             .addNestedStateMachine(autoSetupSkyStone)
             .addState(() ->robot.rotateIMU(70, 3))//todo- make this a curve instead of following the hypotenuse
             .addState(() -> (robot.driveForward(true, 1, .80)))
-            .addState(() ->{robot.crane.extendToPosition(2000,1,8); return robot.crane.ejectStone();})
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
+            .addSingleState(() -> robot.crane.setTowerHeight(1))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
+            .addState(() -> (robot.driveForward(true, 1, .80)))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
+
+
+            
             .build();
 
     public StateMachine primaryRedOld = getStateMachine(autoStage)
