@@ -394,13 +394,13 @@ public class Skystone_6832 extends LinearOpMode {
                         joystickDrive();
                         break;
                     case 1: //autonomous that goes to opponent's crater
-                        if (auto.primaryRed.execute()) active = false;
+                        if (auto.redAutoFull.execute()) active = false;
                         break;
                     case 2: //autonomous that only samples
                         if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
-                        if (auto.depotSample_worlds.execute()) active = false;
+                        if (auto.autoSetupSkyStone.execute()) active = false;
                         break;
                     case 4:
                         if (auto.craterSide_cycle.execute()) active = false;
@@ -971,6 +971,8 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Turret Heading", ()-> robot.turret.getHeading())
                 .addData("Turret Correction", ()->robot.turret.getCorrection())
                 .addData("Turret Power", ()->robot.turret.getMotorPwr());
+        telemetry.addLine()
+                .addData("Turret", "Current tower height: " + robot.crane.getCurrentTowerHeight());
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
                 //.addData("drivedistance", () -> robot.getAverageAbsTicks());
@@ -999,8 +1001,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg / 1000000)
                 .addData("Loop time", "%.0fHz", () -> 1000000000 / loopAvg);
-        telemetry.addLine()
-                .addData("Turret", "Current tower height" + robot.crane.currentTowerHeight);
+
     }
 
 

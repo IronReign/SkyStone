@@ -53,6 +53,11 @@ public class Crane {
     public int pos_reverseSafeDrive;
     public int pos_PartialDeposit;
     public int pos_SafeDrive;
+    public int swivel_Right90;
+    public int swivel_Front;
+    public int swivel_Left90;
+    public int swivel_left_Block;
+    public int swivel_Right_Block;
 
     //autonomous encoder values
     public int pos_AutoPark;
@@ -145,6 +150,12 @@ public class Crane {
         motorHooked = 120;
         motorUnhooked = 5;
         motorMidHooked = 80;
+
+        swivel_Right90 = 0;
+        swivel_Front = 900;
+        swivel_Left90 = 1556;
+        swivel_left_Block = 800;
+        swivel_Right_Block= 1000;
 
         //bel
         // t extension encoder values
@@ -282,6 +293,10 @@ public class Crane {
 
     public void setTowerHeight(int newHeight){
         currentTowerHeight += newHeight;
+    }
+
+    public int getCurrentTowerHeight(){
+        return currentTowerHeight;
     }
 
     int hypotenuse = 0;

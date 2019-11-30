@@ -142,6 +142,7 @@ public class PoseSkystone
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
         reverseDriving,
         retrieving, //retrieve a stone
+        bridgeTransit,
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -609,7 +610,11 @@ public class PoseSkystone
                 if(retrieveStone()){
                     articulation = Articulation.manual;
                 }
-
+               break;
+           case bridgeTransit:
+               if(bridgeTransit()){
+                   articulation = Articulation.manual;
+               }
                break;
            case deploying:
                //auton unfolding after initial hang - should only be called from the hanging position during auton
@@ -837,6 +842,14 @@ public class PoseSkystone
                 return true;
         }
         return false;
+    }
+
+    public boolean bridgeTransit(){
+       if(!retrieveStone())
+            return false;
+        crane.extendToPosition(crane.getExtendABobCurrentPos()+50,1,5);
+        crane.setElbowTargetPos(elbow.getCurrentPosition()-50, 1);
+        return true;
     }
 
     public boolean Deploy(){
