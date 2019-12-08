@@ -109,9 +109,9 @@ public class Autonomous {
             .addState(() -> (robot.driveForward(true, 1, .80)))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
-
-
             
+
+
             .build();
 
     public StateMachine primaryRedOld = getStateMachine(autoStage)

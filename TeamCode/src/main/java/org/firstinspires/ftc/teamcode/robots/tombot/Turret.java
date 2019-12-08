@@ -128,6 +128,7 @@ public class Turret{
     public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - (int)(ticksPerDegree*15), power);}
 
     public void setTurntablePosition(int position, double power) {
+        setTurretMotorMode(false);
         targetRotationTicks = position;
         motorPwr = power;
     }
@@ -212,6 +213,11 @@ public class Turret{
         setPower(correction);
     }
 
+    public void setTurretMotorMode(boolean IMUMODE){
+        if(IMUMODE) {motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);}
+        else{motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);}
+
+    }
 
     /**
      * Rotate to a specific heading with a time cutoff in case the robot gets stuck and cant complete the turn otherwise
@@ -219,6 +225,8 @@ public class Turret{
      * @param maxTime the maximum amount of time allowed to pass before the sequence ends
      */
     public boolean rotateIMUTurret(double targetAngle, double maxTime){
+        setTurretMotorMode(true);
+        turretTargetHeading = turretHeading;
         if(!turnTimerInit){ //intiate the timer that the robot will use to cut of the sequence if it takes too long; only happens on the first cycle
             turnTimer = System.nanoTime() + (long)(maxTime * (long) 1e9);
             turnTimerInit = true;
@@ -264,6 +272,9 @@ public class Turret{
         return turretHeading;
     }
 
+    public double getTurretTargetHeading(){
+        return turretTargetHeading;
+    }
     public double getCorrection(){return correction;}
     public double getMotorPwr(){return motorPwr;}
     public double getMotorPwrActual(){return motor.getPower();}

@@ -617,11 +617,11 @@ public class Skystone_6832 extends LinearOpMode {
             else
                 robot.turret.rotateLeft(left_trigger);
         }
-        if(gamepad1.right_bumper){
-            robot.turret.setToFront();
+        if(toggleAllowed(gamepad1.right_bumper,right_bumper)){
+            robot.turret.rotateIMUTurret(0,1);
         }
-        if(gamepad1.left_bumper){
-            robot.turret.setRotation180();
+        if(toggleAllowed(gamepad1.left_bumper,left_bumper)){
+            robot.turret.rotateIMUTurret(90,1);
         }
         if(toggleAllowed(gamepad1.x,x)){
             robot.crane.hookToggle();
@@ -973,6 +973,10 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Turret Power", ()->robot.turret.getMotorPwr());
         telemetry.addLine()
                 .addData("Turret", "Current tower height: " + robot.crane.getCurrentTowerHeight());
+        telemetry.addLine()
+                .addData("Turret", "Current angle " + robot.turret.getHeading());
+        telemetry.addLine()
+                .addData("Turret", "Current target angle " + robot.turret.getTurretTargetHeading());
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
                 //.addData("drivedistance", () -> robot.getAverageAbsTicks());

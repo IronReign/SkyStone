@@ -58,6 +58,7 @@ public class Crane {
     public int swivel_Left90;
     public int swivel_left_Block;
     public int swivel_Right_Block;
+    boolean switcha;
 
     //autonomous encoder values
     public int pos_AutoPark;
@@ -164,6 +165,7 @@ public class Crane {
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
         extendMin = 300;  //prevent crunching collector tray
+        switcha = false;
     }
 //
 //    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
@@ -367,7 +369,7 @@ public class Crane {
     }
 
 
-    boolean switcha = false;
+
     public void toggleGripper() {
         if(switcha == false) {
             grabStone();
