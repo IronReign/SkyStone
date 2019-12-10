@@ -99,7 +99,7 @@ public class StateMachine {
             return this;
         }
         
-        public Builder addSimultaneousStates(State... newStates) {
+        public Builder addSimultaneousStates(final State... newStates) {
             states.add(new State() {
                 private State[] newStates;
                 private boolean[] completed;
@@ -112,7 +112,12 @@ public class StateMachine {
                             completed[i] = true;
                             statesRemaining--;
                         }
-                    return statesRemaining == 0;
+                    if (statesRemaining == 0) {
+                        completed = new boolean[newStates.length];
+                        statesRemaining = newStates.length;
+                        return true;
+                    } else
+                        return false;
                 }
                 
                 public State init(State[] newStates) {
