@@ -12,6 +12,9 @@
 			<Servo name="gripperSwivel" port="3" />
 			<Servo name="blinkin" port="4" />
 
+			<AnalogInput name="leftAnalog" port="0" />
+			<AnalogInput name="rightAnalog" port="1" />
+
 			<LynxEmbeddedIMU name="turretIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distRight" port="0" bus="2"/>
 		</LynxModule>
