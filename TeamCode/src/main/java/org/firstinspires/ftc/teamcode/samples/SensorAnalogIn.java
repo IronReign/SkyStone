@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /*
 Sample written by Coach for a very simple reading of analog inputs
@@ -53,10 +54,11 @@ final int RED_LED_CHANNEL = 1;
 
     AnalogInput        stoneLeft;                // Device Object
     AnalogInput        stoneRight;               // Device Object
+Servo servo1;
 
     stoneLeft  = hardwareMap.get(AnalogInput.class, "leftAnalog");     //  Use generic form of device mapping
     stoneRight = hardwareMap.get(AnalogInput.class, "rightAnalog");    //  Use generic form of device mapping
-
+    servo1 = hardwareMap.get(Servo.class, "servo1");
 
     // wait for the start button to be pressed.
     telemetry.addData(">", "Press play to start readings");
@@ -64,6 +66,9 @@ final int RED_LED_CHANNEL = 1;
     waitForStart();
 
     while (opModeIsActive())  {
+
+        if (stoneLeft.getVoltage() > 2)  servo1.setPosition(0.5);
+        else servo1.setPosition(0.0);
 
         telemetry.addData("Left", stoneLeft.getVoltage() );
         telemetry.addData("Right", stoneRight.getVoltage() );
