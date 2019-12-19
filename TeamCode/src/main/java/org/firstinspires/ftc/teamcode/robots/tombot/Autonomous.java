@@ -29,7 +29,7 @@ public class Autonomous {
     public boolean enableTelemetry = false;
     public static final Class<? extends VisionProvider>[] visionProviders = VisionProviders.visionProviders;
     public static final Viewpoint viewpoint = Viewpoint.WEBCAM;
-    public int mineralState = 0;
+    public int mineralState = 1;
     private MineralStateProvider mineralStateProvider = () -> mineralState;
 
     //staging and timer variables
@@ -82,17 +82,39 @@ public class Autonomous {
         }
     }
 
-    public StateMachine redRedo = getStateMachine(autoStage)
-            .addState(() -> (robot.driveForward(true, .106, .80)))
-            .addState(() ->robot.crane.extendToPosition(1000,1,8))
-            .addState(() ->{robot.rotateIMU(90, 2); return robot.turret.setRotation90(true);})
-            .addState(() ->{robot.rotateIMU(90, 2); return robot.turret.setRotation90(true);})
-            .addState(() ->{robot.crane.extendToPosition(1000,1,8); return robot.crane.ejectStone();})
-            .addState(() ->robot.crane.grabStone())
+
+    public StateMachine autoSetupSkyStone = getStateMachine(autoStage)
+            //.addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            //.addState(() -> sample())
+            //.addState(() -> (robot.driveForward(true, .106, .50)))
+            .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
+            .addState(() -> robot.crane.ejectStone())
+            .addMineralState(mineralStateProvider,
+                    () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
+                    () -> true,
+                    () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+            .addState(() ->robot.crane.extendToPosition(2300,1,90))
+            .addState(() ->robot.crane.setElbowTargetPos(40,.3))
+            .addState(() -> robot.crane.grabStone())
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.bridgeTransit))
+            .build();
+
+    public StateMachine redAutoFull = getStateMachine(autoStage)
+            .addNestedStateMachine(autoSetupSkyStone)
+            .addState(() ->robot.rotateIMU(70, 3))//todo- make this a curve instead of following the hypotenuse
+            .addState(() -> (robot.driveForward(true, 1, .80)))
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
+            .addSingleState(() -> robot.crane.setTowerHeight(1))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
+            .addState(() -> (robot.driveForward(true, 1, .80)))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
+            
+
 
             .build();
 
-    public StateMachine primaryRed = getStateMachine(autoStage)
+    public StateMachine primaryRedOld = getStateMachine(autoStage)
             //pick up stone
             .addState(() -> (robot.driveForward(true, .106, .80)))
             .addState(() ->robot.crane.setElbowTargetPos(340,1.0))
@@ -122,7 +144,7 @@ public class Autonomous {
             .addState(() -> (robot.driveForward(true, .8, .80))) //forward to 2nd column of tiles
             .build();
 
-    public StateMachine primaryBlue = getStateMachine(autoStage)
+    public StateMachine primaryBlueOld = getStateMachine(autoStage)
             .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
             .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
             .addState(() -> (robot.driveForward(true, .5, .80))) //forward to wall - todo: change to stop with distance sensor insteasd of odometry

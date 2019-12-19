@@ -53,6 +53,12 @@ public class Crane {
     public int pos_reverseSafeDrive;
     public int pos_PartialDeposit;
     public int pos_SafeDrive;
+    public int swivel_Right90;
+    public int swivel_Front;
+    public int swivel_Left90;
+    public int swivel_left_Block;
+    public int swivel_Right_Block;
+    boolean switcha;
 
     //autonomous encoder values
     public int pos_AutoPark;
@@ -146,6 +152,12 @@ public class Crane {
         motorUnhooked = 5;
         motorMidHooked = 80;
 
+        swivel_Right90 = 0;
+        swivel_Front = 900;
+        swivel_Left90 = 1556;
+        swivel_left_Block = 800;
+        swivel_Right_Block= 1000;
+
         //bel
         // t extension encoder values
         extendDeposit = 1489;
@@ -153,6 +165,7 @@ public class Crane {
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
         extendMin = 300;  //prevent crunching collector tray
+        switcha = false;
     }
 //
 //    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
@@ -284,12 +297,17 @@ public class Crane {
         currentTowerHeight += newHeight;
     }
 
+    public int getCurrentTowerHeight(){
+        return currentTowerHeight;
+    }
+
     int hypotenuse = 0;
     public void extendToTowerHeight(){
         hypotenuse = (int)(Math.sqrt(.25 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2)));//in meters
         setElbowTargetPos((int)(ticksPerDegree*Math.acos(.5/ hypotenuse)),1);
         setExtendABobTargetPos((int)(hypotenuse *(107.0/2960.0)));
     }
+
 
 
     public void hookOn(){
@@ -351,7 +369,7 @@ public class Crane {
     }
 
 
-    boolean switcha = false;
+
     public void toggleGripper() {
         if(switcha == false) {
             grabStone();
