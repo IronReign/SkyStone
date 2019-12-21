@@ -1172,6 +1172,16 @@ public class PoseSkystone
 
     }
 
+    public void driveDiffTankField(double xPower, double yPower){
+        double radians = getHeading()*Math.PI/180;
+
+        double temp = Math.cos(radians)*xPower + Math.sin(radians)*yPower;
+        yPower = -xPower*Math.sin(radians) + yPower*Math.cos(radians);
+        xPower=temp;
+
+        driveMixerTank(xPower,yPower);
+    }
+
 
     /**
      * Reset the encoder readings on all drive motors

@@ -552,36 +552,11 @@ public class Skystone_6832 extends LinearOpMode {
         pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
         pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-       pwrDamper = .65;
+        pwrDamper = .65;
 
 
-
-
-        double leftFrontPower;
-        double leftBackPower;
-        double rightFrontPower;
-        double rightBackPower;
-        double elbowSetPose;
-
-
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
-
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight
-
-        double drive = -gamepad1.left_stick_y *.5;
-        double turn = gamepad1.right_stick_x *.5;
-        //double strafe = gamepad1.left_stick_x * 3;
-
-        leftFrontPower = Range.clip(drive + turn, -1.0, 1.0);
-        leftBackPower = Range.clip(drive + turn, -1.0, 1.0);
-        rightFrontPower = Range.clip(drive - turn, -1.0, 1.0);
-        rightBackPower = Range.clip(drive - turn, -1.0, 1.0);
-
-
-
-        robot.driveMixerDiffSteer(drive, turn);
+        //robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot*pwrDamper);
+        robot.driveDiffTankField(pwrDamper*pwrFwd, pwrDamper*pwrRot);
 
         //crane controls
         if (gamepad1.dpad_right) {
