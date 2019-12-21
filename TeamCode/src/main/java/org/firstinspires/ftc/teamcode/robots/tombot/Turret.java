@@ -36,7 +36,7 @@ public class Turret{
     //PID
     PIDController turretPID;
     private double kpTurret = 0.01; //proportional constant multiplier
-    private double kiTurret = 0.000; //integral constant multiplier
+    private double kiTurret = 0.017; //integral constant multiplier
     private double kdTurret= 0.00; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
@@ -69,6 +69,7 @@ public class Turret{
         a360degrees= (int) (ticksPerDegree*360);
         setActive(true);
 
+        turretTargetHeading=0;
         turretPID = new PIDController(0,0,0);
         initIMU(turretIMU);
 
@@ -109,6 +110,11 @@ public class Turret{
             motor.setTargetPosition(targetRotationTicks);
             motor.setPower(motorPwr);
         }
+
+
+
+        //experiment code
+        maintainHeadingTurret(true);
     }
 
     public boolean isActive(){
@@ -131,6 +137,12 @@ public class Turret{
         setTurretMotorMode(false);
         targetRotationTicks = position;
         motorPwr = power;
+    }
+
+
+    //experiment method
+    public void setTurntableAngle(double angle){
+        turretTargetHeading=angle;
     }
 
     public void setPower(double pwr){
@@ -196,7 +208,7 @@ public class Turret{
         //else PID.setOutputRange(pwr - (-1 - pwr),-1-pwr);
 
         //initialization of the PID calculator's output range, target value and multipliers
-        turretPID.setOutputRange(-.25, .25);
+        turretPID.setOutputRange(-.75, .75);
         turretPID.setPID(Kp, Ki, Kd);
         turretPID.setSetpoint(targetAngle);
         turretPID.enable();
@@ -253,7 +265,7 @@ public class Turret{
             //if this is the first time the button has been down, then save the heading that the robot will hold at and set a variable to tell that the heading has been saved
             if (!maintainHeadingInit) {
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-               turretTargetHeading = turretHeading;
+               //turretTargetHeading = turretHeading;
                 maintainHeadingInit = true;
             }
             //hold the saved heading with PID

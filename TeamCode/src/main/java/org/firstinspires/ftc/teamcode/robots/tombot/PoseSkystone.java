@@ -1179,7 +1179,7 @@ public class PoseSkystone
         yPower = -xPower*Math.sin(radians) + yPower*Math.cos(radians);
         xPower=temp;
 
-        driveMixerTank(xPower,yPower);
+        driveMixerDiffSteer(xPower,yPower);
     }
 
 

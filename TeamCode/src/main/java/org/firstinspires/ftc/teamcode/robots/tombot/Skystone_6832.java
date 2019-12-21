@@ -542,9 +542,10 @@ public class Skystone_6832 extends LinearOpMode {
             reverse = 1;
         }
 
+        reverse=-1;
 
         pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
-        pwrRot = -pwrDamper * .75 * gamepad1.right_stick_x;
+        pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
         pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
         pwrStfL = direction * pwrDamper * gamepad1.left_stick_x;
@@ -552,12 +553,31 @@ public class Skystone_6832 extends LinearOpMode {
         pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
         pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-        pwrDamper = .65;
+        pwrDamper = .70;
 
 
-        //robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot*pwrDamper);
-        robot.driveDiffTankField(pwrDamper*pwrFwd, pwrDamper*pwrRot);
+        robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot*pwrDamper);
+        //robot.driveDiffTankField(pwrFwdL*pwrDamper, pwrStfL*pwrDamper);
+        //robot.driveMixerDiffSteer(0, pwrDamper*pwrStfR);
 
+        if (gamepad1.dpad_right) {
+            robot.turret.setTurntableAngle(90);
+        }
+        if (gamepad1.dpad_left) {
+            robot.turret.setTurntableAngle(270);
+        }
+        if (gamepad1.dpad_up) {
+            robot.turret.setTurntableAngle(0);
+        }
+        if (gamepad1.dpad_down) {
+            robot.turret.setTurntableAngle(180);
+        }
+
+
+        robot.turret.update(opModeIsActive());
+
+
+        /*
         //crane controls
         if (gamepad1.dpad_right) {
             robot.crane.increaseElbowAngle();
@@ -622,7 +642,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
         if(toggleAllowed(gamepad2.x,x)) {
             robot.crane.stopSwivel();
-        }
+        }*/
         robot.crane.update();
     }
 
