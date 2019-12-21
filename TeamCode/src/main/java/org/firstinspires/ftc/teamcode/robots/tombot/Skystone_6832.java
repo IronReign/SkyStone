@@ -552,11 +552,6 @@ public class Skystone_6832 extends LinearOpMode {
         pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
         pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-       /* if ((robot.getRoll() > 300) && robot.getRoll() < 350)
-            //todo - needs improvement - should be enabling slowmo mode, not setting the damper directly
-            //at least we are looking at the correct axis now - it was super janky - toggling the damper as the axis fluttered across 0 to 365
-            pwrDamper = .33;
-        else*/
        pwrDamper = .65;
 
 
