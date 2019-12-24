@@ -617,9 +617,13 @@ public class PoseSkystone
                bridgeTransit();
                break;
            case extendToTowerHeightArticulation:
-               extendToTowerHeightArticulation();
+               if(extendToTowerHeightArticulation()){
+                   articulation = Articulation.manual;
+               }
+               break;
            case retractFromTower:
                retractFromTower();
+               break;
            case deploying:
                //auton unfolding after initial hang - should only be called from the hanging position during auton
                // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -857,20 +861,43 @@ public class PoseSkystone
     }
 
     public boolean extendToTowerHeightArticulation(){
-       crane.extendToTowerHeight();
+        crane.extendToTowerHeight();
         return true;
     }
 
+    static int i = 0;
     public boolean retractFromTower(){
-       crane.ejectStone();
-       if(crane.getCurrentAngle() < 45) {
-           crane.setElbowTargetPos(elbow.getCurrentPosition() + 50, 1);
-       }
-       else
-           crane.setElbowTargetPos(1150);
-       retrieveStone();
-       return true;
+
+
+        switch(i) {
+            case (0):
+                crane.toggleGripper();
+                miniTimer = futureTime(1);
+                i++;
+                break;
+            case (1):
+
+                if (System.nanoTime() >= miniTimer) {
+                    miniTimer = futureTime(1);
+                    crane.setElbowTargetAngle(crane.getCurrentAngle() + 10);
+                    i++;
+                }
+
+                break;
+            case (2):
+
+                if (System.nanoTime() >= miniTimer) {
+
+                    articulation = Articulation.retrieving;
+                    i=0;
+                    return true;
+                }
+
+        }
+       return false;
     }
+
+    public static int getI(){return i;}
 
     public boolean Deploy(){
        articulate(Articulation.deploying);

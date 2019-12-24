@@ -129,9 +129,9 @@ public class Turret{
             motor.setPower(0);
     }
 
-    public void rotateRight(double power){ setTurntablePosition(getCurrentRotationEncoderRaw() + (int)(ticksPerDegree*15), power);}
+    public void rotateRight(){setTurntableAngle(getHeading()+5.0);}
 
-    public void rotateLeft(double power){setTurntablePosition(getCurrentRotationEncoderRaw() - (int)(ticksPerDegree*15), power);}
+    public void rotateLeft(){setTurntableAngle(getHeading()-5.0);}
 
     public void setTurntablePosition(int position, double power) {
         setTurretMotorMode(false);
@@ -139,6 +139,15 @@ public class Turret{
         motorPwr = power;
     }
 
+
+
+    public void rotateCardinal(boolean right){
+        int pos = (int) (getHeading()/90.0);
+        if(right)
+            setTurntableAngle((pos+1)*90);
+        else
+            setTurntableAngle(pos*90);
+    }
 
     //experiment method
     public void setTurntableAngle(double angle){
@@ -163,27 +172,27 @@ public class Turret{
         }
     }
 
-    public void setRotation180() {
-        if(getCurrentRotationEncoderRaw() < 0)
-            targetRotationTicks -= getCurrentRotationEncoderRaw()%a180degrees;
-        if(getCurrentRotationEncoderRaw() > 0)
-            targetRotationTicks += getCurrentRotationEncoderRaw()%a180degrees;
-        if(getCurrentRotationEncoderRaw() == 0)
-            targetRotationTicks -= a180degrees;
-        motorPwr = safeTurn;
-    }
+//    public void setRotation180() {
+//        if(getCurrentRotationEncoderRaw() < 0)
+//            targetRotationTicks -= getCurrentRotationEncoderRaw()%a180degrees;
+//        if(getCurrentRotationEncoderRaw() > 0)
+//            targetRotationTicks += getCurrentRotationEncoderRaw()%a180degrees;
+//        if(getCurrentRotationEncoderRaw() == 0)
+//            targetRotationTicks -= a180degrees;
+//        motorPwr = safeTurn;
+//    }
+//
+//    public void setToFront(){
+//        if(getTargetRotationTicks() < a360degrees ||  targetRotationTicks > -a360degrees)
+//            setTurntablePosition(0,safeTurn);
+//        else if(getTargetRotationTicks() < 0) {
+//            setTurntablePosition(getTargetRotationTicks() + getTargetRotationTicks() %a360degrees, .5);
+//        }
+//        else {
+//            setTurntablePosition(getTargetRotationTicks() - getTargetRotationTicks() %a360degrees, .5);
+//        }
 
-    public void setToFront(){
-        if(getTargetRotationTicks() < a360degrees ||  targetRotationTicks > -a360degrees)
-            setTurntablePosition(0,safeTurn);
-        else if(getTargetRotationTicks() < 0) {
-            setTurntablePosition(getTargetRotationTicks() + getTargetRotationTicks() %a360degrees, .5);
-        }
-        else {
-            setTurntablePosition(getTargetRotationTicks() - getTargetRotationTicks() %a360degrees, .5);
-        }
-
-    }
+//    }
 
     public int getCurrentRotationEncoderRaw(){
         return motor.getCurrentPosition();

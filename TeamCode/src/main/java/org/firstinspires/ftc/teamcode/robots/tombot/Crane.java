@@ -58,7 +58,8 @@ public class Crane {
     public int swivel_Left90;
     public int swivel_left_Block;
     public int swivel_Right_Block;
-    boolean switcha;
+    private boolean gripperState;
+    private int gripperSwivelState = 0;
 
     //autonomous encoder values
     public int pos_AutoPark;
@@ -91,12 +92,16 @@ public class Crane {
 
 
     private boolean hookUp = true;
-    private int gripperState = 0;
+    //private int gripperState = 0;
 
-    //filler value; needs to be updated to reflect actual ratio
-    public double ticksPerDegree = 22.3296703;
+    public double ticksPerDegree = 19.4705882353;
+    public final double ticksPerMeter = 806/.2921;
 
     public boolean active = true;
+
+    public boolean getGripperState() {
+        return gripperState;
+    }
 
     public Crane(DcMotor elbow, DcMotor extendABob, DcMotor hook, Servo intakeServoFront, Servo intakeServoBack, Servo gripperSwivel){
 
@@ -165,7 +170,7 @@ public class Crane {
         extendMid= 980;
         extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
         extendMin = 300;  //prevent crunching collector tray
-        switcha = false;
+        gripperState = false;
     }
 //
 //    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
@@ -263,21 +268,10 @@ public class Crane {
     }
 
     public void updateIntake() {
-        switch(intakeState) {
-            case 0:
-                //stopIntake();
-                break;
-            case 1:
-                collect();
-                break;
-            case 2:
-                ejectStone();
-                break;
-            case 3:
-            default:
-                //do nothing
-                break;
-        }
+        if(gripperState == false)
+            grabStone();
+        else
+            ejectStone();
     }
 
     public void setIntakeModeOff() {
@@ -294,6 +288,7 @@ public class Crane {
     }
 
     public void setTowerHeight(int newHeight){
+        if(currentTowerHeight > 0 || newHeight > 0)
         currentTowerHeight += newHeight;
     }
 
@@ -301,14 +296,20 @@ public class Crane {
         return currentTowerHeight;
     }
 
-    int hypotenuse = 0;
+    double test1;
+    double test2;
+
+    double hypotenuse = 0;
     public void extendToTowerHeight(){
-        hypotenuse = (int)(Math.sqrt(.25 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2)));//in meters
-        setElbowTargetPos((int)(ticksPerDegree*Math.acos(.5/ hypotenuse)),1);
-        setExtendABobTargetPos((int)(hypotenuse *(107.0/2960.0)));
+        hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight)* blockHeightMeter),2));//in meters
+        setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
+        setExtendABobLengthMeters(hypotenuse-.3683);
+        test1 = hypotenuse-.3683;
+        test2 = Math.toDegrees(Math.acos(0.8763/ hypotenuse));
     }
 
-
+    public double getTest1(){return test1;}
+    public double getTest2(){return test2;}
 
     public void hookOn(){
 
@@ -331,13 +332,28 @@ public class Crane {
 
     public void swivelGripper(boolean right){
         if(right == true)
-            gripperSwivel.setPosition(.7);
+            gripperSwivel.setPosition(gripperSwivel.getPosition()-.02);
         else
-            gripperSwivel.setPosition(.3);
+            gripperSwivel.setPosition(gripperSwivel.getPosition()+.02);
     }
 
-    public void stopSwivel(){
-        gripperSwivel.setPosition(.5);
+    public void toggleSwivel(){
+        if(gripperSwivelState == 0) {
+            gripperSwivel.setPosition(.5);
+            gripperSwivelState++;
+        }
+        else if(gripperSwivelState == 1) {
+            gripperSwivel.setPosition(1);
+            gripperSwivelState++;
+        }
+        else if(gripperSwivelState == 2) {
+            gripperSwivel.setPosition(.5);
+            gripperSwivelState++;
+        }
+        else{
+            gripperSwivel.setPosition(0);
+            gripperSwivelState = 0;
+        }
     }
 
     //This is for auto
@@ -349,19 +365,19 @@ public class Crane {
     public boolean grabStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateClosed));
         //intakeServoBack.setPosition(servoNormalize(servoGateOpen));
-        gripperState = 1;
+        //gripperState = 1;
         return true;
     }
     public boolean ejectStone(){
         intakeServoFront.setPosition(servoNormalize(servoGateOpen));
         //intakeServoBack.setPosition(servoNormalize(servoGateClosed));
-        gripperState = 2;
+        //gripperState = 2;
         return true;
     }
     public void stopGripper() {
         intakeServoFront.setPosition(servoNormalize(1500));
         //intakeServoBack.setPosition(servoNormalize(1500));
-        gripperState = 0;
+        //gripperState = 0;
     }
 
     public void stopIntake(){
@@ -371,13 +387,11 @@ public class Crane {
 
 
     public void toggleGripper() {
-        if(switcha == false) {
-            grabStone();
-            switcha=true;
+        if(gripperState == false) {
+            gripperState =true;
         }
         else {
-            ejectStone();
-            switcha = false;
+            gripperState = false;
         }
     }
 
@@ -415,6 +429,10 @@ public class Crane {
         if (nearTargetElbow()) return true;
         else return false;
     }
+
+    public void setElbowTargetAngle(double angleDegrees){
+        elbowPos =(int) (ticksPerDegree* angleDegrees);
+    }
     public int getElbowTargetPos(){
         return elbowPos;
     }
@@ -422,8 +440,13 @@ public class Crane {
         return elbow.getCurrentPosition();
     }
     public double getCurrentAngle(){return  elbow.getCurrentPosition()/ticksPerDegree;}
-    public double getCurrentLength(){
-        return (107.0/2960.0)*getExtendABobCurrentPos() + 46;
+
+    public void setExtendABobLengthMeters(double lengthMeters){
+        setExtendABobTargetPos((int)(lengthMeters*ticksPerMeter));
+    }
+
+    public double getCurrentLengthInMeters(){
+        return (ticksPerMeter)*getExtendABobCurrentPos();
     }
     public void setElbowPwr(double pwr){ elbowPwr = pwr; }
 
