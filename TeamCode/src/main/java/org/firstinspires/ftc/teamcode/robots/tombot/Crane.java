@@ -60,6 +60,7 @@ public class Crane {
     public int swivel_Right_Block;
     private boolean gripperState;
     private int gripperSwivelState = 0;
+    double hypotenuse = 0;
 
     //autonomous encoder values
     public int pos_AutoPark;
@@ -274,19 +275,6 @@ public class Crane {
             ejectStone();
     }
 
-    public void setIntakeModeOff() {
-        intakeState = 0;
-    }
-    public void setIntakeModeIn() {
-        intakeState = 1;
-    }
-    public void setIntakeModeOut() {
-        intakeState = 2;
-    }
-    public void setIntakeModeManual() {
-        intakeState = 3;
-    }
-
     public void setTowerHeight(int newHeight){
         if(currentTowerHeight > 0 || newHeight > 0)
         currentTowerHeight += newHeight;
@@ -296,20 +284,21 @@ public class Crane {
         return currentTowerHeight;
     }
 
-    double test1;
-    double test2;
 
-    double hypotenuse = 0;
     public void extendToTowerHeight(){
-        hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight)* blockHeightMeter),2));//in meters
+        hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2));//in meters
         setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
         setExtendABobLengthMeters(hypotenuse-.3683);
-        test1 = hypotenuse-.3683;
-        test2 = Math.toDegrees(Math.acos(0.8763/ hypotenuse));
     }
 
-    public double getTest1(){return test1;}
-    public double getTest2(){return test2;}
+    public void extendToTowerHeight(int height){
+        hypotenuse = Math.sqrt(.76790169 + Math.pow(((height+1)* blockHeightMeter),2));//in meters
+        setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
+        setExtendABobLengthMeters(hypotenuse-.3683);
+    }
+
+
+
 
     public void hookOn(){
 

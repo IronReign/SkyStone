@@ -145,6 +145,7 @@ public class PoseSkystone
         bridgeTransit,
         extendToTowerHeightArticulation,
         retractFromTower,
+        restaccDemo,
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -624,6 +625,10 @@ public class PoseSkystone
            case retractFromTower:
                retractFromTower();
                break;
+           case restaccDemo:
+               if(restaccDemo())
+                   articulation = Articulation.manual;
+               break;
            case deploying:
                //auton unfolding after initial hang - should only be called from the hanging position during auton
                // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -865,22 +870,19 @@ public class PoseSkystone
         return true;
     }
 
-    static int i = 0;
     public boolean retractFromTower(){
-
-
-        switch(i) {
+        switch(miniState) {
             case (0):
                 crane.toggleGripper();
                 miniTimer = futureTime(1);
-                i++;
+                miniState++;
                 break;
             case (1):
 
                 if (System.nanoTime() >= miniTimer) {
                     miniTimer = futureTime(1);
                     crane.setElbowTargetAngle(crane.getCurrentAngle() + 10);
-                    i++;
+                    miniState++;
                 }
 
                 break;
@@ -889,7 +891,7 @@ public class PoseSkystone
                 if (System.nanoTime() >= miniTimer) {
 
                     articulation = Articulation.retrieving;
-                    i=0;
+                    miniState=0;
                     return true;
                 }
 
@@ -897,7 +899,66 @@ public class PoseSkystone
        return false;
     }
 
-    public static int getI(){return i;}
+    //start pos for this is going to be turret 90 degrees left, where the arm is facing the left side of the board
+    boolean atLeft;
+   int auxTowerHeight;
+    public boolean restaccDemo(){
+        if (crane.getCurrentTowerHeight() > 0) {
+            //to the right
+            switch (miniState) {
+                case 0:
+                    extendToTowerHeightArticulation();
+                    crane.setTowerHeight(-1);
+                    extendToTowerHeightArticulation();
+                    miniTimer = futureTime(1);
+                    miniState++;
+                    break;
+                case 1:
+                    if(System.nanoTime() >= miniTimer) {
+                        retractFromTower();
+                        crane.setTowerHeight(-1);
+                        miniTimer = futureTime(1);
+                        miniState++;
+                    }
+                    break;
+                case 2:
+                    if(System.nanoTime() >= miniTimer) {
+                        driveForward(atLeft,.1,.3);
+                        crane.setTowerHeight(auxTowerHeight);
+                        miniTimer = futureTime(1);
+                        miniState++;
+                    }
+                    break;
+                case 3:
+                    if(System.nanoTime() >= miniTimer) {
+                        retractFromTower();
+                        auxTowerHeight++;
+                        miniTimer = futureTime(1);
+                        miniState++;
+                    }
+                    break;
+                case 4:
+                    if(System.nanoTime() >= miniTimer) {
+                        driveForward(!atLeft,.1,.3);
+                        miniState=0;
+                    }
+                    break;
+            }
+            if(atLeft == true)
+                driveForward(true,.1,.3);
+            if(atLeft == false)
+                driveForward(false,.1,.3);
+            atLeft = !atLeft;
+            crane.setTowerHeight(auxTowerHeight);
+            return false;
+        }
+        //to the left
+        switch (miniState) {
+            case 0:
+                extendToTowerHeightArticulation();
+        }
+        return false;
+    }
 
     public boolean Deploy(){
        articulate(Articulation.deploying);

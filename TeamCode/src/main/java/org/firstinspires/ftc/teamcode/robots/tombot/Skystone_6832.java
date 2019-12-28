@@ -524,7 +524,25 @@ public class Skystone_6832 extends LinearOpMode {
             robot.articulate(PoseSkystone.Articulation.manual);
             robot.crane.retractBelt();
         }
+        if(toggleAllowed(gamepad2.x,x,2)) {
+            robot.crane.setTowerHeight(1);
+        }
+        if(toggleAllowed(gamepad2.y,y,2)) {
+            robot.crane.setTowerHeight(-1);
+        }
 
+    }
+
+    boolean restackStage;
+    int towerDemoHeight;
+    public void restaccTowerDemo(boolean buttonState){
+        if(buttonState) {
+            if (restackStage == true) {
+                towerDemoHeight = robot.crane.getCurrentTowerHeight();
+                restackStage = false;
+            }
+                robot.articulate(PoseSkystone.Articulation.restaccDemo);
+        }
     }
 
 
@@ -978,8 +996,6 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("Turret Current tower height: ", ()-> robot.crane.getCurrentTowerHeight());
         telemetry.addLine()
                 .addData("Turret Current angle ", ()-> robot.turret.getHeading());
-        telemetry.addLine()
-                .addData("i val ", ()-> PoseSkystone.getI());
 
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
