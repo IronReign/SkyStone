@@ -944,19 +944,14 @@ public class PoseSkystone
                     }
                     break;
             }
-            if(atLeft == true)
-                driveForward(true,.1,.3);
-            if(atLeft == false)
-                driveForward(false,.1,.3);
-            atLeft = !atLeft;
-            crane.setTowerHeight(auxTowerHeight);
-            return false;
+
         }
-        //to the left
-        switch (miniState) {
-            case 0:
-                extendToTowerHeightArticulation();
-        }
+        if(atLeft == true)
+            driveForward(true,.1,.3);
+        if(atLeft == false)
+            driveForward(false,.1,.3);
+        atLeft = !atLeft;
+        crane.setTowerHeight(auxTowerHeight);
         return false;
     }
 
