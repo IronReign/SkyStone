@@ -59,7 +59,7 @@ public class PoseSkystone
     private Servo intakeServoFront= null;
     private Servo intakeServoBack= null;
     private Servo gripperSwivel = null;
-    private DcMotor hook = null;
+    private Servo hook = null;
     Servo blinkin = null;
 
 
@@ -296,7 +296,7 @@ public class PoseSkystone
         this.intakeServoBack         = this.hwMap.servo.get("intakeServoBack");
         this.gripperSwivel         = this.hwMap.servo.get("gripperSwivel");
 
-        this.hook               = this.hwMap.dcMotor.get("hook");
+        this.hook               = this.hwMap.servo.get("hook");
 
         this.blinkin            = this.hwMap.servo.get("blinkin");
         this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
@@ -318,7 +318,6 @@ public class PoseSkystone
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        hook.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         extender.setDirection(DcMotor.Direction.REVERSE);

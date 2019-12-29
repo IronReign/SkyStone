@@ -661,6 +661,12 @@ public class Skystone_6832 extends LinearOpMode {
             //robot.retractFromTower();
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
+        if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
+            robot.crane.hookOn();
+        }
+        if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
+            robot.crane.hookOff();
+        }
         robot.crane.update();
     }
 

@@ -22,7 +22,7 @@
 		<LynxModule name="Expansion Hub 2" port="2">
 			<NeveRest20Gearmotor name="motorBackRight" port="0" />
 			<NeveRest20Gearmotor name="motorBackLeft" port="1" />
-            <RevRoboticsCoreHexMotor name="hook" port="2" />
+            <servo name="hook" port="0" />
 
 
 			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />

@@ -14,7 +14,7 @@ public class Crane {
 
     DcMotor elbow = null;
     DcMotor extendABob = null;
-    DcMotor hook = null;
+    Servo hook = null;
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
@@ -83,6 +83,10 @@ public class Crane {
     public  int extendMin;  //prevent crunching collector tray
     public  int extendPreLatch = extendMax;
 
+    //foundation hook servo values
+    public int foundation_hook_open = 850;
+    public int foundation_hook_closed = 2100;
+
     public int stow = 650;
 
     public int currentTowerHeight;
@@ -104,7 +108,7 @@ public class Crane {
         return gripperState;
     }
 
-    public Crane(DcMotor elbow, DcMotor extendABob, DcMotor hook, Servo intakeServoFront, Servo intakeServoBack, Servo gripperSwivel){
+    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront, Servo intakeServoBack, Servo gripperSwivel){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
@@ -115,10 +119,6 @@ public class Crane {
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        hook.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hook.setTargetPosition(extendABob.getCurrentPosition());
-        hook.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        hook.setPower(0);
         //hook.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.elbow = elbow;
@@ -302,13 +302,11 @@ public class Crane {
 
     public void hookOn(){
 
-        hook.setTargetPosition(motorHooked);
-        hook.setPower(hookPwr);
+        hook.setPosition(servoNormalize(foundation_hook_open));
         hookUp = false;
     }
     public void hookOff(){
-        hook.setTargetPosition(motorMidHooked);
-        hook.setPower(hookPwr);
+        hook.setPosition(servoNormalize(foundation_hook_closed));
         hookUp = true;
     }
 
