@@ -129,9 +129,9 @@ public class Turret{
             motor.setPower(0);
     }
 
-    public void rotateRight(){setTurntableAngle(turretTargetHeading+10.0);}
+    public void rotateRight(){setTurntableAngle(turretTargetHeading+6.0);}
 
-    public void rotateLeft(){setTurntableAngle(turretTargetHeading-10.0);}
+    public void rotateLeft(){setTurntableAngle(turretTargetHeading-6.0);}
 
     public void setTurntablePosition(int position, double power) {
         setTurretMotorMode(false);

@@ -507,7 +507,8 @@ public class Skystone_6832 extends LinearOpMode {
         if (gamepad1.x)
             robot.maintainHeading(gamepad1.x);
 //        if (gamepad1.y) {
-            robot.turret.maintainHeadingTurret(gamepad1.y);
+        //robot.turret.maintainHeadingTurret(gamepad1.y);
+        robot.restaccDemo(toggleAllowed(gamepad1.a,a,1));
 //        }
 //        if (!gamepad1.y){
 //            robot.turret.setPower(0);
@@ -532,19 +533,6 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
     }
-
-    boolean restackStage;
-    int towerDemoHeight;
-    public void restaccTowerDemo(boolean buttonState){
-        if(buttonState) {
-            if (restackStage == true) {
-                towerDemoHeight = robot.crane.getCurrentTowerHeight();
-                restackStage = false;
-            }
-                robot.articulate(PoseSkystone.Articulation.restaccDemo);
-        }
-    }
-
 
     int reverse = 1;
     private void joystickDrive() {

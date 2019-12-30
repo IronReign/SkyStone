@@ -145,7 +145,6 @@ public class PoseSkystone
         bridgeTransit,
         extendToTowerHeightArticulation,
         retractFromTower,
-        restaccDemo,
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -624,10 +623,6 @@ public class PoseSkystone
            case retractFromTower:
                retractFromTower();
                break;
-           case restaccDemo:
-               if(restaccDemo())
-                   articulation = Articulation.manual;
-               break;
            case deploying:
                //auton unfolding after initial hang - should only be called from the hanging position during auton
                // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -869,28 +864,30 @@ public class PoseSkystone
         return true;
     }
 
+    int miniStateRetTow = 0;
+   double retractTimer;
     public boolean retractFromTower(){
-        switch(miniState) {
+        switch(miniStateRetTow) {
             case (0):
                 crane.toggleGripper();
-                miniTimer = futureTime(1);
-                miniState++;
+                retractTimer = futureTime(1);
+                miniStateRetTow++;
                 break;
             case (1):
 
-                if (System.nanoTime() >= miniTimer) {
-                    miniTimer = futureTime(1);
-                    crane.setElbowTargetAngle(crane.getCurrentAngle() + 10);
-                    miniState++;
+                if (System.nanoTime() >= retractTimer) {
+                    retractTimer = futureTime(1);
+                    crane.setElbowTargetAngle(crane.getCurrentAngle() + 15);
+                    miniStateRetTow++;
                 }
 
                 break;
             case (2):
 
-                if (System.nanoTime() >= miniTimer) {
+                if (System.nanoTime() >= retractTimer) {
 
                     articulation = Articulation.retrieving;
-                    miniState=0;
+                    miniStateRetTow=0;
                     return true;
                 }
 
@@ -901,56 +898,71 @@ public class PoseSkystone
     //start pos for this is going to be turret 90 degrees left, where the arm is facing the left side of the board
     boolean atLeft;
    int auxTowerHeight;
-    public boolean restaccDemo(){
-        if (crane.getCurrentTowerHeight() > 0) {
-            //to the right
-            switch (miniState) {
-                case 0:
-                    extendToTowerHeightArticulation();
-                    crane.setTowerHeight(-1);
-                    extendToTowerHeightArticulation();
-                    miniTimer = futureTime(1);
-                    miniState++;
-                    break;
-                case 1:
-                    if(System.nanoTime() >= miniTimer) {
-                        retractFromTower();
-                        crane.setTowerHeight(-1);
-                        miniTimer = futureTime(1);
-                        miniState++;
-                    }
-                    break;
-                case 2:
-                    if(System.nanoTime() >= miniTimer) {
-                        driveForward(atLeft,.1,.3);
-                        crane.setTowerHeight(auxTowerHeight);
-                        miniTimer = futureTime(1);
-                        miniState++;
-                    }
-                    break;
-                case 3:
-                    if(System.nanoTime() >= miniTimer) {
-                        retractFromTower();
-                        auxTowerHeight++;
-                        miniTimer = futureTime(1);
-                        miniState++;
-                    }
-                    break;
-                case 4:
-                    if(System.nanoTime() >= miniTimer) {
-                        driveForward(!atLeft,.1,.3);
-                        miniState=0;
-                    }
-                    break;
-            }
-
+   int restackStage = 0;
+   double restackTimer;
+   boolean restacktoggle = false;
+    public boolean restaccDemo(boolean buttonvalue){
+        if(buttonvalue){
+            restacktoggle = !restacktoggle;
         }
-        if(atLeft == true)
-            driveForward(true,.1,.3);
-        if(atLeft == false)
-            driveForward(false,.1,.3);
-        atLeft = !atLeft;
-        crane.setTowerHeight(auxTowerHeight);
+        if(restacktoggle) {
+            if (crane.getCurrentTowerHeight() > 0) {
+                switch (restackStage) {
+                    case 0:
+                        extendToTowerHeightArticulation();
+                        crane.setTowerHeight(-1);
+                        extendToTowerHeightArticulation();
+                        restackTimer = futureTime(1);
+                        restackStage++;
+                        break;
+                    case 1:
+                        if (System.nanoTime() >= restackTimer) {
+
+                            if(retractFromTower()) {
+                                restackTimer = futureTime(1);
+                                restackStage++;
+                                resetMotors(true);
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (System.nanoTime() >= restackTimer) {
+                            if(driveForward(atLeft,.1,.3)) {
+                                crane.setTowerHeight(auxTowerHeight);
+                                restackTimer = futureTime(1);
+                                restackStage++;
+                            }
+                        }
+                        break;
+                    case 3:
+                        if (System.nanoTime() >= restackTimer) {
+                            if(retractFromTower()) {
+                                auxTowerHeight++;
+                                restackTimer = futureTime(1);
+                                restackStage++;
+                                resetMotors(true);
+                            }
+                        }
+                        break;
+                    case 4:
+                        if (System.nanoTime() >= restackTimer) {
+                            if(driveForward(!atLeft,.1,.3))
+                            restackStage = 0;
+                        }
+                        break;
+                }
+
+            }
+            else {
+                resetMotors(true);
+                    if(driveForward(atLeft, .1, .3)) {
+                        atLeft = !atLeft;
+                        crane.setTowerHeight(auxTowerHeight);
+                        auxTowerHeight = 0;
+                    }
+                    return false;
+            }
+        }
         return false;
     }
 
@@ -1029,11 +1041,11 @@ public class PoseSkystone
 
         long targetPos = (long)(targetMeters * forwardTPM);
         if(Math.abs(targetPos) > Math.abs(getAverageTicks())){//we've not arrived yet
-            driveMixerDiffTank(power, 0);
+            driveMixerDiffSteer(power,0);
             return false;
         }
         else { //destination achieved
-            driveMixerDiffTank(0, 0);
+            driveMixerDiffSteer(0,0);
             return true;
         }
     }
