@@ -613,7 +613,9 @@ public class PoseSkystone
                 }
                break;
            case bridgeTransit:
-               bridgeTransit();
+               if(bridgeTransit()){
+                   articulation = Articulation.manual;
+               }
                break;
            case extendToTowerHeightArticulation:
                if(extendToTowerHeightArticulation()){

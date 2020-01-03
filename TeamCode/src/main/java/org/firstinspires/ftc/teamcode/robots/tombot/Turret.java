@@ -36,8 +36,8 @@ public class Turret{
     //PID
     PIDController turretPID;
     private double kpTurret = 0.01; //proportional constant multiplier
-    private double kiTurret = 0.017; //integral constant multiplier
-    private double kdTurret= 0.00; //derivative constant multiplier
+    private double kiTurret = 0.0; //integral constant multiplier
+    private double kdTurret= 0.5; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
     //IMU

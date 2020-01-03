@@ -9,12 +9,15 @@ import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
+import org.firstinspires.ftc.teamcode.vision.SkystonePos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
 import org.firstinspires.ftc.teamcode.vision.VisionProviders;
+import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
+ * adb connect 192.168.43.1:5555
  */
 public class Autonomous {
 
@@ -24,6 +27,7 @@ public class Autonomous {
 
     //vision-related configuration
     public VisionProvider vp;
+    public VisionProvidersSkystone vps;
     public int visionProviderState;
     public boolean visionProviderFinalized;
     public boolean enableTelemetry = false;
@@ -52,9 +56,9 @@ public class Autonomous {
 
     private boolean sample() {
         //Turn on camera to see which is gold
-        GoldPos gp = vp.detect();
+        SkystonePos gp = vps.detect();
         // Hold state lets us know that we haven't finished looping through detection
-        if (gp != GoldPos.HOLD_STATE) {
+        if (true) {
             switch (gp) {
                 case LEFT:
                     mineralState = 0;
@@ -66,36 +70,35 @@ public class Autonomous {
                     mineralState = 2;
                     break;
                 case NONE_FOUND:
-                case ERROR1:
-                case ERROR2:
-                case ERROR3:
                 default:
                     mineralState = 1;
                     break;
             }
             telemetry.addData("Vision Detection", "GoldPos: %s", gp.toString());
-            vp.shutdownVision();
+            vps.shutdownVision();
             return true;
-        } else {
-            telemetry.addData("Vision Detection", "HOLD_STATE (still looping through internally)");
-            return false;
         }
+//        else {
+//            telemetry.addData("Vision Detection", "HOLD_STATE (still looping through internally)");
+//            return false;
+//        }
+        return false;
     }
 
 
     public StateMachine autoSetupSkyStone = getStateMachine(autoStage)
-            //.addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            //.addState(() -> sample())
-            //.addState(() -> (robot.driveForward(true, .106, .50)))
+//            .addState(() -> (robot.driveForward(true, .15, .80)))
+//            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//            .addState(() -> sample())
             .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
-            .addState(() -> robot.crane.ejectStone())
+            .addState(() -> robot.crane.toggleGripper())
             .addMineralState(mineralStateProvider,
                     () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
                     () -> true,
                     () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
-            .addState(() ->robot.crane.extendToPosition(2300,1,90))
+            .addState(() ->robot.crane.extendToPosition(2200,.7,90))
             .addState(() ->robot.crane.setElbowTargetPos(40,.3))
-            .addState(() -> robot.crane.grabStone())
+            .addState(() -> robot.crane.toggleGripper())
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.bridgeTransit))
             .build();
 

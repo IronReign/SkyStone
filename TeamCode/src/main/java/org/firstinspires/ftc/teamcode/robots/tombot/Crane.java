@@ -373,12 +373,14 @@ public class Crane {
 
 
 
-    public void toggleGripper() {
+    public boolean toggleGripper() {
         if(gripperState == false) {
             gripperState =true;
+            return true;
         }
         else {
             gripperState = false;
+            return true;
         }
     }
 
