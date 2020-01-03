@@ -9,7 +9,7 @@
 
 			<Servo name="intakeServoFront" port="0" />
 			<Servo name="intakeServoBack" port="2" />
-			<Servo name="gripperSwivel" port="3" />
+			<Servo name="gripperSwivel" port="1" />
 			<Servo name="blinkin" port="4" />
 
 			<AnalogInput name="leftAnalog" port="0" />
@@ -23,7 +23,7 @@
 			<Servo name="hook" port="0" />
 			<NeveRest20Gearmotor name="motorBackRight" port="0" />
 			<NeveRest20Gearmotor name="motorBackLeft" port="1" />
-			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />
+			<LynxEmbe90-ddedIMU name="baseIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="0" bus="2"/>
 			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="0" bus="3"/>
 		</LynxModule>
