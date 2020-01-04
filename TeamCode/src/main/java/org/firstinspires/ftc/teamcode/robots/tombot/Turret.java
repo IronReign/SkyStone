@@ -35,7 +35,7 @@ public class Turret{
 
     //PID
     PIDController turretPID;
-    private double kpTurret = 0.01; //proportional constant multiplier
+    private double kpTurret = 0.05; //proportional constant multiplier
     private double kiTurret = 0.0; //integral constant multiplier
     private double kdTurret= 0.5; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
@@ -58,7 +58,7 @@ public class Turret{
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setTargetPosition(motor.getCurrentPosition());
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.motor = motor;
         targetRotationTicks = 0;
@@ -129,9 +129,20 @@ public class Turret{
             motor.setPower(0);
     }
 
-    public void rotateRight(){setTurntableAngle(turretTargetHeading+6.0);}
+    public void rotateRight(){
+        if(getTurretTargetHeading() <360.0)
+        setTurntableAngle(getHeading()+22.0);
+    else
+        turretTargetHeading = 0.0;}
 
-    public void rotateLeft(){setTurntableAngle(turretTargetHeading-6.0);}
+    public void rotateLeft(){
+        if(getTurretTargetHeading() > 0.0)
+            setTurntableAngle(getHeading()-22.0);
+        else
+            turretTargetHeading = 359.9;
+    }
+
+
 
     public void setTurntablePosition(int position, double power) {
         setTurretMotorMode(false);
@@ -144,9 +155,9 @@ public class Turret{
     public void rotateCardinal(boolean right){
         int pos = (int) (turretTargetHeading/90.0);
         if(right)
-            setTurntableAngle((pos+1)*90);
+            setTurntableAngle((pos+1)*90 % 360);
         else
-            setTurntableAngle(pos*90);
+            setTurntableAngle(pos*90 % 360);
     }
 
     //experiment method

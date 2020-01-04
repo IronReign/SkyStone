@@ -4,7 +4,7 @@
 		<LynxModule name="Expansion Hub 1" port="1">
 			<RevRobotics40HDHexMotor name="elbow" port="1" />
 			<RevRobotics40HDHexMotor name="extender" port="2" />
-			<NeveRest3.7v1Gearmotor name="turret" port="0" />
+			<RevRobotics40HDHexMotor name="turret" port="0" />
 
 
 			<Servo name="intakeServoFront" port="0" />
@@ -21,9 +21,9 @@
 
 		<LynxModule name="Expansion Hub 2" port="2">
 			<Servo name="hook" port="0" />
-			<NeveRest20Gearmotor name="motorBackRight" port="0" />
-			<NeveRest20Gearmotor name="motorBackLeft" port="1" />
-			<LynxEmbe90-ddedIMU name="baseIMU" port="0" bus="0" />
+			<RevRobotics40HDHexMotor name="motorBackRight" port="0" />
+			<RevRobotics40HDHexMotor name="motorBackLeft" port="1" />
+			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="0" bus="2"/>
 			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="0" bus="3"/>
 		</LynxModule>
