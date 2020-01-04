@@ -1562,7 +1562,42 @@ public class PoseSkystone
         }
     }
 
+    /**
+     * pivotTurn is a simple low level method to turn the robot from an arbitrary point on the virtual axle of a diffsteer platform
+     * call this method until it returns true
+     * this must only be called serially until completion - if aborted early it will be in a falsely initialized state
+     * @param speed maximum normalized (-1 to +1) speed to achieve on outermost wheel. negative speed means anticlockwise turn
+     * @param angle degrees of turn to achieve - this is relative to the initial heading as measured during the init stage. negative means measured anticlockwise
+     *              - this does not set the direction of motion, but only when it ends
+     * @param offset center of turn as offset in meters from center of wheelbase. negative offset means to the left of the normal centerpoint
+     * @param timelimit - maximum time alloted to achieve the turn - if hit, the turn probably did not complete
+     * @return - false until it has completed the turn
+     */
 
+    boolean pivotTurnInitialized = false;
+    public boolean pivotTurnIMU(double speed, double angle, double offset, float timelimit){
+
+        final double wheelbase = 0.335; //tombot meters separation between wheels
+        double startangle, finalangle = 0;
+        double radiusright, radiusleft;
+        double arcleft, arcright = 0;
+        double speedleft, speedright;
+
+        if (!pivotTurnInitialized){
+            startangle=getHeading();
+            timelimit = futureTime(timelimit);
+            radiusleft= offset+wheelbase/2;
+            radiusright= offset-wheelbase/2;
+            arcleft = 2*Math.PI*radiusleft*angle/360;
+            arcright = 2*Math.PI*radiusright*angle/360;
+            //if(Math.abs())
+
+            pivotTurnInitialized = true;
+        }
+
+
+        return false;
+}
 
 
 
