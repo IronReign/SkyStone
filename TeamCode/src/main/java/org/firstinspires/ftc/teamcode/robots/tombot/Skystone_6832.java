@@ -303,8 +303,8 @@ public class Skystone_6832 extends LinearOpMode {
                     robot.setZeroHeading();
                     robot.setAutonomousIMUOffset(0); //against lander
                 }
-                robot.articulate(PoseSkystone.Articulation.retrieving);
-                robot.crane.extendToMin();
+                //robot.crane.toggleGripper();
+                //servosetup
             }
 
             if (toggleAllowed(gamepad1.x, x,1   )) {
@@ -587,50 +587,59 @@ public class Skystone_6832 extends LinearOpMode {
 
 
         //crane controls
-        if (gamepad1.dpad_right) {
-            robot.crane.increaseElbowAngle();
-        }
-        if (gamepad1.dpad_left) {
-            robot.crane.decreaseElbowAngle();
-        }
-        if (gamepad1.dpad_up) {
-            robot.crane.extendBelt();
-        }
-        if (gamepad1.dpad_down) {
-            robot.crane.retractBelt();
-        }
+//        if (gamepad1.dpad_right) {
+//            robot.crane.increaseElbowAngle();
+//        }
+//        if (gamepad1.dpad_left) {
+//            robot.crane.decreaseElbowAngle();
+//        }
+//        if (gamepad1.dpad_up) {
+//            robot.crane.extendBelt();
+//        }
+//        if (gamepad1.dpad_down) {
+//            robot.crane.retractBelt();
+//        }
 
         //turret code
-        if(gamepad1.right_trigger > 0){
-                robot.turret.rotateRight();
-        }
+        if(gamepad2.right_trigger > 0.0)
+                robot.turret.rotateLeft(1);
+        if(gamepad2.left_trigger > 0.0)
+                robot.turret.rotateRight(1);
 
-        //other code/ articlations
-        if(gamepad1.left_trigger > 0){
-                robot.turret.rotateLeft();
-        }
+//        if(gamepad1.right_trigger > 0){
+//            robot.turret.rotateRight(right_trigger);
+//        }
+//
+//        //other code/ articlations
+//        if(gamepad1.left_trigger > 0){
+//            robot.turret.rotateLeft(left_trigger);
+//        }
         if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
                 robot.turret.rotateCardinal(true);
         }
+
         if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
             robot.turret.rotateCardinal(false);
         }
         if(toggleAllowed(gamepad1.x,x,1)){
-            robot.crane.hookToggle();
+
         }
         if(toggleAllowed(gamepad1.b,b,1)){
             robot.crane.extendToPosition(1500,1.0,20);
         }
         if(toggleAllowed(gamepad1.a,a,1)){
-            robot.articulate(PoseSkystone.Articulation.retrieving);
+//            if(robot.crane.getCurrentAngle() < 20)
+//                    robot.articulate(PoseSkystone.Articulation.retrieving);
+//            else
+                robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
         if(toggleAllowed(gamepad1.y,y,1)){
             robot.crane.toggleGripper();
         }
-        if(toggleAllowed(gamepad2.x,x,2)) {
+        if(toggleAllowed(gamepad2.y,y,2)) {
             robot.crane.setTowerHeight(1);
         }
-        if(toggleAllowed(gamepad2.y,y,2)) {
+        if(toggleAllowed(gamepad2.x,x,2)) {
             robot.crane.setTowerHeight(-1);
         }
         if(toggleAllowed(gamepad2.a,a,2)) {
@@ -646,8 +655,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.toggleSwivel();
         }
         if (toggleAllowed(gamepad2.dpad_right,dpad_right,2)) {
-            //robot.retractFromTower();
-            robot.articulate(PoseSkystone.Articulation.retractFromTower);
+            robot.crane.toggleGripper();
         }
         if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
             robot.crane.hookOn();
@@ -655,6 +663,20 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
             robot.crane.hookOff();
         }
+        if (gamepad2.right_stick_y < -0.3) {
+            robot.crane.increaseElbowAngle();
+        }
+        if (gamepad2.right_stick_y > 0.3) {
+            robot.crane.decreaseElbowAngle();
+        }
+        if (gamepad2.left_stick_y < -0.3) {
+            robot.crane.extendBelt();
+        }
+        if (gamepad2.left_stick_y > 0.0) {
+            robot.crane.retractBelt();
+        }
+
+
         robot.crane.update();
     }
 

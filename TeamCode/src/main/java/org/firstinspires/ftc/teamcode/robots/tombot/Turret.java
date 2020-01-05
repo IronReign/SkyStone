@@ -35,9 +35,9 @@ public class Turret{
 
     //PID
     PIDController turretPID;
-    private double kpTurret = 0.05; //proportional constant multiplier
+    private double kpTurret = 0.04; //proportional constant multiplier
     private double kiTurret = 0.0; //integral constant multiplier
-    private double kdTurret= 0.5; //derivative constant multiplier
+    private double kdTurret= 0.0; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
     //IMU
@@ -129,17 +129,20 @@ public class Turret{
             motor.setPower(0);
     }
 
-    public void rotateRight(){
-        if(getTurretTargetHeading() <360.0)
-        setTurntableAngle(getHeading()+22.0);
+    public void rotateRight(double multiplier){
+        if(getTurretTargetHeading() <359.9)
+        setTurntableAngle(getHeading()+(1.0*multiplier));
     else
-        turretTargetHeading = 0.0;}
+        turretTargetHeading = 0.1;
+        //turretTargetHeading = 360- getTurretTargetHeading();
+    }
 
-    public void rotateLeft(){
-        if(getTurretTargetHeading() > 0.0)
-            setTurntableAngle(getHeading()-22.0);
+    public void rotateLeft(double multiplier){
+        if(getTurretTargetHeading() > .1)
+            setTurntableAngle(getHeading()-(1.0*multiplier));
         else
             turretTargetHeading = 359.9;
+            //turretTargetHeading = getTurretTargetHeading() - 360;
     }
 
 
@@ -157,7 +160,7 @@ public class Turret{
         if(right)
             setTurntableAngle((pos+1)*90 % 360);
         else
-            setTurntableAngle(pos*90 % 360);
+            setTurntableAngle(pos-1*90 % 360);
     }
 
     //experiment method
@@ -228,7 +231,7 @@ public class Turret{
         //else PID.setOutputRange(pwr - (-1 - pwr),-1-pwr);
 
         //initialization of the PID calculator's output range, target value and multipliers
-        turretPID.setOutputRange(-.75, .75);
+        turretPID.setOutputRange(-1, 1);
         turretPID.setPID(Kp, Ki, Kd);
         turretPID.setSetpoint(targetAngle);
         turretPID.enable();

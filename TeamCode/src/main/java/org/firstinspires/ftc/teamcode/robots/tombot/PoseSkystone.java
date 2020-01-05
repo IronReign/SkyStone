@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -310,9 +311,9 @@ public class PoseSkystone
         //elbow.setDirection(DcMotor.Direction.REVERSE);
 
         //motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
-        motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
-        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotor.Direction.FORWARD);
         //motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -614,7 +615,6 @@ public class PoseSkystone
                break;
            case bridgeTransit:
                if(bridgeTransit()){
-                   articulation = Articulation.manual;
                }
                break;
            case extendToTowerHeightArticulation:
@@ -835,17 +835,18 @@ public class PoseSkystone
         switch(craneArticulation){
             case 0:
                 if(crane.getElbowCurrentPos()<180) crane.setElbowTargetPos(180, 1);
-                crane.extendToPosition(100,1.0,20);
+                crane.extendToPosition(445,1.0,20);
                 miniTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
-                    crane.setElbowTargetPos(180, 1);
+                    crane.setElbowTargetPos(80, 1);
                     craneArticulation++;
                 }
                 break;
             case 2:
+                turret.setTurntableAngle(90.0);
                 craneArticulation=0;
 
                 return true;
@@ -871,7 +872,7 @@ public class PoseSkystone
     public boolean retractFromTower(){
         switch(miniStateRetTow) {
             case (0):
-                crane.toggleGripper();
+                //crane.toggleGripper();
                 retractTimer = futureTime(1);
                 miniStateRetTow++;
                 break;
@@ -1620,6 +1621,7 @@ public class PoseSkystone
      */
     public void setZeroHeading(){
         setHeading(0);
+        turret.setTurntableAngle(0);
     }
 
     /**
