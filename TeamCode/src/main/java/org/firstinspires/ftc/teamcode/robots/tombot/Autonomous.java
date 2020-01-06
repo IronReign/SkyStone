@@ -86,8 +86,8 @@ public class Autonomous {
     }
 
 
-    public StateMachine autoSetupSkyStone = getStateMachine(autoStage)
-//            .addState(() -> (robot.driveForward(true, .15, .80)))
+    public StateMachine autoSkyStoneRetrieve = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true, .05, .80)))
 //            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 //            .addState(() -> sample())
             .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
@@ -97,13 +97,34 @@ public class Autonomous {
                     () -> true,
                     () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
             .addState(() ->robot.crane.extendToPosition(2200,.7,90))
-            .addState(() ->robot.crane.setElbowTargetPos(40,.3))
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.crane.toggleGripper())
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.bridgeTransit))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            //.addTimedState(10f, () -> telemetry.addData("DELAY", robot.getMiniStateRetTow()), () -> telemetry.addData("DELAY", robot.getMiniStateRetTow()))
             .build();
 
     public StateMachine redAutoFull = getStateMachine(autoStage)
-            .addNestedStateMachine(autoSetupSkyStone)
+            .addState(() -> (robot.driveForward(true, .05, .80)))
+//            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//            .addState(() -> sample())
+            .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
+            .addState(() -> robot.crane.toggleGripper())
+            .addMineralState(mineralStateProvider,
+                    () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
+                    () -> true,
+                    () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+            .addState(() ->robot.crane.extendToPosition(2200,.7,90))
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> robot.crane.toggleGripper())
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+
+
+
+
+            //.addNestedStateMachine(autoSkyStoneRetrieve)
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() ->robot.rotateIMU(70, 3))//todo- make this a curve instead of following the hypotenuse
             .addState(() -> (robot.driveForward(true, 1, .80)))
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
@@ -112,9 +133,6 @@ public class Autonomous {
             .addState(() -> (robot.driveForward(true, 1, .80)))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
-            
-
-
             .build();
 
     public StateMachine primaryRedOld = getStateMachine(autoStage)
@@ -144,7 +162,8 @@ public class Autonomous {
             .build();
 
     public StateMachine walkOfShame = getStateMachine(autoStage)
-            .addState(() -> (robot.driveForward(true, .8, .80))) //forward to 2nd column of tiles
+            //.addState(() -> (robot.driveForward(true, .8, .80))) //forward to 2nd column of tiles
+            .addState(() -> (robot.rotateIMU(90,20.0)))
             .build();
 
     public StateMachine primaryBlueOld = getStateMachine(autoStage)

@@ -29,8 +29,7 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
  */
 
 @Config
-public class PoseSkystone
-{
+public class PoseSkystone {
 
     //setup
     HardwareMap hwMap;
@@ -48,17 +47,16 @@ public class PoseSkystone
     public double balanceD = 3.1444;
 
 
-
     //All Actuators
-    private DcMotor motorFrontRight  = null;
-    private DcMotor motorBackLeft   = null;
+    private DcMotor motorFrontRight = null;
+    private DcMotor motorBackLeft = null;
     private DcMotor motorFrontLeft = null;
-    private DcMotor motorBackRight  = null;
+    private DcMotor motorBackRight = null;
     private DcMotor elbow = null;
     private DcMotor extender = null;
     private DcMotor turretMotor = null;
-    private Servo intakeServoFront= null;
-    private Servo intakeServoBack= null;
+    private Servo intakeServoFront = null;
+    private Servo intakeServoBack = null;
     private Servo gripperSwivel = null;
     private Servo hook = null;
     Servo blinkin = null;
@@ -81,10 +79,10 @@ public class PoseSkystone
     private double powerLeft = 0;
     private double powerRight = 0;
     //mecanum types
-    private double powerFrontLeft  = 0;
+    private double powerFrontLeft = 0;
     private double powerFrontRight = 0;
-    private double powerBackLeft   = 0;
-    private double powerBackRight  = 0;
+    private double powerBackLeft = 0;
+    private double powerBackRight = 0;
 
 
     //PID values
@@ -99,7 +97,7 @@ public class PoseSkystone
     private double poseRoll;
     private long timeStamp; //timestamp of last update
     private boolean initialized = false;
-    public  double offsetHeading;
+    public double offsetHeading;
     private double offsetPitch;
     private double offsetRoll;
 
@@ -127,7 +125,7 @@ public class PoseSkystone
 
     private int craneArticulation = 0;
 
-    public enum MoveMode{
+    public enum MoveMode {
         forward,
         backward,
         left,
@@ -135,9 +133,11 @@ public class PoseSkystone
         rotate,
         still;
     }
+
     protected MoveMode moveMode;
 
-    public enum Articulation{ //serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
+    public enum Articulation { //serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
+        calibrate,
         inprogress, //currently in progress to a final articulation
         manual, //target positions are all being manually overridden
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
@@ -164,7 +164,7 @@ public class PoseSkystone
         latchHang; //teleop endgame - retractBelt collector elbow to final position, set locks if implemented
     }
 
-    public enum RobotType{
+    public enum RobotType {
         BigWheel,
         Icarus,
         Minimech,
@@ -176,6 +176,7 @@ public class PoseSkystone
     public Articulation getArticulation() {
         return articulation;
     }
+
     protected Articulation articulation = Articulation.manual;
     double articulationTimer = 0;
 
@@ -186,9 +187,11 @@ public class PoseSkystone
     public boolean isAutonSingleStep() {
         return autonSingleStep;
     }
+
     public void setAutonSingleStep(boolean autonSingleStep) {
         this.autonSingleStep = autonSingleStep;
     }
+
     boolean autonSingleStep = false; //single step through auton deploying stages to facilitate testing and demos
 
 
@@ -205,16 +208,15 @@ public class PoseSkystone
      * Create a Pose instance that stores all real world position/orientation elements:
      * <var>x</var>, <var>y</var>, <var>heading</var>, and <var>speed</var>.
      *
-     * @param x     The position relative to the x axis of the field
-     * @param y     The position relative to the y axis of the field
+     * @param x       The position relative to the x axis of the field
+     * @param y       The position relative to the y axis of the field
      * @param heading The heading of the robot
-     * @param speed The speed of the robot
+     * @param speed   The speed of the robot
      */
-    public PoseSkystone(double x, double y, double heading, double speed)
-    {
+    public PoseSkystone(double x, double y, double heading, double speed) {
 
-        poseX     = x;
-        poseY     = y;
+        poseX = x;
+        poseY = y;
         poseHeading = heading;
         poseSpeed = speed;
         posePitch = 0;
@@ -229,11 +231,10 @@ public class PoseSkystone
      * @param y     The position relative to the y axis of the field
      * @param angle The vuAngle of the robot
      */
-    public PoseSkystone(double x, double y, double angle)
-    {
+    public PoseSkystone(double x, double y, double angle) {
 
-        poseX     = x;
-        poseY     = y;
+        poseX = x;
+        poseY = y;
         poseHeading = angle;
         poseSpeed = 0;
 
@@ -243,15 +244,14 @@ public class PoseSkystone
      * Creates a base Pose instance at the origin, (_0,_0), with _0 speed and _0 vuAngle.
      * Useful for determining the Pose of the robot relative to the origin.
      */
-    public PoseSkystone(RobotType name)
-    {
+    public PoseSkystone(RobotType name) {
 
-        poseX     = 0;
-        poseY     = 0;
+        poseX = 0;
+        poseY = 0;
         poseHeading = 0;
         poseSpeed = 0;
-        posePitch=0;
-        poseRoll=0;
+        posePitch = 0;
+        poseRoll = 0;
 
         currentBot = name;
 
@@ -267,12 +267,11 @@ public class PoseSkystone
     //////////////////////////////////////////////////////////////////////////////////////////
 
 
-
     /**
      * Initializes motors, servos, lights and sensors from a given hardware map
      *
-     * @param ahwMap   Given hardware map
-     * @param isBlue   Tells the robot which alliance to initialize for (however initialization is currently alliance independent)
+     * @param ahwMap Given hardware map
+     * @param isBlue Tells the robot which alliance to initialize for (however initialization is currently alliance independent)
      */
     public void init(HardwareMap ahwMap, boolean isBlue) {
         hwMap = ahwMap;
@@ -284,24 +283,22 @@ public class PoseSkystone
         //create hwmap with config values
         //this.driveLeft          = this.hwMap.dcMotor.get("driveLeft");
         //this.driveRight         = this.hwMap.dcMotor.get("driveRight");
-        this.elbow          = this.hwMap.dcMotor.get("elbow");
+        this.elbow = this.hwMap.dcMotor.get("elbow");
 
 
-
-        this.extender     = this.hwMap.dcMotor.get("extender");
-
+        this.extender = this.hwMap.dcMotor.get("extender");
 
 
-        this.intakeServoFront         = this.hwMap.servo.get("intakeServoFront");
-        this.intakeServoBack         = this.hwMap.servo.get("intakeServoBack");
-        this.gripperSwivel         = this.hwMap.servo.get("gripperSwivel");
+        this.intakeServoFront = this.hwMap.servo.get("intakeServoFront");
+        this.intakeServoBack = this.hwMap.servo.get("intakeServoBack");
+        this.gripperSwivel = this.hwMap.servo.get("gripperSwivel");
 
-        this.hook               = this.hwMap.servo.get("hook");
+        this.hook = this.hwMap.servo.get("hook");
 
-        this.blinkin            = this.hwMap.servo.get("blinkin");
-        this.distForward        = this.hwMap.get(DistanceSensor.class, "distForward");
-        this.distRight          = this.hwMap.get(DistanceSensor.class, "distRight");
-        this.distLeft           = this.hwMap.get(DistanceSensor.class, "distLeft");
+        this.blinkin = this.hwMap.servo.get("blinkin");
+        this.distForward = this.hwMap.get(DistanceSensor.class, "distForward");
+        this.distRight = this.hwMap.get(DistanceSensor.class, "distRight");
+        this.distLeft = this.hwMap.get(DistanceSensor.class, "distLeft");
 
         //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
         motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
@@ -338,7 +335,7 @@ public class PoseSkystone
            }
 */
         //setup subsystems
-        crane = new Crane(elbow,extender,hook, intakeServoFront, intakeServoBack, gripperSwivel);
+        crane = new Crane(elbow, extender, hook, intakeServoFront, intakeServoBack, gripperSwivel);
         turretIMU = hwMap.get(BNO055IMU.class, "turretIMU");
         turret = new Turret(turretMotor, turretIMU);
         ledSystem = new LEDSystem(blinkin);
@@ -357,7 +354,7 @@ public class PoseSkystone
 
     }
 
-    public void resetIMU(){
+    public void resetIMU() {
         BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
         parametersIMU.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parametersIMU.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -367,9 +364,9 @@ public class PoseSkystone
         imu.initialize(parametersIMU);
     }
 
-    public void resetEncoders(){
+    public void resetEncoders() {
 
-    crane.resetEncoders();
+        crane.resetEncoders();
     }
 
 
@@ -377,29 +374,29 @@ public class PoseSkystone
      * update the current location of the robot. This implementation gets heading and orientation
      * from the Bosch BNO055 IMU and assumes a simple differential steer robot with left and right motor
      * encoders. also updates the positions of robot subsystems; make sure to add each subsystem's update class as more are implemented.
-     *
-     *
+     * <p>
+     * <p>
      * The current naive implementation assumes an unobstructed robot - it cannot account
      * for running into objects and assumes no slippage in the wheel encoders.  Debris
      * on the field and the mountain ramps will cause problems for this implementation. Further
      * work could be done to compare odometry against IMU integrated displacement calculations to
      * detect stalls and slips
-     *
+     * <p>
      * This method should be called regularly - about every 20 - 30 milliseconds or so.
      *
      * @param imu
      * @param ticksLeft
      * @param ticksRight
      */
-    public void update(BNO055IMU imu, long ticksLeft, long ticksRight, boolean isActive){
+    public void update(BNO055IMU imu, long ticksLeft, long ticksRight, boolean isActive) {
         long currentTime = System.nanoTime();
 
-        imuAngles= imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
-        if (!initialized){
+        imuAngles = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
+        if (!initialized) {
             //first time in - we assume that the robot has not started moving and that orientation values are set to the current absolute orientation
             //so first set of imu readings are effectively offsets
 
-            offsetHeading = wrapAngleMinus((double)(360-imuAngles.firstAngle), poseHeading);
+            offsetHeading = wrapAngleMinus((double) (360-imuAngles.firstAngle), poseHeading);
             offsetRoll = wrapAngleMinus(imuAngles.secondAngle, poseRoll);
             offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, posePitch);
             initialized = true;
@@ -461,13 +458,13 @@ public class PoseSkystone
                 poseHeadingRad = Math.toRadians(poseHeading);
                 break;
             default:
-                displacement=0; //when rotating or in an undefined moveMode, ignore/reset displacement
+                displacement = 0; //when rotating or in an undefined moveMode, ignore/reset displacement
                 displacementPrev = 0;
                 break;
         }
 
         odometer += Math.abs(displacement);
-        poseSpeed = displacement / (double)(currentTime - this.timeStamp)*1000000; //meters per second when ticks per meter is calibrated
+        poseSpeed = displacement / (double) (currentTime - this.timeStamp) * 1000000; //meters per second when ticks per meter is calibrated
 
         timeStamp = currentTime;
         displacementPrev = displacement;
@@ -484,11 +481,9 @@ public class PoseSkystone
 
     }
 
-    public void updateSensors(boolean isActive){
+    public void updateSensors(boolean isActive) {
         update(imu, 0, 0, isActive);
     }
-
-
 
 
     /**
@@ -501,42 +496,42 @@ public class PoseSkystone
 
     /**
      * Drive forwards for a set power while maintaining an IMU heading using PID
-     * @param Kp proportional multiplier for PID
-     * @param Ki integral multiplier for PID
-     * @param Kd derivative proportional for PID
-     * @param pwr set the forward power
+     *
+     * @param Kp          proportional multiplier for PID
+     * @param Ki          integral multiplier for PID
+     * @param Kd          derivative proportional for PID
+     * @param pwr         set the forward power
      * @param targetAngle the heading the robot will try to maintain while driving
-    */
-    public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle){
+     */
+    public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle) {
         movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle);
     }
 
 
-
     /**
      * Drive with a set power for a set distance while maintaining an IMU heading using PID
-     * @param Kp proportional multiplier for PID
-     * @param pwr set the forward power
-     * @param targetAngle the heading the robot will try to maintain while driving
+     *
+     * @param Kp            proportional multiplier for PID
+     * @param pwr           set the forward power
+     * @param targetAngle   the heading the robot will try to maintain while driving
      * @param forwardOrLeft is the robot driving in the forwards/left (positive) directions or backwards/right (negative) directions
-     * @param targetMeters the target distance (in meters)
+     * @param targetMeters  the target distance (in meters)
      */
-    public boolean driveIMUDistance(double Kp, double pwr, double targetAngle, boolean forwardOrLeft, double targetMeters){
+    public boolean driveIMUDistance(double Kp, double pwr, double targetAngle, boolean forwardOrLeft, double targetMeters) {
 
         //set what direction the robot is supposed to be moving in for the purpose of the field position calculator
-        if(!forwardOrLeft){
+        if (!forwardOrLeft) {
             moveMode = moveMode.backward;
             targetMeters = -targetMeters;
             pwr = -pwr;
-        }
-        else moveMode = moveMode.forward;
+        } else moveMode = moveMode.forward;
 
         //calculates the target position of the drive motors
         long targetPos;
-        targetPos = (long)(targetMeters * forwardTPM);
+        targetPos = (long) (targetMeters * forwardTPM);
 
         //if this statement is true, then the robot has not achieved its target position
-        if(Math.abs(targetPos) < Math.abs(getAverageAbsTicks())){
+        if (Math.abs(targetPos) < Math.abs(getAverageAbsTicks())) {
             driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
             return false;
         }
@@ -552,23 +547,24 @@ public class PoseSkystone
     /**
      * a method written to test servos by plugging them into a designated servo tester port on the REV module
      * designed to work best with debounced gamepad buttons
-     * @param largeUp if true, increase PWM being sent to the servo tester by a large amount
-     * @param smallUp if true, increase PWM being sent to the servo tester by a small amount
+     *
+     * @param largeUp   if true, increase PWM being sent to the servo tester by a large amount
+     * @param smallUp   if true, increase PWM being sent to the servo tester by a small amount
      * @param smallDown if true, decrease PWM being sent to the servo tester by a small amount
      * @param largeDown if true, decrease PWM being sent to the servo tester by a large amount
      */
-    public void servoTester(boolean largeUp, boolean smallUp, boolean smallDown, boolean largeDown){
+    public void servoTester(boolean largeUp, boolean smallUp, boolean smallDown, boolean largeDown) {
         //check to see if the PWM value being sent to the servo should be altered
-        if(largeUp){
+        if (largeUp) {
             servoTesterPos += 100;
         }
-        if(smallUp){
+        if (smallUp) {
             servoTesterPos += 25;
         }
-        if(smallDown){
+        if (smallDown) {
             servoTesterPos -= 25;
         }
-        if(largeDown){
+        if (largeDown) {
             servoTesterPos -= 100;
         }
 
@@ -585,241 +581,244 @@ public class PoseSkystone
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-   double miniTimer;
-   int miniState = 0;
+    double miniTimer;
+    int miniState = 0;
 
-   double depositDriveDistance;
+    double depositDriveDistance;
 
-   public boolean articulate(Articulation target, boolean setAndForget){
+    public boolean articulate(Articulation target, boolean setAndForget) {
         articulate(target);
         return true;
-   }
+    }
 
-   public Articulation articulate(Articulation target) {
-       articulation = target; //store the most recent explict articulation request as our target, allows us to keep calling incomplete multi-step transitions
-       if (target == Articulation.manual) {
-           miniState = 0; //reset ministate - it should only be used in the context of a multi-step transition, so safe to reset it here
-       }
+    public Articulation articulate(Articulation target) {
+        articulation = target; //store the most recent explict articulation request as our target, allows us to keep calling incomplete multi-step transitions
+        if (target == Articulation.manual) {
+            miniState = 0; //reset ministate - it should only be used in the context of a multi-step transition, so safe to reset it here
+        }
 
-       switch (articulation) {
-           case manual:
-               break; //do nothing here - likely we are directly overriding articulations in game
-           case driving:
+        switch (articulation) {
+            case calibrate:
+                calibrate();
+                break;
+            case manual:
+                break; //do nothing here - likely we are directly overriding articulations in game
+            case driving:
                 if (goToSafeDrive()) return target;
-               break;
-           case retrieving: //todo: fixup comments for deploy actions - moved stuff around
-               //auton initial hang at the beginning of a match
-                if(retrieveStone()){
+                break;
+            case retrieving: //todo: fixup comments for deploy actions - moved stuff around
+                //auton initial hang at the beginning of a match
+                if (retrieveStone()) {
                     articulation = Articulation.manual;
                 }
-               break;
-           case bridgeTransit:
-               if(bridgeTransit()){
-               }
-               break;
-           case extendToTowerHeightArticulation:
-               if(extendToTowerHeightArticulation()){
-                   articulation = Articulation.manual;
-               }
-               break;
-           case retractFromTower:
-               retractFromTower();
-               break;
-           case deploying:
-               //auton unfolding after initial hang - should only be called from the hanging position during auton
-               // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
-               switch (miniState) {
-                   case 0:
-                       articulationTimer = futureTime(3.0f);
-                       miniState++;
-                       break;
-                   case 1:
-                       crane.extendToMid(1, 15);
+                break;
+            case bridgeTransit:
+                if (bridgeTransit()) {
+                }
+                break;
+            case extendToTowerHeightArticulation:
+                if (extendToTowerHeightArticulation()) {
+                    articulation = Articulation.manual;
+                }
+                break;
+            case retractFromTower:
+                retractFromTower();
+                break;
+            case deploying:
+                //auton unfolding after initial hang - should only be called from the hanging position during auton
+                // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
+                switch (miniState) {
+                    case 0:
+                        articulationTimer = futureTime(3.0f);
+                        miniState++;
+                        break;
+                    case 1:
+                        crane.extendToMid(1, 15);
 
-                       if (crane.setElbowTargetPos(crane.pos_autonPrelatch, .85) || articulationTimer < System.nanoTime()) {
-                           //if (driveForward(false, .5, .2)) {
-                           //if (supermanLeft.setTargetPosition(supermanLeft.pos_prelatch, 1)) //lower supermanLeft so it's ready to support robot, but not pushing up on hook
-                           //{
-                           miniState = 0; //reset nested state counter for next use
-                           if (!isAutonSingleStep())
-                               articulation = Articulation.deployed; //auto advance to next stage
-                           else articulation = Articulation.manual;
-                           return Articulation.deployed; // signal advance to the deployed stage
-                       }
-                       break;
-               }
-               break;
+                        if (crane.setElbowTargetPos(crane.pos_autonPrelatch, .85) || articulationTimer < System.nanoTime()) {
+                            //if (driveForward(false, .5, .2)) {
+                            //if (supermanLeft.setTargetPosition(supermanLeft.pos_prelatch, 1)) //lower supermanLeft so it's ready to support robot, but not pushing up on hook
+                            //{
+                            miniState = 0; //reset nested state counter for next use
+                            if (!isAutonSingleStep())
+                                articulation = Articulation.deployed; //auto advance to next stage
+                            else articulation = Articulation.manual;
+                            return Articulation.deployed; // signal advance to the deployed stage
+                        }
+                        break;
+                }
+                break;
 
-               //wait until on floor as indicated by time or imu angle or supermanLeft position or distance sensor - whatever is reliable enough
-               //for now we wait on elapsed time to complete sequence
+            //wait until on floor as indicated by time or imu angle or supermanLeft position or distance sensor - whatever is reliable enough
+            //for now we wait on elapsed time to complete sequence
                /*
                articulationTimer = futureTime(2); //setup wait for completion. todo: change this to position based auto advancement
 
                */
-           case deployed:
-               //auton settled on ground - involves retracting the hook,
-               // moving forward a bit to clear lander and then
-               // lowering supermanLeft to driving position
-               if (System.nanoTime() >= articulationTimer) {
-                   switch (miniState) {
-                       case 0:  //push lightly into lander to relieve pressure on hook
-                           crane.hookOff(); //decreaseElbowAngle hook
-                           miniTimer=futureTime(1);
-                           miniState++;
-                           break;
-                           //if (driveForward(false, .2, .7)) miniState++;
-                           //miniTimer = futureTime(1); //setup wait for completion
+            case deployed:
+                //auton settled on ground - involves retracting the hook,
+                // moving forward a bit to clear lander and then
+                // lowering supermanLeft to driving position
+                if (System.nanoTime() >= articulationTimer) {
+                    switch (miniState) {
+                        case 0:  //push lightly into lander to relieve pressure on hook
+                            crane.hookOff(); //decreaseElbowAngle hook
+                            miniTimer = futureTime(1);
+                            miniState++;
+                            break;
+                        //if (driveForward(false, .2, .7)) miniState++;
+                        //miniTimer = futureTime(1); //setup wait for completion
 
-                       case 1:  //decreaseElbowAngle lander hook
-                           if (System.nanoTime() >= miniTimer) {
-                               if (rotateIMU(350, 1)) { //this turn is needed because hook doesn't clear entirely
-                                   resetMotors(true);
-                                   miniTimer = futureTime(1); //setup wait for completion
-                                   miniState++;
-                               }
-                           }
-                           break;
+                        case 1:  //decreaseElbowAngle lander hook
+                            if (System.nanoTime() >= miniTimer) {
+                                if (rotateIMU(350, 1)) { //this turn is needed because hook doesn't clear entirely
+                                    resetMotors(true);
+                                    miniTimer = futureTime(1); //setup wait for completion
+                                    miniState++;
+                                }
+                            }
+                            break;
 
-                       case 2://pull away from lander
-                           if (System.nanoTime() >= miniTimer) {
-                               if(driveForward(true, .25, .4)) {
+                        case 2://pull away from lander
+                            if (System.nanoTime() >= miniTimer) {
+                                if (driveForward(true, .25, .4)) {
 
-                                   //miniTimer = futureTime(1); //setup wait for completion
-                                   miniState++;
-                               }
-                           }
-                           break;
-                       case 3:  //automatically transition to driving articulation
-                           if (System.nanoTime() >= miniTimer) {
-                               miniState = 0; //just being a good citizen for next user of miniState
-                               articulation = Articulation.driving; //force transition to driving articulation
-                               return Articulation.driving; //force transition to driving articulation
-                           }
+                                    //miniTimer = futureTime(1); //setup wait for completion
+                                    miniState++;
+                                }
+                            }
+                            break;
+                        case 3:  //automatically transition to driving articulation
+                            if (System.nanoTime() >= miniTimer) {
+                                miniState = 0; //just being a good citizen for next user of miniState
+                                articulation = Articulation.driving; //force transition to driving articulation
+                                return Articulation.driving; //force transition to driving articulation
+                            }
 
-                           break;
-                   }
+                            break;
+                    }
 
-               }
-               break;
-           case reversedeploying:
-               switch (miniState) {
-                   case 0:
-                       articulationTimer = futureTime(2);
-                       miniState++;
-                       break;
-                   case 1:
-                       crane.extendToMid(1, 15);
+                }
+                break;
+            case reversedeploying:
+                switch (miniState) {
+                    case 0:
+                        articulationTimer = futureTime(2);
+                        miniState++;
+                        break;
+                    case 1:
+                        crane.extendToMid(1, 15);
 
-                       if ((crane.setElbowTargetPos(crane.pos_autonPrelatch, .85)) || articulationTimer < System.nanoTime()) {
-                           if (true || driveForward(false, .1, .2)) {
-                               stopAll();
-                               articulationTimer = 0;
-                               //if (supermanLeft.setTargetPosition(supermanLeft.pos_prelatch, 1)) //lower supermanLeft so it's ready to support robot, but not pushing up on hook
-                               //{
-                               miniState = 0; //reset nested state counter for next use
-                               if (!isAutonSingleStep())
-                                   articulation = Articulation.reversedeployed; //auto advance to next stage
-                               else articulation = Articulation.manual;
-                               return Articulation.reversedeployed; // signal advance to the deployed stage
+                        if ((crane.setElbowTargetPos(crane.pos_autonPrelatch, .85)) || articulationTimer < System.nanoTime()) {
+                            if (true || driveForward(false, .1, .2)) {
+                                stopAll();
+                                articulationTimer = 0;
+                                //if (supermanLeft.setTargetPosition(supermanLeft.pos_prelatch, 1)) //lower supermanLeft so it's ready to support robot, but not pushing up on hook
+                                //{
+                                miniState = 0; //reset nested state counter for next use
+                                if (!isAutonSingleStep())
+                                    articulation = Articulation.reversedeployed; //auto advance to next stage
+                                else articulation = Articulation.manual;
+                                return Articulation.reversedeployed; // signal advance to the deployed stage
 
-                               //}
-                               //break;
-                           }
-                           break;
-                       }
-               }
-               break;
-           case reversedeployed:
-               if (System.nanoTime() >= articulationTimer) {
-                   switch (miniState) {
-                       case 0:  //push lightly into lander to relieve pressure on hook
-                           crane.hookOff(); //decreaseElbowAngle hook
-                           miniTimer=futureTime(1);
-                           miniState++;
-                           break;
-                       case 1:  //decreaseElbowAngle lander hook
-                           if (System.nanoTime() >= miniTimer) {
-                               if (rotateIMU(0, 1)) { //this turn is needed because hook doesn't clear entirely
-                                   resetMotors(true);
-                                   miniTimer = futureTime(1); //setup wait for completion
-                                   miniState++;
-                               }
-                           }
-                           break;
+                                //}
+                                //break;
+                            }
+                            break;
+                        }
+                }
+                break;
+            case reversedeployed:
+                if (System.nanoTime() >= articulationTimer) {
+                    switch (miniState) {
+                        case 0:  //push lightly into lander to relieve pressure on hook
+                            crane.hookOff(); //decreaseElbowAngle hook
+                            miniTimer = futureTime(1);
+                            miniState++;
+                            break;
+                        case 1:  //decreaseElbowAngle lander hook
+                            if (System.nanoTime() >= miniTimer) {
+                                if (rotateIMU(0, 1)) { //this turn is needed because hook doesn't clear entirely
+                                    resetMotors(true);
+                                    miniTimer = futureTime(1); //setup wait for completion
+                                    miniState++;
+                                }
+                            }
+                            break;
 
-                       case 2://pull away from lander
-                           if (System.nanoTime() >= miniTimer) {
-                               if(driveForward(true, .25, .4)) {
+                        case 2://pull away from lander
+                            if (System.nanoTime() >= miniTimer) {
+                                if (driveForward(true, .25, .4)) {
 
-                                   //miniTimer = futureTime(1); //setup wait for completion
-                                   miniState++;
-                               }
-                           }
-                           break;
-                       case 3:  //automatically transition to driving articulation
-                           if (System.nanoTime() >= miniTimer) {
-                               miniState = 0; //just being a good citizen for next user of miniState
-                               articulation = Articulation.reverseDriving; //force transition to driving articulation
-                               return Articulation.reverseDriving; //force transition to driving articulation
-                           }
+                                    //miniTimer = futureTime(1); //setup wait for completion
+                                    miniState++;
+                                }
+                            }
+                            break;
+                        case 3:  //automatically transition to driving articulation
+                            if (System.nanoTime() >= miniTimer) {
+                                miniState = 0; //just being a good citizen for next user of miniState
+                                articulation = Articulation.reverseDriving; //force transition to driving articulation
+                                return Articulation.reverseDriving; //force transition to driving articulation
+                            }
 
-                           break;
-                   }
+                            break;
+                    }
 
-               }
-               break;
+                }
+                break;
 
-           case preIntake: //todo - prep for picking up a stone
-               //goToPreIntake();
-               break;
-           case intake: //todo - grab a stone
-               ////crane.closeGate();
-               //goToIntake();
-               break;
+            case preIntake: //todo - prep for picking up a stone
+                //goToPreIntake();
+                break;
+            case intake: //todo - grab a stone
+                ////crane.closeGate();
+                //goToIntake();
+                break;
 
 
-           case deposit: //todo - this is all junk old code at the moment just for reference
-               //goToDeposit();
-               switch (miniState) { //todo: this needs to be more ministages - need an interim aggressive retractBelt of the elbow followed by supermanLeft, followed by opening the elbow up again, all before the extendMax
-                   case 0: //set basic speeds and start closing elbow to manage COG
-                       crane.restart(.25, 1);
+            case deposit: //todo - this is all junk old code at the moment just for reference
+                //goToDeposit();
+                switch (miniState) { //todo: this needs to be more ministages - need an interim aggressive retractBelt of the elbow followed by supermanLeft, followed by opening the elbow up again, all before the extendMax
+                    case 0: //set basic speeds and start closing elbow to manage COG
+                        crane.restart(.25, 1);
 
-                       if (crane.setElbowTargetPos(crane.pos_PartialDeposit,1) && crane.extendToMid(1,10))
-                           miniState++; //retractBelt elbow as fast as possible and hold state until completion
-                       break;
-                   case 1: //rise up
-                       crane.extendToMin(1,15);
-                       miniState++; //start going really fast to interim position
-                       break;
-                   case 2:
-                       //if (collector.extendToMid(1,15))
-                       miniState++;
-                       break;
-                   case 3:
-                       if (crane.setElbowTargetPos(crane.pos_Deposit, 1)) {  //elbow back out to deposit position
-                           miniState++;
-                       }
-                       break;
-                   case 4:
+                        if (crane.setElbowTargetPos(crane.pos_PartialDeposit, 1) && crane.extendToMid(1, 10))
+                            miniState++; //retractBelt elbow as fast as possible and hold state until completion
+                        break;
+                    case 1: //rise up
+                        crane.extendToMin(1, 15);
+                        miniState++; //start going really fast to interim position
+                        break;
+                    case 2:
+                        //if (collector.extendToMid(1,15))
+                        miniState++;
+                        break;
+                    case 3:
+                        if (crane.setElbowTargetPos(crane.pos_Deposit, 1)) {  //elbow back out to deposit position
+                            miniState++;
+                        }
+                        break;
+                    case 4:
 
-                       driveForward(true,.4, 1); //drive toward lander - helps pre-position  for deposit and slightly counters the robots tendency to over-rotate toward the lander because of all of the other moves
-                       if (crane.extendToMax(1,15)) {
-                           crane.grabStone(); //experimental - auto increaseElbowAngle gate requires that we are on-target side to side and in depth - not really ready for this but wanting to try it out
-                           miniState = 0; //just being a good citizen for next user of miniState
-                           articulation = Articulation.manual; //force end of articulation by switching to manual
-                           return Articulation.manual;
-                       }
-                       break;
-               }
+                        driveForward(true, .4, 1); //drive toward lander - helps pre-position  for deposit and slightly counters the robots tendency to over-rotate toward the lander because of all of the other moves
+                        if (crane.extendToMax(1, 15)) {
+                            crane.grabStone(); //experimental - auto increaseElbowAngle gate requires that we are on-target side to side and in depth - not really ready for this but wanting to try it out
+                            miniState = 0; //just being a good citizen for next user of miniState
+                            articulation = Articulation.manual; //force end of articulation by switching to manual
+                            return Articulation.manual;
+                        }
+                        break;
+                }
 
-               break;
+                break;
 
-           default:
-               return target;
+            default:
+                return target;
 
-       }
-       return target;
-   }
+        }
+        return target;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -828,6 +827,37 @@ public class PoseSkystone
     ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
+
+
+    private int calibrateStage = 0;//todo- finish
+    public boolean calibrate(){
+        switch(calibrateStage)
+        {
+            case 0:
+                crane.toggleSwivel();
+                miniTimer = futureTime(1);
+                calibrateStage++;
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    resetEncoders();
+                    setZeroHeading();
+                    turret.rotateCardinal(false);
+                    miniTimer = futureTime(3);
+                    calibrateStage++;
+                }
+                break;
+            case 2:
+                turret.setTurntableAngle(90.0);
+                calibrateStage = 0;
+
+                return true;
+        }
+            return false;
+}
+
+
+
 
 //todo these need to be tested - those that are used in articulate() have probably been fixed up by now
 
@@ -846,7 +876,7 @@ public class PoseSkystone
                 }
                 break;
             case 2:
-                turret.setTurntableAngle(90.0);
+                turret.setTurntableAngle(90.0); // todo- take this out when we init to 0
                 craneArticulation=0;
 
                 return true;
@@ -897,6 +927,8 @@ public class PoseSkystone
         }
        return false;
     }
+
+    public int getMiniStateRetTow(){return miniStateRetTow;}
 
     //start pos for this is going to be turret 90 degrees left, where the arm is facing the left side of the board
     boolean atLeft;

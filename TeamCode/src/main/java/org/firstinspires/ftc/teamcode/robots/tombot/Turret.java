@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
+import static org.firstinspires.ftc.teamcode.util.Conversions.wrap360;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
 
@@ -52,6 +53,7 @@ public class Turret{
     private double turretTargetHeading = 0.0;
     Orientation imuAngles;
     boolean maintainHeadingInit;
+    private final double angleIncrement = 10;
 
     public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
@@ -128,32 +130,27 @@ public class Turret{
         else
             motor.setPower(0);
     }
-
-    public void rotateRight(double multiplier){
-        if(getTurretTargetHeading() <359.9)
-        setTurntableAngle(getHeading()+(1.0*multiplier));
-    else
-        turretTargetHeading = 0.1;
-        //turretTargetHeading = 360- getTurretTargetHeading();
+    public void adjust(double speed) {
+        setTurntableAngle(getHeading(), 10.0 * speed);
     }
 
-    public void rotateLeft(double multiplier){
-        if(getTurretTargetHeading() > .1)
-            setTurntableAngle(getHeading()-(1.0*multiplier));
-        else
-            turretTargetHeading = 359.9;
-            //turretTargetHeading = getTurretTargetHeading() - 360;
+    public void rotateRight(double speed){
+
+        setTurntableAngle(getHeading(), angleIncrement * speed);
+
     }
 
+    public void rotateLeft(double speed){
 
+        setTurntableAngle(getHeading(), angleIncrement * -speed);
+
+    }
 
     public void setTurntablePosition(int position, double power) {
         setTurretMotorMode(false);
         targetRotationTicks = position;
         motorPwr = power;
     }
-
-
 
     public void rotateCardinal(boolean right){
         int pos = (int) (turretTargetHeading/90.0);
@@ -163,9 +160,12 @@ public class Turret{
             setTurntableAngle(pos-1*90 % 360);
     }
 
-    //experiment method
+    public void setTurntableAngle(double currentAngle, double adjustAngle){
+        turretTargetHeading=wrap360(currentAngle, adjustAngle);
+    }
+
     public void setTurntableAngle(double angle){
-        turretTargetHeading=angle;
+        turretTargetHeading=wrap360(angle);
     }
 
     public void setPower(double pwr){
@@ -306,7 +306,6 @@ public class Turret{
     public double getHeading(){
         return turretHeading;
     }
-
     public double getTurretTargetHeading(){
         return turretTargetHeading;
     }

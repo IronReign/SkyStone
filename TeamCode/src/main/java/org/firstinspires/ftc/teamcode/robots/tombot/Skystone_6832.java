@@ -42,6 +42,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
+import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
+
 
 /**
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
@@ -298,6 +300,8 @@ public class Skystone_6832 extends LinearOpMode {
 
             //reset the elbow, lift and supermanLeft motors - operator must make sure robot is in the stowed position, flat on the ground
             if (toggleAllowed(gamepad1.b, b,1)) {
+                robot.crane.toggleSwivel();
+
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
                     robot.resetEncoders();
                     robot.setZeroHeading();
@@ -396,13 +400,14 @@ public class Skystone_6832 extends LinearOpMode {
                         joystickDrive();
                         break;
                     case 1: //autonomous that goes to opponent's crater
-                        if (auto.redAutoFull.execute()) active = false;
+                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
                         break;
                     case 2: //autonomous that only samples
-                        if (auto.walkOfShame.execute()) active = false;
+                        if (auto.redAutoFull.execute()) active = false;
+                        //if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
-                        if (auto.autoSetupSkyStone.execute()) active = false;
+                        if (auto.autoSkyStoneRetrieve.execute()) active = false;
                         break;
                     case 4:
                         if (auto.craterSide_cycle.execute()) active = false;
@@ -582,7 +587,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 */
 
-        robot.turret.update(opModeIsActive());
+
 
 
 
@@ -600,20 +605,15 @@ public class Skystone_6832 extends LinearOpMode {
 //            robot.crane.retractBelt();
 //        }
 
-        //turret code
-        if(gamepad2.right_trigger > 0.0)
-                robot.turret.rotateLeft(1);
-        if(gamepad2.left_trigger > 0.0)
-                robot.turret.rotateRight(1);
+        //turret controls
+        if(notdeadzone(gamepad2.right_trigger))
+                robot.turret.rotateRight(gamepad2.right_trigger * 5);
+        if(notdeadzone(gamepad2.left_trigger))
+                robot.turret.rotateLeft(gamepad2.left_trigger * 5);
 
-//        if(gamepad1.right_trigger > 0){
-//            robot.turret.rotateRight(right_trigger);
-//        }
-//
-//        //other code/ articlations
-//        if(gamepad1.left_trigger > 0){
-//            robot.turret.rotateLeft(left_trigger);
-//        }
+        if(notdeadzone(gamepad2.right_stick_x) )
+            robot.turret.rotateRight(gamepad2.right_stick_x * 5);
+
         if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
                 robot.turret.rotateCardinal(true);
         }
@@ -663,21 +663,23 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
             robot.crane.hookOff();
         }
-        if (gamepad2.right_stick_y < -0.3) {
-            robot.crane.increaseElbowAngle();
+
+        if (notdeadzone(gamepad2.left_stick_y)) {
+            robot.crane.adjustElbowAngle(gamepad2.left_stick_y);
         }
-        if (gamepad2.right_stick_y > 0.3) {
-            robot.crane.decreaseElbowAngle();
+
+        if (notdeadzone(gamepad2.right_stick_y)) {
+            robot.crane.adjustBelt(gamepad2.right_stick_y);
         }
-        if (gamepad2.left_stick_y < -0.3) {
-            robot.crane.extendBelt();
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad2.right_stick_x);
         }
-        if (gamepad2.left_stick_y > 0.0) {
-            robot.crane.retractBelt();
-        }
+
+
 
 
         robot.crane.update();
+        robot.turret.update(opModeIsActive());
     }
 
     private void joystickDrivePregameMode() {
@@ -996,7 +998,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("roll", () -> robot.getRoll())
                 .addData("pitch", () -> robot.getPitch())
-                .addData("yaw", () -> robot.getHeading())
+                .addData("heading", () -> robot.getHeading())
                 .addData("yawraw", () -> robot.getHeading());
         telemetry.addLine()
                 .addData("Loop time", "%.0fms", () -> loopAvg/1000000)

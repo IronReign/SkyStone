@@ -539,16 +539,25 @@ public class Crane {
     public void increaseElbowAngle(){
         setElbowTargetPos(Math.min(getElbowCurrentPos() + 100, pos_Intake));
     }
+
+    public void adjustElbowAngle(double speed){
+        setElbowTargetPos(Math.max(getElbowCurrentPos() + (int)(200 * speed), 0));
+
+    }
     public void decreaseElbowAngle(){
         setElbowTargetPos(Math.max(getElbowCurrentPos() - 100, 0));
-
     }
 
     public void extendBelt(){
         setExtendABobTargetPos(Math.min(getExtendABobCurrentPos() + 100, extendMax));
     }
+
     public void retractBelt(){
         setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() - 100, extendMin));
+    }
+
+    public void adjustBelt(double speed){
+        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() + (int)(250 * speed), extendMin));
     }
 
     public void runToAngle(double angle){

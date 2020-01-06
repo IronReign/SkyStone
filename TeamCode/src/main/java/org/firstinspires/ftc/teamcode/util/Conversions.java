@@ -4,7 +4,10 @@ import org.firstinspires.ftc.teamcode.RC;
 
 public class Conversions {
 
+    private static double deadzone = 0.2;
+
     public Conversions(){}
+
 
     public static double servoNormalize(int pulse){
         double normalized = (double)pulse;
@@ -38,15 +41,29 @@ public class Conversions {
         }
         return diff;
     }
+    public static double wrap360(double angle){
+        double tmp;
+        tmp = wrapAngle(angle);
+        if (tmp < 0.0) return 360-tmp;
+        return tmp;
+    }
+    public static double wrap360(double angleCurrent, double angleChange){
 
+        return wrap360(angleCurrent + angleChange);
+    }
 
+    public static double wrapAngle(double angle){
+        return (angle) % 360;
+    }
     /**
-     * Apply and angular adjustment to a base angle with result wrapping around at 360 degress
+     * Apply an angular adjustment to a base angle with result wrapping around at 360 degress
      *
      * @param angle1
      * @param angle2
      * @return
      */
+
+
     public static double wrapAngle(double angle1, double angle2){
         return (angle1 + angle2) % 360;
     }
@@ -80,6 +97,11 @@ public class Conversions {
 
     public static long futureTime(float seconds){
         return System.nanoTime() + (long) (seconds * 1e9);
+    }
+
+    public static boolean notdeadzone(double value){
+        if (value> -deadzone && value < deadzone) return false;
+        else return true;
     }
 
 }
