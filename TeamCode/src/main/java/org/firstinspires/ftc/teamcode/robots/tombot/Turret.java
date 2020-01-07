@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
+import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrap360;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
@@ -153,11 +154,16 @@ public class Turret{
     }
 
     public void rotateCardinal(boolean right){
-        int pos = (int) (turretTargetHeading/90.0);
+
+        setTurntableAngle(nextCardinal(getHeading(),right,10));
+
+    /*    int pos = (int) (turretTargetHeading/90.0);
         if(right)
             setTurntableAngle((pos+1)*90 % 360);
         else
             setTurntableAngle(pos-1*90 % 360);
+
+     */
     }
 
     public void setTurntableAngle(double currentAngle, double adjustAngle){

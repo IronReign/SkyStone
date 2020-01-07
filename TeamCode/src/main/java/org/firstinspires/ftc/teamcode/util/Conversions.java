@@ -44,7 +44,7 @@ public class Conversions {
     public static double wrap360(double angle){
         double tmp;
         tmp = wrapAngle(angle);
-        if (tmp < 0.0) return 360-tmp;
+        if (tmp < 0.0) return 360+tmp;
         return tmp;
     }
     public static double wrap360(double angleCurrent, double angleChange){
@@ -102,6 +102,21 @@ public class Conversions {
     public static boolean notdeadzone(double value){
         if (value> -deadzone && value < deadzone) return false;
         else return true;
+    }
+
+    public static double nextCardinal(double currentAngle, boolean right, double hop){
+        double tmp;
+        if (right) {
+            tmp = (currentAngle + hop) % 360;
+            tmp = Math.floor(tmp/90) + 1;
+            if (tmp>=4) tmp = 0;
+        }
+        else{
+            tmp = (currentAngle - hop);
+            tmp = Math.floor(tmp/90);
+            if (tmp<0) tmp = 3;
+        }
+        return tmp*90;
     }
 
 }

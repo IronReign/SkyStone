@@ -665,11 +665,11 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngle(gamepad2.left_stick_y);
+            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
         }
 
         if (notdeadzone(gamepad2.right_stick_y)) {
-            robot.crane.adjustBelt(gamepad2.right_stick_y);
+            robot.crane.adjustBelt(-gamepad2.right_stick_y);
         }
         if (notdeadzone(gamepad2.right_stick_x)) {
             robot.turret.adjust(gamepad2.right_stick_x);
@@ -1012,7 +1012,8 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("Turret Current tower height: ", ()-> robot.crane.getCurrentTowerHeight());
         telemetry.addLine()
-                .addData("Turret Current angle ", ()-> robot.turret.getHeading());
+                .addData("Turret Current angle ", ()-> robot.turret.getHeading())
+                .addData("Joystick Y ", ()-> gamepad1.right_stick_y);
 
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
