@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -871,12 +870,12 @@ public class PoseSkystone {
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
-                    crane.setElbowTargetPos(80, 1);
+                    turret.setTurntableAngle(90.0); // todo- take this out when we init to 0
                     craneArticulation++;
                 }
                 break;
             case 2:
-                turret.setTurntableAngle(90.0); // todo- take this out when we init to 0
+                crane.setElbowTargetPos(80, 1);
                 craneArticulation=0;
 
                 return true;
@@ -945,7 +944,7 @@ public class PoseSkystone {
                 switch (restackStage) {
                     case 0:
                         extendToTowerHeightArticulation();
-                        crane.setTowerHeight(-1);
+                        crane.changeTowerHeight(-1);
                         extendToTowerHeightArticulation();
                         restackTimer = futureTime(1);
                         restackStage++;
@@ -963,7 +962,7 @@ public class PoseSkystone {
                     case 2:
                         if (System.nanoTime() >= restackTimer) {
                             if(driveForward(atLeft,.1,.3)) {
-                                crane.setTowerHeight(auxTowerHeight);
+                                crane.changeTowerHeight(auxTowerHeight);
                                 restackTimer = futureTime(1);
                                 restackStage++;
                             }
@@ -992,7 +991,7 @@ public class PoseSkystone {
                 resetMotors(true);
                     if(driveForward(atLeft, .1, .3)) {
                         atLeft = !atLeft;
-                        crane.setTowerHeight(auxTowerHeight);
+                        crane.changeTowerHeight(auxTowerHeight);
                         auxTowerHeight = 0;
                     }
                     return false;

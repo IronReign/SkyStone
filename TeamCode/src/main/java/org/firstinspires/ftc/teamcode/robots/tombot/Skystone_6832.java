@@ -531,10 +531,10 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.retractBelt();
         }
         if(toggleAllowed(gamepad2.x,x,2)) {
-            robot.crane.setTowerHeight(1);
+            robot.crane.changeTowerHeight(1);
         }
         if(toggleAllowed(gamepad2.y,y,2)) {
-            robot.crane.setTowerHeight(-1);
+            robot.crane.changeTowerHeight(-1);
         }
 
     }
@@ -637,10 +637,10 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.toggleGripper();
         }
         if(toggleAllowed(gamepad2.y,y,2)) {
-            robot.crane.setTowerHeight(1);
+            robot.crane.changeTowerHeight(1);
         }
         if(toggleAllowed(gamepad2.x,x,2)) {
-            robot.crane.setTowerHeight(-1);
+            robot.crane.changeTowerHeight(-1);
         }
         if(toggleAllowed(gamepad2.a,a,2)) {
                 robot.crane.extendToTowerHeight();

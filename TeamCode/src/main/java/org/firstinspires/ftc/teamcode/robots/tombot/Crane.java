@@ -275,9 +275,9 @@ public class Crane {
             ejectStone();
     }
 
-    public void setTowerHeight(int newHeight){
-        if(currentTowerHeight > 0 || newHeight > 0)
-        currentTowerHeight += newHeight;
+    public void changeTowerHeight(int newHeightAddition){
+        if(currentTowerHeight > 0 || newHeightAddition > 0)
+        currentTowerHeight += newHeightAddition;
     }
 
     public int getCurrentTowerHeight(){
