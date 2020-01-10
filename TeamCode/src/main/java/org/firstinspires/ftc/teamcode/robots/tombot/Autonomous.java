@@ -116,17 +116,16 @@ public class Autonomous {
                     () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
             .addState(() ->robot.crane.extendToPosition(2200,.7,90))
             .addState(() ->robot.crane.setElbowTargetPos(40,.1))
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.crane.toggleGripper())
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
 
 
 
 
-            //.addNestedStateMachine(autoSkyStoneRetrieve)
-            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() ->robot.rotateIMU(70, 3))//todo- make this a curve instead of following the hypotenuse
-            .addState(() -> (robot.driveForward(true, 1, .80)))
+            .addTimedState(5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() ->robot.rotateIMU(50, 4))//todo- make this a curve instead of following the hypotenuse
+            .addState(() -> (robot.driveForward(true, 1.3, .80)))
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);})
             .addSingleState(() -> robot.crane.setTowerHeight(1))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))

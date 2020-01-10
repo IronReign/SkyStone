@@ -361,6 +361,13 @@ public class Crane {
         //gripperState = 2;
         return true;
     }
+    public boolean setIntakePos(boolean open){
+        if(open)
+            intakeServoFront.setPosition(servoNormalize(servoGateOpen));
+        else
+            intakeServoFront.setPosition(servoNormalize(servoGateClosed));
+        return true;
+    }
     public void stopGripper() {
         intakeServoFront.setPosition(servoNormalize(1500));
         //intakeServoBack.setPosition(servoNormalize(1500));
