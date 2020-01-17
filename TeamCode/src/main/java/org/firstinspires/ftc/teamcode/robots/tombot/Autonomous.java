@@ -94,7 +94,7 @@ public class Autonomous {
                     () -> true,
                     () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
             .addState(() ->robot.crane.extendToPosition(2200,.7,90))
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1))//todo-increase this value
+            .addState(() ->robot.crane.setElbowTargetPos(75,.1))//todo-increase this value
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.crane.toggleGripper())
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
@@ -109,20 +109,17 @@ public class Autonomous {
             .addState(() -> robot.crane.toggleGripper())
             .addMineralState(mineralStateProvider,
                     () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
-                    () -> true,
-                    () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
-            .addState(() ->robot.crane.extendToPosition(2200,.7,90))
+            () -> true,
+            () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+            .addState(() ->robot.crane.extendToPosition(2100,.7,90))
             .addState(() ->robot.crane.setElbowTargetPos(40,.1))
             .addState(() -> robot.crane.toggleGripper())
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
 
-
-
-
             .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
-            .addState(() ->robot.rotateIMU(40, 4))//todo- make this a curve instead of following the hypotenuse
-            .addState(() -> (robot.driveForward(true, 1.3, .80)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() ->robot.rotateIMU(75, 8))//todo- make this a curve instead of following the hypotenuse
+            .addState(() -> (robot.driveForward(true, 1.91008, .80)))//this and ^^^^ put the robot in front of the build plate
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);}) //gets the arm and the robot in their correct orientation for depositing
             .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
@@ -131,15 +128,16 @@ public class Autonomous {
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //note for now this puts the arm at 90
 
+            //todo - this is the first block
             //this is the stuff that can be copied for each stone sequentially, just adjust the values
-            .addState(() -> (robot.driveForward(false, 1, .80)))//puts the robot in front of the block in the quarry
+            .addState(() -> (robot.driveForward(false, 1.651, .80)))//puts the robot in front of the block in the quarry
             .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
             .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
             .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
             .addState(() -> robot.crane.toggleGripper()) // yum!
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
-            .addState(() -> (robot.driveForward(true, 1.3, .80))) //goes back to the build platform
+            .addState(() -> (robot.driveForward(true, 1.651, .80))) //goes back to the build platform
             .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
             .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
@@ -148,7 +146,56 @@ public class Autonomous {
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
 
+            //todo- this is the second block
+            .addState(() -> (robot.driveForward(false, 2.21996, .80)))//puts the robot in front of the block in the quarry
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
+            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
+            .addState(() -> robot.crane.toggleGripper()) // yum!
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
+            .addState(() -> (robot.driveForward(true, 2.21996, .80))) //goes back to the build platform
+            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
+            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
+            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
+            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
 
+            //todo- this is the third block
+            .addState(() -> (robot.driveForward(false, 2.39776, .80)))//puts the robot in front of the block in the quarry
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
+            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
+            .addState(() -> robot.crane.toggleGripper()) // yum!
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
+            .addState(() -> (robot.driveForward(true, 2.39776, .80))) //goes back to the build platform
+            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
+            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
+            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
+            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
+
+            //todo- this is the 4th block
+            .addState(() -> (robot.driveForward(false, 2.62636, .80)))//puts the robot in front of the block in the quarry
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
+            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
+            .addState(() -> robot.crane.toggleGripper()) // yum!
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
+            .addState(() -> (robot.driveForward(true, 2.62636, .80))) //goes back to the build platform
+            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
+            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
+            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
+            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
 
             //the ending sequnce todo- test how this actually should funtion
             .addState(() ->{robot.turret.rotateIMUTurret(270,3); return robot.rotateIMU(0,3);}) // sets the robot facing the build plate and the arm in the most convinent position
@@ -189,9 +236,15 @@ public class Autonomous {
 //            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
             .build();
 
-    public StateMachine walkOfShame = getStateMachine(autoStage)
-            //.addState(() -> (robot.driveForward(true, .8, .80))) //forward to 2nd column of tiles
-            .addState(() -> (robot.rotateIMU(90,20.0)))
+    public StateMachine walkOfShameRed = getStateMachine(autoStage)
+            //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
+            .addState(() -> (robot.rotateIMU(90, 4)))
+            .build();
+
+    public StateMachine walkOfShameBlue = getStateMachine(autoStage)
+            //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            .addState(() -> (robot.rotateIMU(90, 4)))
             .build();
 
     public StateMachine primaryBlueOld = getStateMachine(autoStage)

@@ -285,6 +285,7 @@ public class Crane {
     }
 
 
+
     public void extendToTowerHeight(){
         hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2));//in meters
         setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
@@ -378,7 +379,18 @@ public class Crane {
 
     }
 
-
+    public void setMotorsForCalibration(boolean isOn){
+        if(isOn) {
+            elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            ///extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+        else{
+            elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+    }
 
     public boolean toggleGripper() {
         if(gripperState == false) {

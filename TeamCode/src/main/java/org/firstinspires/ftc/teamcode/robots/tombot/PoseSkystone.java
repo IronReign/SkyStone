@@ -117,6 +117,7 @@ public class PoseSkystone {
 
     private double poseSavedHeading = 0.0;
 
+    public boolean isBlue = false;
 
     public int servoTesterPos = 1600;
     public double autonomousIMUOffset = 0;
@@ -193,7 +194,9 @@ public class PoseSkystone {
 
     boolean autonSingleStep = false; //single step through auton deploying stages to facilitate testing and demos
 
-
+    public void setIsBlue(boolean blue){
+        isBlue = blue;
+    }
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
     ////                                                                                  ////
@@ -270,9 +273,8 @@ public class PoseSkystone {
      * Initializes motors, servos, lights and sensors from a given hardware map
      *
      * @param ahwMap Given hardware map
-     * @param isBlue Tells the robot which alliance to initialize for (however initialization is currently alliance independent)
      */
-    public void init(HardwareMap ahwMap, boolean isBlue) {
+    public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
         /* eg: Initialize the hardware variables. Note that the strings used here as parameters
          * to 'get' must correspond to the names assigned during the robot configuration
@@ -364,7 +366,6 @@ public class PoseSkystone {
     }
 
     public void resetEncoders() {
-
         crane.resetEncoders();
     }
 
@@ -485,6 +486,7 @@ public class PoseSkystone {
     }
 
 
+
     /**
      * Stops all motors on the robot
      */
@@ -530,7 +532,7 @@ public class PoseSkystone {
         targetPos = (long) (targetMeters * forwardTPM);
 
         //if this statement is true, then the robot has not achieved its target position
-        if (Math.abs(targetPos) < Math.abs(getAverageAbsTicks())) {
+        if (Math.abs(targetPos) < Math.abs(getAverageTicks())) {
             driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
             return false;
         }
@@ -569,7 +571,6 @@ public class PoseSkystone {
 
         //send the PWM value to the servo regardless of if it is altered or not
     }
-
 
 //todo - All Articulations need to be rebuilt - most of these are from icarus and will be removed
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -870,7 +871,7 @@ public class PoseSkystone {
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
-                    turret.setTurntableAngle(90.0); // todo- take this out when we init to 0
+                    turret.setTurntableAngle(0.0); // todo- take this out when we init to
                     craneArticulation++;
                 }
                 break;
@@ -1380,6 +1381,14 @@ public class PoseSkystone {
     public long getAverageAbsTicks(){
         long averageTicks = (Math.abs(motorFrontLeft.getCurrentPosition()) + Math.abs(motorBackLeft.getCurrentPosition()) + Math.abs(motorFrontRight.getCurrentPosition()) + Math.abs(motorBackRight.getCurrentPosition()))/4;
         return averageTicks;
+    }
+
+    public int getLeftMotorTicks(){
+        return motorBackLeft.getCurrentPosition();
+    }
+
+    public int getRightMotorTicks(){
+        return motorBackRight.getCurrentPosition();
     }
 
     /**
