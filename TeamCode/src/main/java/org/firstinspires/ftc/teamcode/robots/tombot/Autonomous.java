@@ -241,6 +241,15 @@ public class Autonomous {
             .addState(() -> (robot.rotateIMU(90, 4)))
             .build();
 
+    public StateMachine autoCalibrate = getStateMachine(autoStage)
+            .addState(() -> (robot.driveIMUDistance(1,0,true,1))) //forward to 2nd column of tiles
+            //.addState(() -> (robot.driveForward(true, 1, .40))) //forward to 2nd column of tiles
+            .build();
+    public StateMachine autoCalibrateForward = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true,1,1))) //forward to 2nd column of tiles
+            //.addState(() -> (robot.driveForward(true, 1, .40))) //forward to 2nd column of tiles
+            .build();
+
     public StateMachine walkOfShameBlue = getStateMachine(autoStage)
             //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))

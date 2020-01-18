@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.motors.RevRobotics40HdHexMotor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -85,7 +87,7 @@ public class PoseSkystone {
 
 
     //PID values
-    public static int forwardTPM = 1060; //todo - fix value this was based on icarus - measurement was for the original 42 tooth driven sprocket, since replaced by a 32 tooth sprocket
+    public static int forwardTPM = 1304;//todo- use drive IMU to get this perfect
     private int strafeTPM = 1909; //todo - fix value high priority this current value is based on Kraken - minimech will be different
     private double poseX;
     private double poseY;
@@ -512,36 +514,52 @@ public class PoseSkystone {
     /**
      * Drive with a set power for a set distance while maintaining an IMU heading using PID
      *
-     * @param Kp            proportional multiplier for PID
      * @param pwr           set the forward power
      * @param targetAngle   the heading the robot will try to maintain while driving
-     * @param forwardOrLeft is the robot driving in the forwards/left (positive) directions or backwards/right (negative) directions
+     * @param forward is the robot driving in the forwards/left (positive) directions or backwards/right (negative) directions
      * @param targetMeters  the target distance (in meters)
      */
-    public boolean driveIMUDistance(double Kp, double pwr, double targetAngle, boolean forwardOrLeft, double targetMeters) {
+    public boolean driveIMUDistance(double pwr, double targetAngle, boolean forward, double targetMeters) {
 
         //set what direction the robot is supposed to be moving in for the purpose of the field position calculator
-        if (!forwardOrLeft) {
+        if (!forward) {
             moveMode = moveMode.backward;
             targetMeters = -targetMeters;
             pwr = -pwr;
-        } else moveMode = moveMode.forward;
+        }
+        else moveMode = moveMode.forward;
 
         //calculates the target position of the drive motors
         long targetPos;
         targetPos = (long) (targetMeters * forwardTPM);
 
+        driveIMU(kpDrive, kiDrive, kdDrive, 0, targetAngle, false);
         //if this statement is true, then the robot has not achieved its target position
         if (Math.abs(targetPos) < Math.abs(getAverageTicks())) {
-            driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
-            return false;
-        }
+            //driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
 
-        //destination achieved
+            return false;
+        }//destination achieved
         else {
-            stopAll();
+//            stopAll();
+            driveMixerDiffSteer(0,0);
             return true;
         }
+
+
+//        long targetPos = (long)(targetMeters * forwardTPM);
+//        if(Math.abs(targetPos) > Math.abs(getAverageTicks())){//we've not arrived yet
+//            driveMixerDiffSteer(power,0);
+//            return false;
+//        }
+//        else { //destination achieved
+//            driveMixerDiffSteer(0,0);
+//            return true;
+//        }
+
+
+
+
     }
 
 

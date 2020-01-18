@@ -472,18 +472,10 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.walkOfShameBlue.execute()) active = false;
                         break;
                     case 5:
-                        if (auto.depotSide_deposit.execute()) active = false;
+                        if (auto.autoCalibrate.execute()) active = false;
                         break;
                     case 6:
-//                        if(driveStraight()) active = false;
-//                        if(toggleAllowed(gamepad1.right_bumper,right_bumper)){
-//                            robot.setForwardTPM(robot.getForwardTPM()+10);
-//                        }else if(toggleAllowed(gamepad1.left_bumper,left_bumper)){
-//                            robot.setForwardTPM(robot.getForwardTPM()-10);
-//                        }
-                        turnTest();
-
-
+                       if (auto.autoCalibrateForward.execute()) active = false;
                         break;
                     case 7:
                         tpmtuning();
@@ -587,6 +579,7 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.dpad_up,dpad_up,1)) {
             robot.crane.changeTowerHeight(1);
         }
+
         if(toggleAllowed(gamepad1.dpad_down,dpad_down,1)) {
             robot.crane.changeTowerHeight(-1);
         }
@@ -679,13 +672,12 @@ public class Skystone_6832 extends LinearOpMode {
         if(notdeadzone(gamepad2.left_trigger))
                 robot.turret.rotateLeft(gamepad2.left_trigger * 5);
 
-        if(notdeadzone(gamepad2.right_stick_x) )
-            robot.turret.rotateRight(gamepad2.right_stick_x * 5);
+//        if(notdeadzone(gamepad2.right_stick_x) )
+//            robot.turret.rotateRight(gamepad2.right_stick_x * 5);
 
         if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
                 robot.turret.rotateCardinal(true);
         }
-
         if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
             robot.turret.rotateCardinal(false);
         }
@@ -740,8 +732,8 @@ public class Skystone_6832 extends LinearOpMode {
         if (notdeadzone(gamepad2.right_stick_y)) {
             robot.crane.adjustBelt(-gamepad2.right_stick_y);
         }
-        if (notdeadzone(gamepad2.right_stick_x)) {
-            robot.turret.adjust(gamepad2.right_stick_x);
+        if (notdeadzone(gamepad2.left_stick_x)) {
+            robot.turret.adjust(gamepad2.left_stick_x);
         }
 
 
