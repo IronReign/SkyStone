@@ -109,6 +109,32 @@ public class Autonomous {
             .addState(() -> robot.crane.toggleGripper())
             .addMineralState(mineralStateProvider,
                     () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
+                    () -> true,
+                    () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+            .addState(() ->robot.crane.extendToPosition(2100,.7,90))
+            .addState(() ->robot.crane.setElbowTargetPos(40,.1))
+            .addState(() -> robot.crane.toggleGripper())
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
+            .addState(() ->robot.rotateIMU(75, 8))//todo- make this a curve instead of following the hypotenuse
+            .addState(() -> (robot.driveForward(true, 1.91008, .80)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(270,3);}) //gets the arm and the robot in their correct orientation for depositing
+            .addState(() -> (robot.driveForward(true, .01, .80)))//this and ^^^^ put the robot in front of the build plate
+            .addSingleState(() -> robot.crane.hookOn())
+
+
+            .build();
+
+    public StateMachine redAutoFullSecondary = getStateMachine(autoStage)
+            .addState(() -> (robot.driveForward(true, .05, .80)))
+//            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//            .addState(() -> sample())
+            .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
+            .addState(() -> robot.crane.toggleGripper())
+            .addMineralState(mineralStateProvider,
+                    () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
             () -> true,
             () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
             .addState(() ->robot.crane.extendToPosition(2100,.7,90))
@@ -242,11 +268,7 @@ public class Autonomous {
             .build();
 
     public StateMachine autoCalibrate = getStateMachine(autoStage)
-            .addState(() -> (robot.driveIMUDistance(1,0,true,1))) //forward to 2nd column of tiles
-            //.addState(() -> (robot.driveForward(true, 1, .40))) //forward to 2nd column of tiles
-            .build();
-    public StateMachine autoCalibrateForward = getStateMachine(autoStage)
-            .addState(() -> (robot.driveForward(true,1,1))) //forward to 2nd column of tiles
+            .addState(() -> (robot.driveIMUDistance(.2,0,true,2))) //forward to 2nd column of tiles
             //.addState(() -> (robot.driveForward(true, 1, .40))) //forward to 2nd column of tiles
             .build();
 

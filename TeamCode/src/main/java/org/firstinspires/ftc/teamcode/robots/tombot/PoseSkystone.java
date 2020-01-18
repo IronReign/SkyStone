@@ -533,11 +533,11 @@ public class PoseSkystone {
         long targetPos;
         targetPos = (long) (targetMeters * forwardTPM);
 
-        driveIMU(kpDrive, kiDrive, kdDrive, 0, targetAngle, false);
-        //if this statement is true, then the robot has not achieved its target position
-        if (Math.abs(targetPos) < Math.abs(getAverageTicks())) {
-            //driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
 
+        //if this statement is true, then the robot has not achieved its target position
+        if (Math.abs(targetPos) > Math.abs(getAverageTicks())) {
+            //driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
+            driveIMU(kpDrive, kiDrive, kdDrive, pwr, targetAngle, false);
             return false;
         }//destination achieved
         else {

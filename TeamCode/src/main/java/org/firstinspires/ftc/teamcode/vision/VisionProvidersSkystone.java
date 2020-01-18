@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode.vision;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.samples.ConceptVuforiaSkyStoneNavigationWebcam;
 
 public class VisionProvidersSkystone {
 
     private int posState;
-    ConceptVuforiaSkyStoneNavigationWebcam vs;
 
 
     public VisionProvidersSkystone() {
-        vs = new ConceptVuforiaSkyStoneNavigationWebcam();
-    }
+
 
     public void reset() {
     }

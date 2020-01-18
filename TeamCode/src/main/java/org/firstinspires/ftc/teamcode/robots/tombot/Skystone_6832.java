@@ -475,7 +475,7 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.autoCalibrate.execute()) active = false;
                         break;
                     case 6:
-                       if (auto.autoCalibrateForward.execute()) active = false;
+                       //if (auto.autoCalibrateForward.execute()) active = false;
                         break;
                     case 7:
                         tpmtuning();
