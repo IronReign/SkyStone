@@ -327,9 +327,10 @@ public class Skystone_6832 extends LinearOpMode {
 //
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
                     robot.setZeroHeading();
-                    robot.crane.setElbowTargetPos(154);
+                    robot.crane.setElbowTargetPos(354);
                     robot.crane.toggleSwivel();
                     robot.turret.rotateCardinal(false);
+                    robot.crane.setElbowTargetPos(154);
 
                 }
             }
@@ -364,9 +365,10 @@ public class Skystone_6832 extends LinearOpMode {
 
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
                     robot.setZeroHeading();
-                    robot.crane.setElbowTargetPos(154);
+                    robot.crane.setElbowTargetPos(354);
                     robot.crane.toggleSwivel();
                     robot.turret.rotateCardinal(true);
+                    robot.crane.setElbowTargetPos(154);
                 }
             }
 
@@ -472,10 +474,10 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.walkOfShameBlue.execute()) active = false;
                         break;
                     case 5:
-                        if (auto.autoCalibrate.execute()) active = false;
+                        if (auto.redAutoFullSecondary.execute()) active = false;
                         break;
                     case 6:
-                       //if (auto.autoCalibrateForward.execute()) active = false;
+                        if(auto.visionTest.execute()) active = false;
                         break;
                     case 7:
                         tpmtuning();
@@ -630,7 +632,7 @@ public class Skystone_6832 extends LinearOpMode {
         pwrDamper = .70;
 
 
-        robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot*pwrDamper);
+        robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot);
         //robot.driveDiffTankField(pwrFwdL*pwrDamper, pwrStfL*pwrDamper);
         //robot.driveMixerDiffSteer(0, pwrDamper*pwrStfR);
 /*
@@ -1051,7 +1053,9 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("state", () -> state)
                 .addData("autoStage", () -> auto.autoStage)
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
-                .addData("Articulation", () -> robot.getArticulation());
+                .addData("Articulation", () -> robot.getArticulation())
+                .addData("skystonePos: ", () -> robot.xPos);
+
         telemetry.addLine()
                 //.addData("elbowA", () -> robot.crane.isActive())
                 .addData("elbowC", () -> robot.crane.getElbowCurrentPos())

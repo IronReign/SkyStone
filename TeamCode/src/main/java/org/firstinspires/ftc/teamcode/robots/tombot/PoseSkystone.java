@@ -9,10 +9,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.vision.SkystonePos;
+import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
@@ -126,6 +132,11 @@ public class PoseSkystone {
 
 
     private int craneArticulation = 0;
+
+    //vision related
+    VisionProvidersSkystone vps;
+    public SkystonePos pos = SkystonePos.NONE_FOUND;
+    public double xPos = 0;
 
     public enum MoveMode {
         forward,
@@ -355,6 +366,13 @@ public class PoseSkystone {
         imu = hwMap.get(BNO055IMU.class, "baseIMU");
         imu.initialize(parametersIMU);
 
+        //initialize vision
+        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+        parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
+        vps = new VisionProvidersSkystone(ClassFactory.getInstance().createVuforia(parameters));
     }
 
     public void resetIMU() {
