@@ -1667,13 +1667,38 @@ public class PoseSkystone {
             radiusright= offset-wheelbase/2;
             arcleft = 2*Math.PI*radiusleft*angle/360;
             arcright = 2*Math.PI*radiusright*angle/360;
-            //if(Math.abs())
 
-            pivotTurnInitialized = true;
+            //the longest arc will be set to the speed and the shorter arc will be the relative fraction of that speed
+            //the goal is to get both motors to arrive at their destination position at the same time with constant speed
+            if(Math.abs(arcleft)>=Math.abs(arcright)){
+                speedleft = speed;
+                speedright = speed * arcright / arcleft; }
+            else {
+                speedright = speed;
+                speedleft = speed * arcleft / arcright; }
+
+
+        //set drive motors to run to position mode
+        motorBackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        motorBackRight.setTargetPosition((int)arcright);
+        motorBackLeft.setTargetPosition((int)arcleft);
+
+        //start movinvg
+        motorBackRight.setPower(speedleft);
+        motorBackLeft.setPower((speedright));
+
+        pivotTurnInitialized = true;
+
         }
 
-
-        return false;
+        if ((timelimit<futureTime(0)) &&((motorBackLeft.isBusy() || motorBackRight.isBusy()))) return false;
+        else
+        {
+            resetMotors(true);
+            return true;
+        }
 }
 
 
