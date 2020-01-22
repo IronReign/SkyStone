@@ -55,6 +55,8 @@ public class Turret{
     Orientation imuAngles;
     boolean maintainHeadingInit;
     private final double angleIncrement = 10;
+    private boolean isMaintainingHeading = true;
+
 
     public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
@@ -99,12 +101,12 @@ public class Turret{
         if (!initialized) {
             //first time in - we assume that the robot has not started moving and that orientation values are set to the current absolute orientation
             //so first set of imu readings are effectively offsets
-
             offsetHeading = wrapAngleMinus(360 - imuAngles.firstAngle, turretHeading);
             offsetRoll = wrapAngleMinus(imuAngles.secondAngle, turretRoll);
             offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, turretPitch);
             initialized = true;
         }
+
         turretHeading = wrapAngle((360-imuAngles.firstAngle), offsetHeading);
 
 
@@ -117,7 +119,9 @@ public class Turret{
 
 
         //experiment code
-        maintainHeadingTurret(true);
+        if(isMaintainingHeading)
+            maintainHeadingTurret(true);
+
     }
 
     public boolean isActive(){
@@ -140,6 +144,8 @@ public class Turret{
         setTurntableAngle(getHeading(), angleIncrement * speed);
 
     }
+
+    public void toggleMaintainHeading(boolean isMaintainingHeading){this.isMaintainingHeading =! isMaintainingHeading;}
 
     public void rotateLeft(double speed){
 
@@ -307,6 +313,11 @@ public class Turret{
             maintainHeadingInit = false;
             setPower(0);
         }
+    }
+
+    public boolean setOffsetHeading(double new0){
+        offsetHeading = new0;
+        return true;
     }
 
     public double getHeading(){

@@ -330,7 +330,7 @@ public class Skystone_6832 extends LinearOpMode {
                     robot.crane.setElbowTargetPos(354);
                     robot.crane.toggleSwivel();
                     robot.turret.rotateCardinal(false);
-                    robot.crane.setElbowTargetPos(154);
+                    //robot.crane.setElbowTargetPos(154);
 
                 }
             }
@@ -368,25 +368,25 @@ public class Skystone_6832 extends LinearOpMode {
                     robot.crane.setElbowTargetPos(354);
                     robot.crane.toggleSwivel();
                     robot.turret.rotateCardinal(true);
-                    robot.crane.setElbowTargetPos(154);
+                    //robot.crane.setElbowTargetPos(154);
                 }
             }
 
-            if (toggleAllowed(gamepad1.x, x,1   )) {
-                isHooked = !isHooked;
-                if (isHooked)
-                    robot.crane.hookOff();
-                else
-                    robot.crane.hookOn();
-            }
-
-            if (toggleAllowed(gamepad1.y, y,1)) {
-                auto.autoDelay++;
-                if (auto.autoDelay > 20) auto.autoDelay = 0;
-            }
-
-            if (toggleAllowed(gamepad1.left_stick_button, left_stick_button,1))
-                enableHookSensors = !enableHookSensors;
+//            if (toggleAllowed(gamepad1.x, x,1   )) {
+//                isHooked = !isHooked;
+//                if (isHooked)
+//                    robot.crane.hookOff();
+//                else
+//                    robot.crane.hookOn();
+//            }
+//
+//            if (toggleAllowed(gamepad1.y, y,1)) {
+//                auto.autoDelay++;
+//                if (auto.autoDelay > 20) auto.autoDelay = 0;
+//            }
+//
+//            if (toggleAllowed(gamepad1.left_stick_button, left_stick_button,1))
+//                enableHookSensors = !enableHookSensors;
 
             //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
                 //robot.crane.hookOn();
@@ -460,10 +460,10 @@ public class Skystone_6832 extends LinearOpMode {
                     case 0: //code for tele-op control
                         joystickDrive();
                         break;
-                    case 1: //autonomous that goes to opponent's crater
-                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
-                        break;
-                    case 2: //autonomous that only samples
+//                    case 1: //autonomous that goes to opponent's crater
+//                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
+//                        break;
+                    case 1: //autonomous that only samples
                         if (auto.redAutoFull.execute()) active = false;
                         //if (auto.walkOfShame.execute()) active = false;
                         break;
@@ -474,7 +474,7 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.walkOfShameBlue.execute()) active = false;
                         break;
                     case 5:
-                        if (auto.redAutoFullSecondary.execute()) active = false;
+                        if (auto.autoMethodTesterTool.execute()) active = false;
                         break;
                     case 6:
                         if(auto.visionTest.execute()) active = false;

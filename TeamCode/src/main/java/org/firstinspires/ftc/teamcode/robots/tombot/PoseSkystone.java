@@ -384,7 +384,6 @@ public class PoseSkystone {
 
         imu.initialize(parametersIMU);
     }
-
     public void resetEncoders() {
         crane.resetEncoders();
     }
