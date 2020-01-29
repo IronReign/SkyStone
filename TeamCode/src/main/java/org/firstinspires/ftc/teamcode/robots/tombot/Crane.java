@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
 /**
  * Created by 2938061 on 11/10/2017.
@@ -18,7 +19,7 @@ public class Crane {
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
-    Servo intakeServoFront = null;
+    Servo servoGripper = null;
     Servo intakeServoBack = null;
     Servo gripperSwivel = null;
 
@@ -39,8 +40,8 @@ public class Crane {
     public int motorUnhooked;
     public int motorMidHooked;
 
-    int servoGateOpen;
-    int servoGateClosed;
+    int servoGripperOpen;
+    int servoGripperClosed;
 
     public double intakePwr;
     //normal Teleop encoder values
@@ -108,7 +109,7 @@ public class Crane {
         return gripperState;
     }
 
-    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront, Servo intakeServoBack, Servo gripperSwivel){
+    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo servoGripper, Servo intakeServoBack, Servo gripperSwivel){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
@@ -124,7 +125,7 @@ public class Crane {
         this.elbow = elbow;
         this.extendABob = extendABob;
         this.hook = hook;
-        this.intakeServoFront = intakeServoFront;
+        this.servoGripper = servoGripper;
         this.intakeServoBack = intakeServoBack;
         this.gripperSwivel = gripperSwivel;
         intakeServoBack.setDirection(Servo.Direction.REVERSE);
@@ -151,8 +152,8 @@ public class Crane {
         pos_latched = 2764;
         pos_postlatch = 1240;
 
-        servoGateOpen = 1350;
-        servoGateClosed = 800;
+        servoGripperOpen = 1350;
+        servoGripperClosed = 800;
 
         motorHooked = 120;
         motorUnhooked = 5;
@@ -173,62 +174,6 @@ public class Crane {
         extendMin = 300;  //prevent crunching collector tray
         gripperState = false;
     }
-//
-//    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo intakeServoFront){
-//
-//        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        elbow.setTargetPosition(elbow.getCurrentPosition());
-//        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
-//
-//        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        extendABob.setTargetPosition(extendABob.getCurrentPosition());
-//        extendABob.setDirection(DcMotorSimple.Direction.REVERSE);
-//        //extendABobRight.setDirection(DcMotorSimple.Direction.REVERSE);
-//
-//        //intakeGate.setDirection(Servo.Direction.REVERSE);
-//
-//        this.elbow = elbow;
-//        this.extendABob = extendABob;
-//        this.hook = hook;
-//        this.intakeServoFront = intakeServoFront;
-//        intakeServoBack.setDirection(Servo.Direction.REVERSE);
-//
-//        intakePwr = .3; //.35;
-//        //normal Teleop encoder values
-//        pos_preIntake = 3600;
-//        pos_Intake   = 3900;
-//        pos_Deposit  = 1520;
-//        pos_reverseIntake = 1407;
-//        pos_reversePreDeposit=1408;
-//        pos_reverseDeposit = 3400;
-//        pos_reverseSafeDrive = 1000;
-//        pos_PartialDeposit = 1700;
-//        pos_SafeDrive = 800;
-//
-//        //autonomous encoder values
-//        pos_AutoPark = pos_SafeDrive + 500;
-//        pos_autonPrelatch = 2950;
-//
-//        //end game encoder values
-//        pos_prelatch = 2000;
-//        pos_latched = 2764;
-//        pos_postlatch = 1240;
-//
-//        servoGateOpen = 2200;
-//        servoGateClosed = 900;
-//
-//        motorHooked = 1800;
-//        motorUnhooked = 1300;
-//
-//        //belt extension encoder values
-//        extendDeposit = 1489;
-//        extendMax = 2960;
-//        extendMid= 980;
-//        extendLow = 650; //clears hook and good for retracting prior to deposit without tipping robot
-//        extendMin = 300;  //prevent crunching collector tray
-//    }
 
 
     public void update(){
@@ -242,7 +187,7 @@ public class Crane {
             extendABob.setTargetPosition(extendABobPos);
             extendABob.setPower(extendABobPwr);
         }
-        updateIntake();
+        updateGripper();
         updateBeltToElbow();
     }
 
@@ -268,7 +213,7 @@ public class Crane {
         return (int)(2.0/9 * ((belt+offset)-620)) ;
     }
 
-    public void updateIntake() {
+    public void updateGripper() {
         if(gripperState == false)
             grabStone();
         else
@@ -297,9 +242,6 @@ public class Crane {
         setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
         setExtendABobLengthMeters(hypotenuse-.3683);
     }
-
-
-
 
     public void hookOn(){
 
@@ -351,27 +293,26 @@ public class Crane {
     }
 
     public boolean grabStone(){
-        intakeServoFront.setPosition(servoNormalize(servoGateClosed));
-        //intakeServoBack.setPosition(servoNormalize(servoGateOpen));
+        servoGripper.setPosition(servoNormalize(servoGripperClosed));
+
         //gripperState = 1;
         return true;
     }
     public boolean ejectStone(){
-        intakeServoFront.setPosition(servoNormalize(servoGateOpen));
-        //intakeServoBack.setPosition(servoNormalize(servoGateClosed));
+        servoGripper.setPosition(servoNormalize(servoGripperOpen));
         //gripperState = 2;
         return true;
     }
-    public boolean setIntakePos(boolean open){
+    public boolean setGripperPos(boolean open){
         if(open)
-            intakeServoFront.setPosition(servoNormalize(servoGateOpen));
+            servoGripper.setPosition(servoNormalize(servoGripperOpen));
         else
-            intakeServoFront.setPosition(servoNormalize(servoGateClosed));
+            servoGripper.setPosition(servoNormalize(servoGripperClosed));
         return true;
     }
     public void stopGripper() {
-        intakeServoFront.setPosition(servoNormalize(1500));
-        //intakeServoBack.setPosition(servoNormalize(1500));
+        servoGripper.setPosition(servoNormalize(1500));
+
         //gripperState = 0;
     }
 
@@ -583,9 +524,6 @@ public class Crane {
         setElbowTargetPos((int)(angle * ticksPerDegree));
     }//untested
 
-    public static double servoNormalize(int pulse){
-        double normalized = (double)pulse;
-        return (normalized - 750.0) / 1500.0; //convert mr servo controller pulse width to double on _0 - 1 scale
-    }
+
 }
 

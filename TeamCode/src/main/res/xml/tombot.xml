@@ -7,7 +7,7 @@
 			<RevRobotics40HDHexMotor name="turret" port="0" />
 
 
-			<Servo name="intakeServoFront" port="0" />
+			<Servo name="servoGripper" port="0" />
 			<Servo name="intakeServoBack" port="2" />
 			<Servo name="gripperSwivel" port="1" />
 			<Servo name="blinkin" port="4" />

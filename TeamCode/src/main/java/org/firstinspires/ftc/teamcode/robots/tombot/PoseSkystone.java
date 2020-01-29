@@ -303,7 +303,7 @@ public class PoseSkystone {
         this.extender = this.hwMap.dcMotor.get("extender");
 
 
-        this.intakeServoFront = this.hwMap.servo.get("intakeServoFront");
+        this.intakeServoFront = this.hwMap.servo.get("servoGripper");
         this.intakeServoBack = this.hwMap.servo.get("intakeServoBack");
         this.gripperSwivel = this.hwMap.servo.get("gripperSwivel");
 
