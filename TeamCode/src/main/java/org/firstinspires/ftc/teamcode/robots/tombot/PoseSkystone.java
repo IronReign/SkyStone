@@ -869,9 +869,12 @@ public class PoseSkystone {
         switch(calibrateStage)
         {
             case 0:
-                crane.toggleSwivel();
-                miniTimer = futureTime(1);
-                calibrateStage++;
+
+                //calibrate the elbow and arm
+                if (crane.calibrate()) {
+                    miniTimer = futureTime(1);
+                    calibrateStage++;
+                }
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {

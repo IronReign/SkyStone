@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
 /**
@@ -75,6 +77,10 @@ public class Crane {
     public int autodepotthingy=350;
 
     //.374
+
+    //elbow safety limits
+    public int elbowMin = 0;
+    public int elbowMax = 300; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
 
     //belt extension encoder values
     public  int extendDeposit;
@@ -320,17 +326,63 @@ public class Crane {
 
     }
 
-    public void setMotorsForCalibration(boolean isOn){
-        if(isOn) {
+    //this is a behavior to calibrate the crane including the elbow, arm and gripper
+    //keep calling until it returns true
+    //arm should be pointed mostly up and mostly retracted
+    //first raise the elbow on low power so it stalls on physical limit of hitting the extension motor shaft
+    //must be run without encoders so power won't ramp up
+    //retract the arm (extendabob) until it stops on low power - this will be its zero position
+
+    int calibrateStage;
+    double calibrateTimer;
+
+    public boolean calibrate(){
+
+        switch(calibrateStage){
+            case 0:
+                setMotorsForCalibration();
+
+                elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                elbow.setPower(.10);
+                extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                extendABob.setPower(-.10); //retract to zero position
+                calibrateTimer = futureTime(4.0f); //allow enough time for elbow to open fully and arm to retract
+                calibrateStage++;
+                break;
+            case 1:
+                if (System.nanoTime() >= calibrateTimer){
+                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
+                    extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extendToMin(); //push out to the minimum extension - this will need to be pulled back to zero for starting position
+
+                    elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
+                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    //elbow.setTargetPosition(-elbowMax); //normally we set the target through a method, but we have to override the safety here
+                    elbowPos=-elbowMax; //set target explicitly
+                    elbow.setPower(.3); //set speed explicitly
+                    calibrateTimer = futureTime(3.0f); //allow enough time for elbow to close fully
+                    calibrateStage++;
+
+                }
+                break;
+            case 2:
+                if (System.nanoTime() >= calibrateTimer) {
+                    elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
+                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    elbow.setTargetPosition(elbowMin); //this should not generate a movement
+                    return true;
+                }
+                break;
+        }
+
+
+        return false;
+    }
+
+    public void setMotorsForCalibration(){
+
             elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            ///extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        else{
-            elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            //extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
+            extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public boolean toggleGripper() {
@@ -370,6 +422,7 @@ public class Crane {
     public void setExtendABobPwr(double pwr){ extendABobPwr = pwr; }
 
     public void setElbowTargetPos(int pos){
+        if (pos>=elbowMin && pos<=elbowMax)
         elbowPos = pos;
     }
     public boolean setElbowTargetPos(int pos, double speed){
