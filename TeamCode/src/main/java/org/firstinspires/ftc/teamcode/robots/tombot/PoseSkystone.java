@@ -634,7 +634,7 @@ public class PoseSkystone {
 
         switch (articulation) {
             case calibrate:
-                calibrate();
+                if (calibrate()) articulation = Articulation.manual;
                 break;
             case manual:
                 break; //do nothing here - likely we are directly overriding articulations in game

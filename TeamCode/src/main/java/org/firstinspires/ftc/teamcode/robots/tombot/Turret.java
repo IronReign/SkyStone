@@ -136,7 +136,7 @@ public class Turret{
             motor.setPower(0);
     }
     public void adjust(double speed) {
-        setTurntableAngle(getHeading(), 10.0 * speed);
+        setTurntableAngle(getHeading(), 5.0 * speed);
     }
 
     public void rotateRight(double speed){

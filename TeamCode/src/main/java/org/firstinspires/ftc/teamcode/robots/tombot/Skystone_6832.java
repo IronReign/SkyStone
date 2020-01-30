@@ -326,11 +326,12 @@ public class Skystone_6832 extends LinearOpMode {
 //                }
 //
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-                    robot.setZeroHeading();
-                    robot.crane.setElbowTargetPos(354);
-                    robot.crane.toggleSwivel();
-                    robot.turret.rotateCardinal(false);
+//                    robot.setZeroHeading();
+//                    robot.crane.setElbowTargetPos(354);
+//                    robot.crane.toggleSwivel();
+//                    robot.turret.rotateCardinal(false);
                     //robot.crane.setElbowTargetPos(154);
+                    robot.articulate(PoseSkystone.Articulation.calibrate);
 
                 }
             }
@@ -734,8 +735,8 @@ public class Skystone_6832 extends LinearOpMode {
         if (notdeadzone(gamepad2.right_stick_y)) {
             robot.crane.adjustBelt(-gamepad2.right_stick_y);
         }
-        if (notdeadzone(gamepad2.left_stick_x)) {
-            robot.turret.adjust(gamepad2.left_stick_x);
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad2.right_stick_x);
         }
 
 
