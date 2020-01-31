@@ -80,8 +80,8 @@ public class Crane {
 
     //elbow safety limits
     public int elbowMin = 0;
-    public int elbowStart = 160; //put arm just under 18" from ground
-    public int elbowMax = 1250; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int elbowStart = 180; //put arm just under 18" from ground
+    public int elbowMax = 1270; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
 
     //belt extension encoder values
     public  int extendDeposit;
@@ -92,8 +92,8 @@ public class Crane {
     public  int extendPreLatch = extendMax;
 
     //foundation hook servo values
-    public int foundation_hook_open = 850;
-    public int foundation_hook_closed = 2100;
+    public int foundation_hook_open = 1740;
+    public int foundation_hook_closed = 2200;
 
     public int stow = 650;
 
@@ -360,7 +360,7 @@ public class Crane {
                     //elbow.setTargetPosition(-elbowMax); //normally we set the target through a method, but we have to override the safety here
                     elbowPos=-elbowMax; //set target explicitly
                     elbow.setPower(.3); //set speed explicitly
-                    calibrateTimer = futureTime(3.0f); //allow enough time for elbow to close fully
+                    calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
                     calibrateStage++;
 
                 }
@@ -370,7 +370,7 @@ public class Crane {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     elbow.setTargetPosition(elbowMin); //this should not generate a movement
-                    calibrateTimer = futureTime(3.0f); //allow enough time for elbow to close fully
+                    calibrateTimer = futureTime(1f); //allow enough time to raise to starting position
                     calibrateStage++;
                 }
                 break;
@@ -378,10 +378,30 @@ public class Crane {
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setTargetPosition(elbowStart);
                     extendToPosition(0,.2,15);
+                    calibrateTimer = futureTime(1.0f); //enough time for next stage - retract egain
+                    calibrateStage++;
+
+                }
+                break;
+            case 4: //one more retract of extension
+                if (System.nanoTime() >= calibrateTimer) {
+                    extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    extendABob.setPower(-.20); //retract to zero position
+                    calibrateTimer = futureTime(1.0f); //allow enough time for next stage
+                    calibrateStage++;
+                }
+                break;
+
+            case 5: //final zero of extension
+                if (System.nanoTime() >= calibrateTimer) {
+                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
+                    extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     calibrateStage = 0;
                     return true;
                 }
                 break;
+
+
         }
 
 

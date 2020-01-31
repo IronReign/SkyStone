@@ -872,7 +872,7 @@ public class PoseSkystone {
 
                 //calibrate the elbow and arm
                 if (crane.calibrate()) {
-                    miniTimer = futureTime(1);
+                    //miniTimer = futureTime(1);
                     calibrateStage++;
                 }
                 break;
@@ -880,16 +880,24 @@ public class PoseSkystone {
                 if (System.nanoTime() >= miniTimer) {
                     resetEncoders();
                     setZeroHeading();
-                    turret.rotateCardinal(false);
-                    miniTimer = futureTime(3);
+                    //if(rotateIMU(270,7))
+                    //
+                    miniTimer = futureTime(1f);
                     calibrateStage++;
                 }
                 break;
             case 2:
-                turret.setTurntableAngle(90.0);
-                calibrateStage = 0;
-
-                return true;
+                if(System.nanoTime() > miniTimer) {
+                    if(turret.rotateIMUTurret(270.0, 2))
+                    calibrateStage++;
+                }
+                break;
+            case 3:
+                if(driveIMUDistance(.3,270,false,.5)) {
+                    calibrateStage = 0;
+                    return true;
+                }
+                break;
         }
             return false;
 }

@@ -303,7 +303,7 @@ public class Skystone_6832 extends LinearOpMode {
             //reset the elbow, lift and supermanLeft motors - operator must make sure robot is in the stowed position, flat on the ground
             if (toggleAllowed(gamepad1.b, b,1)) {
 //                robot.crane.toggleSwivel();
-//                robot.setIsBlue(false);
+                robot.setIsBlue(false);
 //                robot.setAutonomousIMUOffset(0); //against lander
 //
 //                if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
@@ -333,6 +333,12 @@ public class Skystone_6832 extends LinearOpMode {
                     //robot.crane.setElbowTargetPos(154);
                     robot.articulate(PoseSkystone.Articulation.calibrate);
 
+//                    robot.crane.setElbowTargetPos(354);
+//                    robot.rotateIMU(270,3);
+//                    robot.turret.rotateCardinal(false);
+//                    robot.driveIMUDistance(.01,270,false,.1);
+
+
                 }
             }
 
@@ -342,7 +348,7 @@ public class Skystone_6832 extends LinearOpMode {
 //                switch(setupStage){
 //                    case 0:
 //                        robot.setAutonomousIMUOffset(0); //against lander
-//                        robot.setIsBlue(true);
+                        robot.setIsBlue(true);
 //                        if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
 //                            robot.crane.setMotorsForCalibration(true);
 //                            robot.setZeroHeading();

@@ -243,12 +243,11 @@ public class Autonomous {
             .build();
 
     public StateMachine walkOfShameRed = getStateMachine(autoStage)
-            //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
-            .addState(() -> (robot.rotateIMU(90, 4)))
+            .addState(() -> (robot.rotateIMU(270, 3)))
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage)
-            .addState(() -> (robot.turret.setOffsetHeading(90.0)))
+            //.addState(() -> (robot.turret.setOffsetHeading(90.0)))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .build();
 
