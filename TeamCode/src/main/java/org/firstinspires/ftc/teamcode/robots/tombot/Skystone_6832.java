@@ -44,6 +44,7 @@ import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
+import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
 
 /**
@@ -372,9 +373,9 @@ public class Skystone_6832 extends LinearOpMode {
 
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
                     robot.setZeroHeading();
-                    robot.crane.setElbowTargetPos(354);
-                    robot.crane.toggleSwivel();
-                    robot.turret.rotateCardinal(true);
+                    //robot.crane.setElbowTargetPos(354);
+                    //robot.crane.toggleSwivel();
+                    //robot.turret.rotateCardinal(true);
                     //robot.crane.setElbowTargetPos(154);
                 }
             }
@@ -696,6 +697,7 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.b,b,1)){
             robot.crane.setElbowTargetPos(250);
             robot.crane.extendToPosition(1500,1.0,20);
+            //robot.crane.servoGripper.setPosition(servoNormalize(2200));
         }
         if(toggleAllowed(gamepad1.a,a,1)){
 //            if(robot.crane.getCurrentAngle() < 20)
@@ -704,7 +706,10 @@ public class Skystone_6832 extends LinearOpMode {
                 robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
         if(toggleAllowed(gamepad1.y,y,1)){
-            robot.crane.toggleGripper();
+       robot.crane.toggleGripper();
+            //robot.crane.servoGripper.setPosition(servoNormalize(1500));
+
+
         }
         if(toggleAllowed(gamepad2.y,y,2)) {
             robot.crane.changeTowerHeight(1);
@@ -728,10 +733,15 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.toggleGripper();
         }
         if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
-            robot.crane.hookOn();
+            robot.crane.setElbowTargetPos(250);
+            robot.crane.extendToPosition(2500,1.0,20);
         }
         if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
-            robot.crane.hookOff();
+            robot.crane.setElbowTargetPos(250);
+            robot.crane.extendToPosition(1500,1.0,20);
+        }
+        if(toggleAllowed(gamepad2.dpad_left,dpad_left,2)){
+            robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
 
         if (notdeadzone(gamepad2.left_stick_y)) {

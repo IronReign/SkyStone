@@ -38,7 +38,7 @@ public class Turret{
     //PID
     PIDController turretPID;
     private double kpTurret = 0.04; //proportional constant multiplier
-    private double kiTurret = 0.025; //integral constant multiplier
+    private double kiTurret = 0.0; //integral constant multiplier
     private double kdTurret= 0.01; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
@@ -136,7 +136,7 @@ public class Turret{
             motor.setPower(0);
     }
     public void adjust(double speed) {
-        setTurntableAngle(getHeading(), 5.0 * speed);
+        setTurntableAngle(getHeading(), 7.0 * speed);
     }
 
     public void rotateRight(double speed){
@@ -231,6 +231,10 @@ public class Turret{
         targetRotationTicks = 0;
         motorPwr = safeTurn;
     }
+
+//    public boolean calibrate(){
+//        if ()
+//    }
 
     public void resetEncoder() {
         //just encoders - only safe to call if we know collector is in normal starting position

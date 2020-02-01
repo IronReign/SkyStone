@@ -81,7 +81,7 @@ public class Crane {
     //elbow safety limits
     public int elbowMin = 0;
     public int elbowStart = 180; //put arm just under 18" from ground
-    public int elbowMax = 1270; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int elbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
 
     //belt extension encoder values
     public  int extendDeposit;
@@ -219,11 +219,24 @@ public class Crane {
         return (int)(2.0/9 * ((belt+offset)-620)) ;
     }
 
+    int grabState = 0;
+    double grabTimer;
+
     public void updateGripper() {
-        if(gripperState == false)
-            grabStone();
-        else
-            ejectStone();
+        switch(grabState){
+            case 0:
+                servoGripper.setPosition(servoNormalize(2200));
+                grabTimer = futureTime(1);
+                grabState++;
+
+            case 1:
+                if (System.nanoTime() >= grabTimer) {
+                    servoGripper.setPosition(servoNormalize(1500));
+                    grabState++;
+                }
+                break;
+        }
+
     }
 
     public void changeTowerHeight(int newHeightAddition){
@@ -415,14 +428,8 @@ public class Crane {
     }
 
     public boolean toggleGripper() {
-        if(gripperState == false) {
-            gripperState =true;
-            return true;
-        }
-        else {
-            gripperState = false;
-            return true;
-        }
+        grabState = 0;
+        return true;
     }
 
 
@@ -461,8 +468,9 @@ public class Crane {
         else return false;
     }
 
-    public void setElbowTargetAngle(double angleDegrees){
+    public boolean setElbowTargetAngle(double angleDegrees){
         elbowPos =(int) (ticksPerDegree* angleDegrees);
+        return true;
     }
     public int getElbowTargetPos(){
         return elbowPos;

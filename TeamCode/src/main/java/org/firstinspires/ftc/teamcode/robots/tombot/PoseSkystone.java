@@ -159,6 +159,9 @@ public class PoseSkystone {
         bridgeTransit,
         extendToTowerHeightArticulation,
         retractFromTower,
+        shootOut,
+        shootOutII,
+        recockGripper,
         deploying, //auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
         deployed, //auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
         reversedeploying,
@@ -656,6 +659,21 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case shootOut:
+                if (shootOut()) {
+                    articulation = Articulation.manual;
+                }
+                break;
+            case shootOutII:
+                if (shootOutPartII()) {
+                    articulation = Articulation.manual;
+                }
+                break;
+            case recockGripper:
+                if (recockStoneGrabber()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case retractFromTower:
                 retractFromTower();
                 break;
@@ -872,6 +890,8 @@ public class PoseSkystone {
 
                 //calibrate the elbow and arm
                 if (crane.calibrate()) {
+                    crane.toggleSwivel();
+                    crane.toggleSwivel();
                     //miniTimer = futureTime(1);
                     calibrateStage++;
                 }
@@ -885,15 +905,17 @@ public class PoseSkystone {
                     miniTimer = futureTime(1f);
                     calibrateStage++;
                 }
-                break;
-            case 2:
+                break;//ur mom gae lol
+            case 2://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
                 if(System.nanoTime() > miniTimer) {
                     if(turret.rotateIMUTurret(270.0, 2))
                     calibrateStage++;
                 }
                 break;
             case 3:
-                if(driveIMUDistance(.3,270,false,.5)) {
+                if(driveIMUDistance(.2,270,false,.2)) {
+                    driveIMUDistance(.2,270,false,.1);
+                    crane.toggleSwivel();
                     calibrateStage = 0;
                     return true;
                 }
@@ -902,7 +924,24 @@ public class PoseSkystone {
             return false;
 }
 
-
+    int grabState = 0;
+    double grabTimer;
+    public boolean recockStoneGrabber(){
+        switch(grabState){
+            case 0:
+                crane.servoGripper.setPosition(2200);
+                grabTimer = futureTime(3);
+                grabState++;
+            case 1:
+                if (System.nanoTime() >= grabTimer) {
+                    crane.servoGripper.setPosition(1500);
+                    grabState = 0;
+                    return true;
+                }
+                break;
+                }
+        return false;
+}
 
 
 //todo these need to be tested - those that are used in articulate() have probably been fixed up by now
@@ -922,7 +961,7 @@ public class PoseSkystone {
                 }
                 break;
             case 2:
-                crane.setElbowTargetPos(80, 1);
+                crane.setElbowTargetPos(70, 1);
                 craneArticulation=0;
 
                 return true;
@@ -943,19 +982,65 @@ public class PoseSkystone {
         return true;
     }
 
+    int shootStage = 0;
+    public boolean shootOut() {
+        switch (shootStage) {
+            case 0:
+                if(crane.setElbowTargetAngle(30)) {
+                    miniTimer = futureTime(1);
+                    shootStage++;
+                }
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    crane.setExtendABobLengthMeters(3.28);
+                    shootStage++;
+                }
+                break;
+            case 2:
+                shootStage = 0;
+                return true;
+
+        }
+        return false;
+    }
+
+    int shootStagePtII = 0;
+    public boolean shootOutPartII() {
+        switch (shootStage) {
+            case 0:
+                if(crane.setElbowTargetAngle(30)) {
+                    miniTimer = futureTime(1);
+                    shootStage++;
+                }
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    crane.setExtendABobLengthMeters(6.56);
+                    shootStage++;
+                }
+                break;
+            case 2:
+                shootStage = 0;
+                return true;
+
+        }
+        return false;
+    }
+
     int miniStateRetTow = 0;
    double retractTimer;
     public boolean retractFromTower(){
         switch(miniStateRetTow) {
             case (0):
                 //crane.toggleGripper();
-                retractTimer = futureTime(1);
+                retractTimer = futureTime(0);
                 miniStateRetTow++;
                 break;
             case (1):
 
                 if (System.nanoTime() >= retractTimer) {
-                    retractTimer = futureTime(1);
+                    retractTimer = futureTime(.5f);
                     crane.setElbowTargetAngle(crane.getCurrentAngle() + 15);
                     miniStateRetTow++;
                 }
