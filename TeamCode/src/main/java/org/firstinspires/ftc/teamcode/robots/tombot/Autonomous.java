@@ -63,47 +63,46 @@ public class Autonomous {
 //
     }
 
-    public StateMachine visionTest = getStateMachine(autoStage)
-            .addState(() -> {
-             robot.xPos = robot.vps.detect();
-             return false;
-            })
-            .build();
+//    public StateMachine visionTest = getStateMachine(autoStage)
+//            .addState(() -> {
+//             robot.xPos = robot.vps.detect();
+//             return false;
+//            })
+//            .build();
 
 
 
     public StateMachine redAutoFull = getStateMachine(autoStage)
-            //.addState(() -> (robot.driveForward(true, .05, .80)))
-//            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            .addState(() -> robot.crane.toggleGripper())
+            .addState(() -> robot.crane.setGripperSwivelRotation(1600))
 //            .addState(() -> sample())
             .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
-            .addState(() -> robot.crane.toggleGripper())
             .addMineralState(mineralStateProvider,
                     () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
                     () -> true,
                     () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
-            .addState(() ->robot.crane.extendToPosition(2100,.7,90))
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1))
-            .addState(() -> robot.crane.toggleGripper())
-            .addTimedState(.1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() ->robot.crane.extendToPosition(2160,.7,90))
+            .addState(() ->robot.crane.setElbowTargetPos(40,.3))
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             //.addTimedState(6f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
             //.addState(() -> robot.turret.setOffsetHeading(90.0))
 
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
+            //.addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
             //.addState(() ->robot.rotateIMU(217, 9))//todo- make this a curve instead of following the hypotenuse
-            .addState(() -> (robot.driveIMUDistance(.4,0,true,1.91008)))//this and ^^^^ put the robot in front of the build plate
-            .addState(() ->{robot.turret.rotateIMUTurret(270,6); return robot.rotateIMU(270,6);}) //gets the arm and the robot in their correct orientation for depositing
-            .addState(() -> (robot.driveForward(true, .001, .30)))//this and ^^^^ put the robot in front of the build plate
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+
+            .addState(() -> (robot.driveIMUDistance(.6,90,true,1.91008)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.crane.setElbowTargetPos(100,.8)))
+            .addState(() ->{robot.turret.rotateIMUTurret(90,6); return robot.rotateIMU(90,6);}) //gets the arm and the robot in their correct orientation for depositing
+            .addState(() -> (robot.driveForward(true, .01, .30)))//this and ^^^^ put the robot in front of the build plate
             .addSingleState(() -> robot.crane.hookOn())
-            .addTimedState(5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
-            .addSimultaneousStates(()->{robot.turret.rotateIMUTurret(270,10); return robot.driveForward(false,.1,1);})
-            .addState(() -> (robot.driveForward(true, 1, .30)))//this and ^^^^ put the robot in front of the build plate
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
+            .addSimultaneousStates(()->{robot.turret.rotateIMUTurret(270,20); return robot.driveForward(false,.1,1);})
             .addSingleState(() -> robot.crane.hookOff())
-
-
-
-
+            .addState(() -> (robot.driveForward(true, 1, .30)))//this and ^^^^ put the robot in front of the build plate
             .build();
 
 
@@ -247,13 +246,12 @@ public class Autonomous {
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage)
-            //.addState(() -> (robot.turret.setOffsetHeading(90.0)))
-            .addState(() -> (robot.driveIMUDistance(.4,0,true,1.91008)))
+            .addState(() -> (robot.driveIMUDistance(.1,0,true,1)))
             .build();
 
     public StateMachine walkOfShameBlue = getStateMachine(autoStage)
             //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            .addState(() ->robot.crane.setElbowTargetPos(-10,1))
             .addState(() -> (robot.rotateIMU(90, 4)))
             .build();
 
