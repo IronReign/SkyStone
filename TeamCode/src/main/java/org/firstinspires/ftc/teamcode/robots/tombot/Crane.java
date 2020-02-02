@@ -79,7 +79,7 @@ public class Crane {
     //.374
 
     //elbow safety limits
-    public int elbowMin = 0;
+    public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
     public int elbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
 
@@ -176,7 +176,7 @@ public class Crane {
         extendDeposit = 1489;
         extendMax = 2960;
         extendMid= 980;
-        extendLow = 300; //clears foundation grabber at all times
+        extendLow = 600; //clears foundation grabber at all times
         extendMin = 200;  //prevent crunching foundation grabber
         gripperState = false;
     }
@@ -219,15 +219,18 @@ public class Crane {
         return (int)(2.0/9 * ((belt+offset)-620)) ;
     }
 
-    int grabState = 0;
+    int grabState = 2;
     double grabTimer;
 
     public void updateGripper() {
         switch(grabState){
             case 0:
                 servoGripper.setPosition(servoNormalize(2200));
-                grabTimer = futureTime(1);
-                grabState++;
+                //if(setElbowTargetPos(elbow.getCurrentPosition(),.2)) {
+                    grabTimer = futureTime(1);
+                    grabState++;
+                //}
+                break;
 
             case 1:
                 if (System.nanoTime() >= grabTimer) {
@@ -354,7 +357,6 @@ public class Crane {
         switch(calibrateStage){
             case 0:
                 setMotorsForCalibration();
-
                 elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 elbow.setPower(.15);
                 extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -371,6 +373,9 @@ public class Crane {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     //elbow.setTargetPosition(-elbowMax); //normally we set the target through a method, but we have to override the safety here
+                    //extendToPosition(100,.2,15);
+                    toggleSwivel();
+                    toggleSwivel();
                     elbowPos=-elbowMax; //set target explicitly
                     elbow.setPower(.3); //set speed explicitly
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
@@ -390,8 +395,8 @@ public class Crane {
             case 3: //reset elbow and arm to starting position
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setTargetPosition(elbowStart);
-                    extendToPosition(0,.2,15);
-                    calibrateTimer = futureTime(1.0f); //enough time for next stage - retract egain
+                    extendToPosition(0,.6,15);
+                    calibrateTimer = futureTime(4.0f); //enough time for next stage - retract egain
                     calibrateStage++;
 
                 }
@@ -591,7 +596,12 @@ public class Crane {
     }
 
     public void adjustElbowAngle(double speed){
-        setElbowTargetPos(Math.max(getElbowCurrentPos() + (int)(200 * speed), 0));
+        if(extendABob.getCurrentPosition() > 600 && speed < 0 && elbow.getCurrentPosition() > 200)
+            speed *= .8;
+        if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 200)
+            speed *= .5;
+        setElbowTargetPos(Math.max(getElbowCurrentPos() + (int)(200 * speed), elbowMin));
+
 
     }
     public void decreaseElbowAngle(){

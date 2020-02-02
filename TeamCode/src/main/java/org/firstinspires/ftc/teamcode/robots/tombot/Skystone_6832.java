@@ -372,7 +372,8 @@ public class Skystone_6832 extends LinearOpMode {
                 //robot.crane.toggleGripper();
 
                 if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-                    robot.setZeroHeading();
+                    robot.articulate(PoseSkystone.Articulation.calibrateBlue);
+
                     //robot.crane.setElbowTargetPos(354);
                     //robot.crane.toggleSwivel();
                     //robot.turret.rotateCardinal(true);
@@ -400,6 +401,8 @@ public class Skystone_6832 extends LinearOpMode {
                 //robot.crane.hookOn();
             //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
                 //robot.crane.hookOff();
+
+
 
             if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left,1)) {
                 auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; //switch vision provider
@@ -485,7 +488,7 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.autoMethodTesterTool.execute()) active = false;
                         break;
                     case 6:
-                        if(auto.visionTest.execute()) active = false;
+//                        if(auto.visionTest.execute()) active = false;
                         break;
                     case 7:
                         tpmtuning();
@@ -745,7 +748,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
+            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y); //
         }
 
         if (notdeadzone(gamepad2.right_stick_y)) {
@@ -1070,8 +1073,8 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("state", () -> state)
                 .addData("autoStage", () -> auto.autoStage)
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
-                .addData("Articulation", () -> robot.getArticulation())
-                .addData("skystonePos: ", () -> robot.xPos);
+                .addData("Articulation", () -> robot.getArticulation());
+                //.addData("skystonePos: ", () -> robot.xPos);
 
         telemetry.addLine()
                 //.addData("elbowA", () -> robot.crane.isActive())

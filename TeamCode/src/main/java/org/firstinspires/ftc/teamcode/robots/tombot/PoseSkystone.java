@@ -19,6 +19,8 @@ import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystonePos;
 import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
@@ -43,7 +45,7 @@ public class PoseSkystone {
     PIDController drivePID = new PIDController(0, 0, 0);
 
     public double kpDrive = 0.01; //proportional constant multiplier
-    public double kiDrive = 0.000; //integral constant multiplier
+    public double kiDrive = 0.001; //integral constant multiplier
     public double kdDrive = 0.001; //derivative constant multiplier
 
 
@@ -81,6 +83,7 @@ public class PoseSkystone {
     DistanceSensor distForward;
     DistanceSensor distLeft;
     DistanceSensor distRight;
+    //DigitalChannel magSensor;
 
     //drive train power values
     private double powerLeft = 0;
@@ -134,9 +137,9 @@ public class PoseSkystone {
     private int craneArticulation = 0;
 
     //vision related
-    VisionProvidersSkystone vps;
-    public SkystonePos pos = SkystonePos.NONE_FOUND;
-    public double xPos = 0;
+//    VisionProvidersSkystone vps;
+//    public SkystonePos pos = SkystonePos.NONE_FOUND;
+//    public double xPos = 0;
 
     public enum MoveMode {
         forward,
@@ -151,6 +154,7 @@ public class PoseSkystone {
 
     public enum Articulation { //serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
         calibrate,
+        calibrateBlue,
         inprogress, //currently in progress to a final articulation
         manual, //target positions are all being manually overridden
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
@@ -316,6 +320,8 @@ public class PoseSkystone {
         this.distForward = this.hwMap.get(DistanceSensor.class, "distForward");
         this.distRight = this.hwMap.get(DistanceSensor.class, "distRight");
         this.distLeft = this.hwMap.get(DistanceSensor.class, "distLeft");
+        //this.magSensor = this.hwMap.get(DigitalChannel.class, "magSensor");
+
 
         //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");
         motorBackLeft = hwMap.get(DcMotor.class, "motorBackLeft");
@@ -333,6 +339,7 @@ public class PoseSkystone {
         //motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //magSensor.setMode(DigitalChannel.Mode.INPUT);
 
         extender.setDirection(DcMotor.Direction.REVERSE);
 
@@ -375,7 +382,7 @@ public class PoseSkystone {
 
         parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
         parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
-        vps = new VisionProvidersSkystone(ClassFactory.getInstance().createVuforia(parameters));
+//        vps = new VisionProvidersSkystone(ClassFactory.getInstance().createVuforia(parameters));
     }
 
     public void resetIMU() {
@@ -639,6 +646,9 @@ public class PoseSkystone {
             case calibrate:
                 if (calibrate()) articulation = Articulation.manual;
                 break;
+            case calibrateBlue:
+                if (calibrateBlue()) articulation = Articulation.manual;
+                break;
             case manual:
                 break; //do nothing here - likely we are directly overriding articulations in game
             case driving:
@@ -890,8 +900,6 @@ public class PoseSkystone {
 
                 //calibrate the elbow and arm
                 if (crane.calibrate()) {
-                    crane.toggleSwivel();
-                    crane.toggleSwivel();
                     //miniTimer = futureTime(1);
                     calibrateStage++;
                 }
@@ -913,9 +921,7 @@ public class PoseSkystone {
                 }
                 break;
             case 3:
-                if(driveIMUDistance(.2,270,false,.2)) {
-                    driveIMUDistance(.2,270,false,.1);
-                    crane.toggleSwivel();
+                if(rotateIMU(270,6.0)) {
                     calibrateStage = 0;
                     return true;
                 }
@@ -923,6 +929,44 @@ public class PoseSkystone {
         }
             return false;
 }
+
+    private int calibrateStageBlue = 0;//todo- finish
+    public boolean calibrateBlue(){
+        switch(calibrateStageBlue)
+        {
+            case 0:
+
+                //calibrate the elbow and arm
+                if (crane.calibrate()) {
+                    //miniTimer = futureTime(1);
+                    calibrateStageBlue++;
+                }
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    resetEncoders();
+                    setZeroHeading();
+                    //if(rotateIMU(270,7))
+                    //
+                    miniTimer = futureTime(1f);
+                    calibrateStageBlue++;
+                }
+                break;//ur mom gae lol
+            case 2://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                if(System.nanoTime() > miniTimer) {
+                    if(turret.rotateIMUTurret(90.0, 2))
+                        calibrateStageBlue++;
+                }
+                break;
+            case 3:
+                if(rotateIMU(90,6.0)) {
+                    calibrateStageBlue = 0;
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
 
     int grabState = 0;
     double grabTimer;
@@ -945,26 +989,31 @@ public class PoseSkystone {
 
 
 //todo these need to be tested - those that are used in articulate() have probably been fixed up by now
-
+    double retreiveTimer;
     public boolean retrieveStone(){
         switch(craneArticulation){
             case 0:
-                if(crane.getElbowCurrentPos()<180) crane.setElbowTargetPos(180, 1);
+                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
                 crane.extendToPosition(445,1.0,20);
-                miniTimer = futureTime(1);
+                retreiveTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
-                if (System.nanoTime() >= miniTimer) {
-                    turret.setTurntableAngle(0.0); // todo- take this out when we init to
+                if (System.nanoTime() >= retreiveTimer) {
+                    turret.setPower(.4);
+                    turret.setTurntableAngle(0.0);
                     craneArticulation++;
+                    retreiveTimer = futureTime(1);
+                    turret.setPower(1);
+
                 }
                 break;
             case 2:
-                crane.setElbowTargetPos(70, 1);
-                craneArticulation=0;
-
-                return true;
+                if (System.nanoTime() >= retreiveTimer) {
+                    crane.setElbowTargetPos(0, 1);
+                    craneArticulation = 0;
+                    return true;
+                }
         }
         return false;
     }

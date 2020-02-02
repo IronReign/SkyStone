@@ -1,5 +1,6 @@
 
 //written by Cooper Clem, 2019
+
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -15,6 +16,8 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrap360;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+
 
 public class Turret{
     //motor
@@ -38,8 +41,8 @@ public class Turret{
     //PID
     PIDController turretPID;
     private double kpTurret = 0.04; //proportional constant multiplier
-    private double kiTurret = 0.0; //integral constant multiplier
-    private double kdTurret= 0.01; //derivative constant multiplier
+    private double kiTurret = 0.01; //integral constant multiplier
+    private double kdTurret= 0.05; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
     //IMU
@@ -57,6 +60,9 @@ public class Turret{
     private final double angleIncrement = 10;
     private boolean isMaintainingHeading = true;
 
+    //sensors
+    //DigitalChannel magSensor;
+
 
     public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
@@ -64,6 +70,8 @@ public class Turret{
         motor.setTargetPosition(motor.getCurrentPosition());
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //motor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        //this.magSensor = magSensor;
 
         this.motor = motor;
         targetRotationTicks = 0;
@@ -123,6 +131,8 @@ public class Turret{
             maintainHeadingTurret(true);
 
     }
+
+    //public boolean getMagSensorVal() {return magSensor.getState(); }
 
     public boolean isActive(){
         return active;
@@ -263,6 +273,8 @@ public class Turret{
         //performs the turn with the correction applied
         setPower(correction);
     }
+
+
 
     public void setTurretMotorMode(boolean IMUMODE){
         if(IMUMODE) {motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);}

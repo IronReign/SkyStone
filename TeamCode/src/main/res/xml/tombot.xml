@@ -26,6 +26,7 @@
 			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />
 			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="0" bus="2"/>
 			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="0" bus="3"/>
+
 		</LynxModule>
 	</LynxUsbDevice>
     <Webcam name="Webcam 1" serialNumber="BFD5985F" />
