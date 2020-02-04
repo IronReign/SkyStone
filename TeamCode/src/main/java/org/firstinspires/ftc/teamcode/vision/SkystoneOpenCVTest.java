@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name="open cv skystone test")
-public class OpenCVSkystoneTest extends LinearOpMode {
+public class SkystoneOpenCVTest extends LinearOpMode {
 
-    OpenCVIntegrationSkystone vp;
+    SkystoneOpenCVIntegration vp;
 
     @Override
     public void runOpMode() {
@@ -14,8 +14,8 @@ public class OpenCVSkystoneTest extends LinearOpMode {
         telemetry.update();
 
         while (!isStarted()) {
-            vp = new OpenCVIntegrationSkystone();
-            vp.initializeVision(hardwareMap, telemetry, false, Viewpoint.WEBCAM);
+            vp = new SkystoneOpenCVIntegration();
+            vp.initializeVision(hardwareMap, telemetry, false, Viewpoint.WEBCAM, true);
 
             telemetry.addData("Status", "initialized vision");
             telemetry.update();
@@ -24,14 +24,14 @@ public class OpenCVSkystoneTest extends LinearOpMode {
         telemetry.addData("Status", "Started");
         telemetry.update();
 
-        GoldPos gp = null;
+        SkystoneTargetInfo gp = null;
 
         while (opModeIsActive()) {
-            GoldPos newGp = vp.detect();
-            if (newGp != GoldPos.HOLD_STATE)
-                gp = newGp;
+            SkystoneTargetInfo target = vp.detect();
+            if (target.finished)
+                gp = target;
             telemetry.addData("VisionDetection", "%s", gp);
-            telemetry.addData("HoldState", "%s", newGp == GoldPos.HOLD_STATE ? "YES" : "NO");
+            telemetry.addData("Found", "%s", target.finished ? "YES" : "NO");
             telemetry.update();
         }
         vp.shutdownVision();

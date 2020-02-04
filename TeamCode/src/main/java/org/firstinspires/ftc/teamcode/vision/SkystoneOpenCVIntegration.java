@@ -27,7 +27,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-public class OpenCVIntegrationSkystone implements VisionProvider {
+public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
 
     private VuforiaLocalizer vuforia;
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> q;
@@ -39,6 +39,8 @@ public class OpenCVIntegrationSkystone implements VisionProvider {
     private FtcDashboard dashboard;
     private ColorBlobDetector blobDetector;
     private boolean enableTelemetry;
+    SkystoneTargetInfo target;
+    boolean redAlliance;
 
     private int _numbefOfContours = Integer.MIN_VALUE;
 
@@ -57,10 +59,11 @@ public class OpenCVIntegrationSkystone implements VisionProvider {
     }
 
     @Override
-    public void initializeVision(HardwareMap hardwareMap, Telemetry telemetry, boolean enableTelemetry, Viewpoint viewpoint) {
+    public void initializeVision(HardwareMap hardwareMap, Telemetry telemetry, boolean enableTelemetry, Viewpoint viewpoint, boolean redAlliance) {
         initVuforia(hardwareMap, viewpoint);
         q = vuforia.getFrameQueue();
         state = 0;
+        this.redAlliance = redAlliance;
         this.telemetry = telemetry;
         this.enableTelemetry = enableTelemetry;
         if (enableTelemetry)
@@ -79,11 +82,15 @@ public class OpenCVIntegrationSkystone implements VisionProvider {
     }
 
     @Override
-    public GoldPos detect() {
+    public SkystoneTargetInfo detect() {
         switch (state) {
             case 0:
-                if (q.isEmpty())
-                    return GoldPos.HOLD_STATE;
+                if (q.isEmpty()){
+                    target.confidence=0;
+                    target.finished=false;
+                    return target;
+                }
+
                 VuforiaLocalizer.CloseableFrame frame;
                 try {
                     frame = q.take();
@@ -116,7 +123,9 @@ public class OpenCVIntegrationSkystone implements VisionProvider {
             case 3:
                 if (contours.size() == 0) {
                     state = -2;
-                    return GoldPos.NONE_FOUND;
+                    target.confidence=0;
+                    target.finished=false;
+                    return target;
                 }
                 lowest = null;
                 for (MatOfPoint contour : contours) {
@@ -129,19 +138,35 @@ public class OpenCVIntegrationSkystone implements VisionProvider {
                 for (MatOfPoint contour : blobDetector.getContours())
                     contour.release();
                 state = 0;
-                if (lowest.x < 320d / 3)
-                    return GoldPos.LEFT;
+                if (lowest.x < 320d / 3) {
+                    target.confidence = 1;
+                    target.quarryPosition = (redAlliance)? StonePos.NORTH : StonePos.SOUTH;
+                    return target;
+                }
+
                 else if (lowest.x < 640d / 3)
-                    return GoldPos.MIDDLE;
+                {
+                    target.confidence = 1;
+                    target.quarryPosition =  StonePos.MIDDLE;
+                    return target;
+                }
                 else
-                    return GoldPos.RIGHT;
+                {
+                    target.confidence = 1;
+                    target.quarryPosition = (!redAlliance)? StonePos.NORTH : StonePos.SOUTH;
+                    return target;
+                }
             default:
-                return GoldPos.ERROR2;
+                target.confidence=0;
+                target.finished=false;
+                return target;
         }
         state++;
         telemetry.addData("OpenCV State Machine State", state);
         telemetry.addData("OpenCV # of contours", _numbefOfContours);
-        return GoldPos.HOLD_STATE;
+        target.confidence=0;
+        target.finished=false;
+        return target;
     }
 
     private static Point centroidish(MatOfPoint matOfPoint) {
