@@ -2,14 +2,11 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.motors.RevRobotics40HdHexMotor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -17,9 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
-import org.firstinspires.ftc.teamcode.vision.SkystonePos;
-import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
@@ -137,7 +131,7 @@ public class PoseSkystone {
     private int craneArticulation = 0;
 
     //vision related
-//    VisionProvidersSkystone vps;
+//    VisionProviderSkystoneByMaheshMaybe vps;
 //    public SkystonePos pos = SkystonePos.NONE_FOUND;
 //    public double xPos = 0;
 
@@ -382,7 +376,7 @@ public class PoseSkystone {
 
         parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
         parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
-//        vps = new VisionProvidersSkystone(ClassFactory.getInstance().createVuforia(parameters));
+//        vps = new VisionProviderSkystoneByMaheshMaybe(ClassFactory.getInstance().createVuforia(parameters));
     }
 
     public void resetIMU() {

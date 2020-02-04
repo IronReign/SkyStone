@@ -6,11 +6,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
-import org.firstinspires.ftc.teamcode.vision.SkystonePos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
-import org.firstinspires.ftc.teamcode.vision.VisionProviders;
-import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
+import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
+import org.firstinspires.ftc.teamcode.vision.VisionProviderSkystoneByMaheshMaybe;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
@@ -24,11 +23,11 @@ public class Autonomous {
 
     //vision-related configuration
     public VisionProvider vp;
-    public VisionProvidersSkystone vps;
+    public VisionProviderSkystoneByMaheshMaybe vps;
     public int visionProviderState;
     public boolean visionProviderFinalized;
     public boolean enableTelemetry = false;
-    public static final Class<? extends VisionProvider>[] visionProviders = VisionProviders.visionProviders;
+    public static final Class<? extends VisionProvider>[] visionProviders = VisionProvidersRoverRuckus.visionProviders;
     public static final Viewpoint viewpoint = Viewpoint.WEBCAM;
     public int mineralState = 1;
     private MineralStateProvider mineralStateProvider = () -> mineralState;
@@ -883,7 +882,7 @@ public class Autonomous {
             telemetry.addData("Please wait", "Initializing vision");
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
-            vp = VisionProviders.defaultProvider.newInstance();
+            vp = VisionProvidersRoverRuckus.defaultProvider.newInstance();
             //vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
-import org.firstinspires.ftc.teamcode.vision.VisionProviders;
+import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
@@ -25,7 +25,7 @@ public class Autonomous {
     public int visionProviderState;
     public boolean visionProviderFinalized;
     public boolean enableTelemetry = false;
-    public static final Class<? extends VisionProvider>[] visionProviders = VisionProviders.visionProviders;
+    public static final Class<? extends VisionProvider>[] visionProviders = VisionProvidersRoverRuckus.visionProviders;
     public static final Viewpoint viewpoint = Viewpoint.WEBCAM;
     public int mineralState = 0;
     private MineralStateProvider mineralStateProvider = () -> mineralState;
@@ -756,7 +756,7 @@ public class Autonomous {
             telemetry.addData("Please wait", "Initializing vision");
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
-            vp = VisionProviders.defaultProvider.newInstance();
+            vp = VisionProvidersRoverRuckus.defaultProvider.newInstance();
             vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);

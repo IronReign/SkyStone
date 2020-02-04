@@ -32,18 +32,13 @@ package org.firstinspires.ftc.teamcode.vision;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.vision.Viewpoint;
-import org.firstinspires.ftc.teamcode.vision.GoldPos;
-import org.firstinspires.ftc.teamcode.vision.VisionProvider;
-import org.firstinspires.ftc.teamcode.vision.VisionProviders;
-
 /**
  * Demonstrates empty OpMode
  */
 @TeleOp(name = "VisionProvider Test", group = "Linear Opmode")
 public class VisionProviderTest extends LinearOpMode {
 
-    private static final Class<? extends VisionProvider>[] visionProviders = VisionProviders.visionProviders;
+    private static final Class<? extends VisionProvider>[] visionProviders = VisionProvidersRoverRuckus.visionProviders;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Configuration");
