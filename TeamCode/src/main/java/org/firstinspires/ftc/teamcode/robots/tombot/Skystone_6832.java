@@ -257,6 +257,9 @@ public class Skystone_6832 extends LinearOpMode {
         public Log log() {
             return null;
         }
+        @Override public void speak(String text){}
+        @Override public void speak(String text, String languageCode, String countryCode){}
+
     };
 
     @Override
