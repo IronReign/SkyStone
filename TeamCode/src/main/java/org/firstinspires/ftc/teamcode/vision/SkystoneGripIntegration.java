@@ -87,6 +87,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
 
     @Override
     public SkystoneTargetInfo detect() {
+        Bitmap bm = Bitmap.createBitmap(1,1,Bitmap.Config.RGB_565);
         switch (state) {
             case 0:
                 if (q.isEmpty()){
@@ -102,7 +103,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
                     throw new RuntimeException(e);
                 }
                 Image img = VisionUtils.getImageFromFrame(frame, PIXEL_FORMAT.RGB565);
-                Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
+                bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
                 bm.copyPixelsFromBuffer(img.getPixels());
                 mat = VisionUtils.bitmapToMat(bm, CvType.CV_8UC3);
                 break;
@@ -121,7 +122,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
                 }
                 Bitmap overlayBitmap = Bitmap.createBitmap(overlay.width(), overlay.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(overlay, overlayBitmap);
-                dashboard.sendImage(overlayBitmap);
+                dashboard.sendImage(bm);
                 overlay.release();
                 break;
             case 3:

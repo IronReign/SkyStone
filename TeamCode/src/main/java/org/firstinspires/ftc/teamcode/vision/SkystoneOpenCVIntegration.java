@@ -33,6 +33,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> q;
     private int state = -1;
     private Mat mat;
+    private Mat overlay;
     private List<MatOfPoint> contours;
     private Point lowest;
     private Telemetry telemetry;
@@ -102,9 +103,10 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
                 Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
                 bm.copyPixelsFromBuffer(img.getPixels());
                 mat = VisionUtils.bitmapToMat(bm, CvType.CV_8UC3);
+                overlay = VisionUtils.bitmapToMat(bm, CvType.CV_8UC3);
                 break;
             case 1:
-                blobDetector.process(mat, mat);
+                blobDetector.process(mat, overlay);
                 //mat.release();
                 contours = blobDetector.getContours();
                 _numbefOfContours = contours.size();
@@ -112,10 +114,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
             case 2:
                 if (!enableTelemetry)
                     break;
-                Mat overlay = mat;
-                for (int i = 0; i < contours.size(); i++) {
-                    Imgproc.drawContours(overlay, contours, i, new Scalar(Math.random() * 255, Math.random() * 255, Math.random() * 255), 2);
-                }
+
                 Bitmap overlayBitmap = Bitmap.createBitmap(overlay.width(), overlay.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(overlay, overlayBitmap);
                 dashboard.sendImage(overlayBitmap);
