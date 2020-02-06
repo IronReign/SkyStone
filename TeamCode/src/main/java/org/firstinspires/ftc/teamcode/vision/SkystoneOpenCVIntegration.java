@@ -63,6 +63,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
         initVuforia(hardwareMap, viewpoint);
         q = vuforia.getFrameQueue();
         state = 0;
+        target = new SkystoneTargetInfo();
         this.redAlliance = redAlliance;
         this.telemetry = telemetry;
         this.enableTelemetry = enableTelemetry;
@@ -104,7 +105,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
                 break;
             case 1:
                 blobDetector.process(mat, mat);
-                mat.release();
+                //mat.release();
                 contours = blobDetector.getContours();
                 _numbefOfContours = contours.size();
                 break;
@@ -127,7 +128,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
                     target.finished=false;
                     return target;
                 }
-                lowest = null;
+                lowest = new Point();
                 for (MatOfPoint contour : contours) {
                     Point centroid = centroidish(contour);
                     if (lowest.y > centroid.y)

@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.vision.dummy.RightDummyVisionIntegration;
 public final class VisionProvidersSkystone {
     private VisionProvidersSkystone() { throw new RuntimeException("Utility Class"); }
 
-    public static final Class<? extends VisionProvider>[] visionProviders =
-            new Class[]{DogeCVIntegration.class, MiddleDummyVisionIntegration.class,
+    public static final Class<? extends SkystoneVisionProvider>[] visionProviders =
+            new Class[]{SkystoneOpenCVIntegration.class, SkystoneGripIntegration.class, MiddleDummyVisionIntegration.class,
                     LeftDummyVisionIntegration.class, RightDummyVisionIntegration.class};
 
 

@@ -22,9 +22,9 @@ public class SkystoneQuarryGripPipeline {
     private Mat hsvThresholdOutput = new Mat();
     private MatOfKeyPoint findBlobsOutput = new MatOfKeyPoint();
 
-    static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
+//    static {
+//        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//    }
 
     /**
      * This is the primary method that runs the entire pipeline and updates the outputs.
@@ -33,7 +33,7 @@ public class SkystoneQuarryGripPipeline {
         // Step Blur0:
         Mat blurInput = source0;
         BlurType blurType = BlurType.get("Gaussian Blur");
-        double blurRadius = 17.117117117117118;
+        double blurRadius = 17.0;
         blur(blurInput, blurType, blurRadius, blurOutput);
 
         // Step HSV_Threshold0:

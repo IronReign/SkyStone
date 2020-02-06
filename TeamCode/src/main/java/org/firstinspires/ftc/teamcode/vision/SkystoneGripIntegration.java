@@ -64,12 +64,13 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
         initVuforia(hardwareMap, viewpoint);
         q = vuforia.getFrameQueue();
         state = 0;
+        target = new SkystoneTargetInfo(); //this is NOT the standard vuforia-style target
         this.redAlliance = redAlliance;
         this.telemetry = telemetry;
         this.enableTelemetry = enableTelemetry;
         if (enableTelemetry)
             dashboard = FtcDashboard.getInstance();
-        //blobDetector = new ColorBlobDetector();
+        blobDetector = new ColorBlobDetector();
         pipeline = new SkystoneQuarryGripPipeline();
         //blobDetector.setHsvColor(new Scalar(44, 75, 100));
 
@@ -107,7 +108,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
                 break;
             case 1:
                 pipeline.process(mat);
-                mat.release();
+                //mat.release();
                 contours = blobDetector.getContours();
                 _numbefOfContours = contours.size();
                 break;
@@ -130,7 +131,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
                     target.finished=false;
                     return target;
                 }
-                lowest = null;
+                lowest = new Point();
                 for (MatOfPoint contour : contours) {
                     Point centroid = centroidish(contour);
                     if (lowest.y > centroid.y)

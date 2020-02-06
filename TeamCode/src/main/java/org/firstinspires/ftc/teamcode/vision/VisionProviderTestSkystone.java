@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "Skystone VisionProvider Test", group = "Linear Opmode")
 public class VisionProviderTestSkystone extends LinearOpMode {
 
-    private static final Class<? extends VisionProvider>[] visionProviders = VisionProvidersSkystone.visionProviders;
+    private static final Class<? extends SkystoneVisionProvider>[] visionProviders = VisionProvidersSkystone.visionProviders;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Configuration");
@@ -46,7 +46,7 @@ public class VisionProviderTestSkystone extends LinearOpMode {
         int visionProviderState = 0;
         boolean toggle = false;
         boolean visionProviderFinalized = false;
-        VisionProvider vp = null;
+        SkystoneVisionProvider vp = null;
         while (!isStarted()) {
             if (!visionProviderFinalized && gamepad1.dpad_left && !toggle) {
                 toggle = true;
@@ -61,7 +61,7 @@ public class VisionProviderTestSkystone extends LinearOpMode {
                     telemetry.addData("Please wait","Initializing vision");
                     telemetry.update();
                     vp = visionProviders[visionProviderState].newInstance();
-                    vp.initializeVision(hardwareMap, telemetry, true, Viewpoint.WEBCAM);
+                    vp.initializeVision(hardwareMap, telemetry, true, Viewpoint.WEBCAM, true);
                 } catch (IllegalAccessException | InstantiationException e) {
                     throw new RuntimeException(e);
                 }
@@ -77,18 +77,18 @@ public class VisionProviderTestSkystone extends LinearOpMode {
                 telemetry.addData("Please wait","Initializing vision");
                 telemetry.update();
                 vp = visionProviders[visionProviderState].newInstance();
-                vp.initializeVision(hardwareMap, telemetry, true, Viewpoint.WEBCAM);
+                vp.initializeVision(hardwareMap, telemetry, true, Viewpoint.WEBCAM, true);
             } catch (IllegalAccessException | InstantiationException e) {
                 throw new RuntimeException(e);
             }
         }
-        GoldPos gp = null;
+        SkystoneTargetInfo t = null;
         while (opModeIsActive()) {
-            GoldPos newGp = vp.detect();
-            if (newGp != GoldPos.HOLD_STATE)
-                gp = newGp;
-            telemetry.addData("VisionDetection", "%s", gp);
-            telemetry.addData("HoldState", "%s", newGp == GoldPos.HOLD_STATE ? "YES" : "NO");
+            SkystoneTargetInfo tnew = vp.detect();
+            if (!tnew.finished)
+                t = tnew;
+            telemetry.addData("VisionDetection", "%s", t.quarryPosition);
+            telemetry.addData("HoldState", "%s", tnew.finished ? "YES" : "NO");
             telemetry.update();
         }
         vp.shutdownVision();
