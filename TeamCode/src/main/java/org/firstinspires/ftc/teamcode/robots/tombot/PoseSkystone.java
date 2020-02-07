@@ -154,9 +154,11 @@ public class PoseSkystone {
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
         reverseDriving,
         retrieving, //retrieve a stone
+        retriving2,
         bridgeTransit,
         extendToTowerHeightArticulation,
         retractFromTower,
+        retractFromBlock,
         shootOut,
         shootOutII,
         recockGripper,
@@ -654,6 +656,12 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case retriving2: //todo: fixup comments for deploy actions - moved stuff around
+                //auton initial hang at the beginning of a match
+                if (retrieveStoneTower()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case bridgeTransit:
                 if (bridgeTransit()) {
                 }
@@ -680,6 +688,9 @@ public class PoseSkystone {
                 break;
             case retractFromTower:
                 retractFromTower();
+                break;
+            case retractFromBlock:
+                retractFromBlock();
                 break;
             case deploying:
                 //auton unfolding after initial hang - should only be called from the hanging position during auton
@@ -1012,6 +1023,35 @@ public class PoseSkystone {
         return false;
     }
 
+    double retreiveTimer2;
+    public boolean retrieveStoneTower(){
+        switch(craneArticulation){
+            case 0:
+                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
+                crane.extendToPosition(445,1.0,20);
+                retreiveTimer2 = futureTime(1);
+                craneArticulation++;
+                break;
+            case 1:
+                if (System.nanoTime() >= retreiveTimer2) {
+                    turret.setPower(.4);
+                    turret.setTurntableAngle(0.0);
+                    craneArticulation++;
+                    retreiveTimer2 = futureTime(1);
+                    turret.setPower(1);
+
+                }
+                break;
+            case 2:
+                if (System.nanoTime() >= retreiveTimer2) {
+                    crane.setElbowTargetPos(0, 1);
+                    craneArticulation = 0;
+                    return true;
+                }
+        }
+        return false;
+    }
+
     public boolean bridgeTransit(){
        if(!retrieveStone())
             return false;
@@ -1076,7 +1116,7 @@ public class PoseSkystone {
     public boolean retractFromTower(){
         switch(miniStateRetTow) {
             case (0):
-                //crane.toggleGripper();
+                crane.toggleGripper();
                 retractTimer = futureTime(0);
                 miniStateRetTow++;
                 break;
@@ -1093,13 +1133,44 @@ public class PoseSkystone {
 
                 if (System.nanoTime() >= retractTimer) {
 
-                    articulation = Articulation.retrieving;
+                    articulation = Articulation.retriving2;
                     miniStateRetTow=0;
                     return true;
                 }
 
         }
        return false;
+    }
+
+    int miniStateRetTow2 = 0;
+    double retractTimer2;
+    public boolean retractFromBlock(){
+        switch(miniStateRetTow2) {
+            case (0):
+                //crane.toggleGripper();
+                retractTimer2 = futureTime(0);
+                miniStateRetTow2++;
+                break;
+            case (1):
+
+                if (System.nanoTime() >= retractTimer2) {
+                    retractTimer2 = futureTime(.5f);
+                    crane.setElbowTargetAngle(crane.getCurrentAngle() + 15);
+                    miniStateRetTow2++;
+                }
+
+                break;
+            case (2):
+
+                if (System.nanoTime() >= retractTimer2) {
+
+                    articulation = Articulation.retrieving;
+                    miniStateRetTow2=0;
+                    return true;
+                }
+
+        }
+        return false;
     }
 
     public int getMiniStateRetTow(){return miniStateRetTow;}

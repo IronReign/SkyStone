@@ -90,18 +90,19 @@ public class Autonomous {
 
             //.addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
             //.addState(() ->robot.rotateIMU(217, 9))//todo- make this a curve instead of following the hypotenuse
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addTimedState(4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
 
-            .addState(() -> (robot.driveIMUDistance(.6,90,true,1.91008)))//this and ^^^^ put the robot in front of the build plate
-            .addState(() -> (robot.crane.setElbowTargetPos(100,.8)))
-            .addState(() ->{robot.turret.rotateIMUTurret(90,6); return robot.rotateIMU(90,6);}) //gets the arm and the robot in their correct orientation for depositing
-            .addState(() -> (robot.driveForward(true, .01, .30)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.driveIMUDistance(.6,270,true,.305)))//this and ^^^^ put the robot in front of the build plate
+            .addSingleState(() -> robot.rotateIMU(0.0, 3.0))
+            .addState(() -> (robot.driveIMUDistance(.6,0.0,true,2.0668)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.crane.setElbowTargetPos(220,.8)))
+            .addSingleState(() -> robot.rotateIMU(0.0, 3.0))
+            .addState(() -> (robot.driveForward(true, .1, .30)))//this and ^^^^ put the robot in front of the build plate
             .addSingleState(() -> robot.crane.hookOn())
             .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
-            .addSimultaneousStates(()->{robot.turret.rotateIMUTurret(270,20); return robot.driveForward(false,.1,1);})
+            .addState(() -> (robot.driveForward(false, .1, .30)))//this and ^^^^ put the robot in front of the build plate
             .addSingleState(() -> robot.crane.hookOff())
-            .addState(() -> (robot.driveForward(true, 1, .30)))//this and ^^^^ put the robot in front of the build plate
             .build();
 
 

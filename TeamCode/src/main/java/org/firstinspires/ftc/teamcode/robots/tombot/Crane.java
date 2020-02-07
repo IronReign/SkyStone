@@ -596,9 +596,9 @@ public class Crane {
     }
 
     public void adjustElbowAngle(double speed){
-        if(extendABob.getCurrentPosition() > 600 && speed < 0 && elbow.getCurrentPosition() > 200)
+        if(extendABob.getCurrentPosition() > 600 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .8;
-        if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 200)
+        if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .5;
         setElbowTargetPos(Math.max(getElbowCurrentPos() + (int)(200 * speed), elbowMin));
 
