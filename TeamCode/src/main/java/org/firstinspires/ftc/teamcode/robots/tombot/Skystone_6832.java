@@ -346,7 +346,10 @@ public class Skystone_6832 extends LinearOpMode {
                 }
             }
 
-            //blue alliance
+            if (toggleAllowed(gamepad1.y,y,1)) {
+                robot.articulate(PoseSkystone.Articulation.calibrateBasic);
+
+            }
 
             if (toggleAllowed(gamepad1.x,x,1)) {
 //                switch(setupStage){

@@ -149,6 +149,7 @@ public class PoseSkystone {
     public enum Articulation { //serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
         calibrate,
         calibrateBlue,
+        calibrateBasic,
         inprogress, //currently in progress to a final articulation
         manual, //target positions are all being manually overridden
         driving, //optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
@@ -645,6 +646,9 @@ public class PoseSkystone {
             case calibrateBlue:
                 if (calibrateBlue()) articulation = Articulation.manual;
                 break;
+            case calibrateBasic:
+                if (calibrateBasic()) articulation = Articulation.manual;
+                break;
             case manual:
                 break; //do nothing here - likely we are directly overriding articulations in game
             case driving:
@@ -935,6 +939,11 @@ public class PoseSkystone {
             return false;
 }
 
+    public boolean calibrateBasic(){
+        setZeroHeading();
+        return true;
+    }
+
     private int calibrateStageBlue = 0;//todo- finish
     public boolean calibrateBlue(){
         switch(calibrateStageBlue)
@@ -1035,7 +1044,7 @@ public class PoseSkystone {
             case 1:
                 if (System.nanoTime() >= retreiveTimer2) {
                     turret.setPower(.4);
-                    turret.setTurntableAngle(0.0);
+                    turret.setTurntableAngle(180.0);
                     craneArticulation++;
                     retreiveTimer2 = futureTime(1);
                     turret.setPower(1);
@@ -1117,7 +1126,7 @@ public class PoseSkystone {
         switch(miniStateRetTow) {
             case (0):
                 crane.toggleGripper();
-                retractTimer = futureTime(0);
+                retractTimer = futureTime(.01f);
                 miniStateRetTow++;
                 break;
             case (1):
@@ -1154,8 +1163,8 @@ public class PoseSkystone {
             case (1):
 
                 if (System.nanoTime() >= retractTimer2) {
-                    retractTimer2 = futureTime(.5f);
-                    crane.setElbowTargetAngle(crane.getCurrentAngle() + 15);
+                    retractTimer2 = futureTime(0f);
+                    crane.setElbowTargetAngle(1100);
                     miniStateRetTow2++;
                 }
 
