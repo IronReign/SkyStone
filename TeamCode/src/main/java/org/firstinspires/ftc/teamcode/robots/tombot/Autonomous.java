@@ -112,16 +112,21 @@ public class Autonomous {
             .addState(() -> (robot.crane.setElbowTargetPos(10,1)))
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
-            .addTimedState(6f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            //drive south to next stone
             .addState(() -> (robot.driveIMUDistance(.6,0.0,false,2.2)))//this and ^^^^ put the robot in front of the build plate
 
+            //position elbow, arm and gripper for oblique pickup
             .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
             .addState(() -> robot.turret.rotateIMUTurret(220,3))//deposit stone
             .addState(() -> robot.crane.setGripperSwivelRotation(1200))
             .addState(() ->robot.crane.extendToPosition(450,.7,10))
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.crane.setElbowTargetPos(0,1)))
 
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            //grab stone
+            .addState(() -> (robot.crane.setElbowTargetPos(0,1)))
 
 //
 //            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
