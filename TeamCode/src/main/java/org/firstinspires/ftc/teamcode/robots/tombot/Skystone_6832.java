@@ -356,7 +356,10 @@ public class Skystone_6832 extends LinearOpMode {
                     }
                 }
 
-                //blue alliance
+            if (toggleAllowed(gamepad1.y,y,1)) {
+                robot.articulate(PoseSkystone.Articulation.calibrateBasic);
+
+            }
 
                 if (toggleAllowed(gamepad1.x, x, 1)) {
 //                switch(setupStage){
@@ -631,7 +634,6 @@ public class Skystone_6832 extends LinearOpMode {
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
             robot.setAutonSingleStep(true);
-            isHooked = false;
             joystickDriveStarted = true;
         }
 
@@ -642,54 +644,19 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         reverse=-1;
+        pwrDamper = .70;
 
         pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
         pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
-        pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
-        pwrStfL = direction * pwrDamper * gamepad1.left_stick_x;
-
-        pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
-        pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
-
-        pwrDamper = .70;
-
+        //old mecanum controls
+//        pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
+//        pwrStfL = direction * pwrDamper * gamepad1.left_stick_x;
+//
+//        pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
+//        pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
         robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot);
-        //robot.driveDiffTankField(pwrFwdL*pwrDamper, pwrStfL*pwrDamper);
-        //robot.driveMixerDiffSteer(0, pwrDamper*pwrStfR);
-/*
-        if (gamepad1.dpad_right) {
-            robot.turret.setTurntableAngle(90);
-        }
-        if (gamepad1.dpad_left) {
-            robot.turret.setTurntableAngle(270);
-        }
-        if (gamepad1.dpad_up) {
-            robot.turret.setTurntableAngle(0);
-        }
-        if (gamepad1.dpad_down) {
-            robot.turret.setTurntableAngle(180);
-        }
-*/
-
-
-
-
-
-        //crane controls
-//        if (gamepad1.dpad_right) {
-//            robot.crane.increaseElbowAngle();
-//        }
-//        if (gamepad1.dpad_left) {
-//            robot.crane.decreaseElbowAngle();
-//        }
-//        if (gamepad1.dpad_up) {
-//            robot.crane.extendBelt();
-//        }
-//        if (gamepad1.dpad_down) {
-//            robot.crane.retractBelt();
-//        }
 
         //turret controls
         if(notdeadzone(gamepad2.right_trigger))
@@ -697,65 +664,79 @@ public class Skystone_6832 extends LinearOpMode {
         if(notdeadzone(gamepad2.left_trigger))
                 robot.turret.rotateLeft(gamepad2.left_trigger * 5);
 
-//        if(notdeadzone(gamepad2.right_stick_x) )
-//            robot.turret.rotateRight(gamepad2.right_stick_x * 5);
-
+        //Pad1 Bumbers - Rotate Cardinal
         if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
                 robot.turret.rotateCardinal(true);
         }
         if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
             robot.turret.rotateCardinal(false);
         }
+
+        //Foundation Gripper
         if(toggleAllowed(gamepad1.x,x,1)){
             robot.crane.hookToggle();
         }
+
+        //presets a quick extend out on the arm to get near a stone
         if(toggleAllowed(gamepad1.b,b,1)){
             robot.crane.setElbowTargetPos(250);
             robot.crane.extendToPosition(1500,1.0,20);
             //robot.crane.servoGripper.setPosition(servoNormalize(2200));
         }
+
+        //trigger retractFromTower articulation
         if(toggleAllowed(gamepad1.a,a,1)){
 //            if(robot.crane.getCurrentAngle() < 20)
 //                    robot.articulate(PoseSkystone.Articulation.retrieving);
 //            else
                 robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
+
+
         if(toggleAllowed(gamepad1.y,y,1)){
-       robot.crane.toggleGripper();
+            robot.crane.toggleGripper();
             //robot.crane.servoGripper.setPosition(servoNormalize(1500));
-
-
         }
+
         if(toggleAllowed(gamepad2.y,y,2)) {
             //robot.crane.changeTowerHeight(1);
         }
+
         if(toggleAllowed(gamepad2.x,x,2)) {
             //robot.crane.changeTowerHeight(-1);
         }
+
         if(toggleAllowed(gamepad2.a,a,2)) {
             //robot.crane.extendToTowerHeight();
             robot.crane.toggleGripper();
         }
+
         if(gamepad2.left_bumper) {
             robot.crane.swivelGripper(false);
         }
+
         if(gamepad2.right_bumper) {
             robot.crane.swivelGripper(true);
         }
+
         if(toggleAllowed(gamepad2.b,b,2)) {
             robot.crane.toggleSwivel();
         }
+
         if (toggleAllowed(gamepad2.dpad_right,dpad_right,2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromBlock);
         }
+
         if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
             robot.crane.setElbowTargetPos(250);
             robot.crane.extendToPosition(2500,1.0,20);
         }
+
         if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
             robot.crane.setElbowTargetPos(250);
             robot.crane.extendToPosition(1500,1.0,20);
         }
+
         if(toggleAllowed(gamepad2.dpad_left,dpad_left,2)){
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
@@ -772,8 +753,6 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
 
-
-
         robot.crane.update();
         robot.turret.update(opModeIsActive());
     }
@@ -783,36 +762,36 @@ public class Skystone_6832 extends LinearOpMode {
         robot.setAutonSingleStep(true); //single step through articulations having to do with deploying
 
         robot.ledSystem.setColor(LEDSystem.Color.CALM);
+        reverse = -1;
 
-        boolean doDelatch = false;
-        if (toggleAllowed(gamepad1.b, b,1)) {
-            stateDelatch++;
-            if (stateDelatch > 2) stateDelatch = 0;
-            doDelatch = true;
+        pwrDamper = .50;
+
+        //drive joysticks
+        pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
+        pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+
+        robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
+
+        //turret controls  - this is on gamepad2 in teleop - but on gamepad 1 for prematch setup
+        if (notdeadzone(gamepad1.right_trigger))
+            robot.turret.rotateRight(gamepad2.right_trigger * 5);
+        if (notdeadzone(gamepad1.left_trigger))
+            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+
+        //Pad1 Bumbers - Rotate Cardinal
+        if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
+            robot.turret.rotateCardinal(true);
         }
+        if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
+            robot.turret.rotateCardinal(false);
 
-        if (toggleAllowed(gamepad1.x, x,1)) {
-            stateDelatch--;
-            if (stateDelatch < 0) stateDelatch = 2;
-            doDelatch = true;
         }
-
-        if (doDelatch) {
-            switch (stateDelatch) {
-                case 0:
-                    robot.articulate(PoseSkystone.Articulation.retrieving);
-                    break;
-                case 1:
-                    robot.articulate(PoseSkystone.Articulation.deploying);
-                    break;
-                case 2:
-                    robot.articulate(PoseSkystone.Articulation.deployed);
-                    break;
-                default:
-                    break;
-            }
+        //fine adjustment of turret - this is on gamepad2 right stick in teleop - but on gamepad 1 for prematch setup
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad1.left_stick_x);
         }
     }
+
 
     private void logTurns(double target) {
         telemetry.addData("Error: ", target - robot.getHeading());
