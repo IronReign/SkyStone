@@ -301,13 +301,23 @@ public class Skystone_6832 extends LinearOpMode {
 
             stateSwitch();
 
-            float initTimer = 0f;
-            int setupStage = 0;
-            //red alliance
-            //reset the elbow, lift and supermanLeft motors - operator must make sure robot is in the stowed position, flat on the ground
-            if (toggleAllowed(gamepad1.b, b,1)) {
+            if (active) {
+
+                //we can do very basic driving to get to calibration position
+
+                joystickDriveEndgameMode();
+
+            }
+
+            else { //if inactive we are in configuration mode
+
+                float initTimer = 0f;
+                int setupStage = 0;
+                //red alliance
+                //reset the elbow, lift and supermanLeft motors - operator must make sure robot is in the stowed position, flat on the ground
+                if (toggleAllowed(gamepad1.b, b, 1)) {
 //                robot.crane.toggleSwivel();
-                robot.setIsBlue(false);
+                    robot.setIsBlue(false);
 //                robot.setAutonomousIMUOffset(0); //against lander
 //
 //                if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
@@ -329,13 +339,13 @@ public class Skystone_6832 extends LinearOpMode {
 //
 //                }
 //
-                if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
 //                    robot.setZeroHeading();
 //                    robot.crane.setElbowTargetPos(354);
 //                    robot.crane.toggleSwivel();
 //                    robot.turret.rotateCardinal(false);
-                    //robot.crane.setElbowTargetPos(154);
-                    robot.articulate(PoseSkystone.Articulation.calibrate);
+                        //robot.crane.setElbowTargetPos(154);
+                        robot.articulate(PoseSkystone.Articulation.calibrate);
 
 //                    robot.crane.setElbowTargetPos(354);
 //                    robot.rotateIMU(270,3);
@@ -343,16 +353,16 @@ public class Skystone_6832 extends LinearOpMode {
 //                    robot.driveIMUDistance(.01,270,false,.1);
 
 
+                    }
                 }
-            }
 
-            //blue alliance
+                //blue alliance
 
-            if (toggleAllowed(gamepad1.x,x,1)) {
+                if (toggleAllowed(gamepad1.x, x, 1)) {
 //                switch(setupStage){
 //                    case 0:
 //                        robot.setAutonomousIMUOffset(0); //against lander
-                        robot.setIsBlue(true);
+                    robot.setIsBlue(true);
 //                        if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
 //                            robot.crane.setMotorsForCalibration(true);
 //                            robot.setZeroHeading();
@@ -372,17 +382,17 @@ public class Skystone_6832 extends LinearOpMode {
 //                            robot.crane.toggleSwivel();
 //                        }
 //                }
-                //robot.crane.toggleGripper();
+                    //robot.crane.toggleGripper();
 
-                if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-                    robot.articulate(PoseSkystone.Articulation.calibrateBlue);
+                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                        robot.articulate(PoseSkystone.Articulation.calibrateBlue);
 
-                    //robot.crane.setElbowTargetPos(354);
-                    //robot.crane.toggleSwivel();
-                    //robot.turret.rotateCardinal(true);
-                    //robot.crane.setElbowTargetPos(154);
+                        //robot.crane.setElbowTargetPos(354);
+                        //robot.crane.toggleSwivel();
+                        //robot.turret.rotateCardinal(true);
+                        //robot.crane.setElbowTargetPos(154);
+                    }
                 }
-            }
 
 //            if (toggleAllowed(gamepad1.x, x,1   )) {
 //                isHooked = !isHooked;
@@ -400,35 +410,34 @@ public class Skystone_6832 extends LinearOpMode {
 //            if (toggleAllowed(gamepad1.left_stick_button, left_stick_button,1))
 //                enableHookSensors = !enableHookSensors;
 
-            //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
+                //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
                 //robot.crane.hookOn();
-            //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
+                //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
                 //robot.crane.hookOff();
 
 
-
-            if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left,1)) {
-                auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; //switch vision provider
-            }
-            if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up,1)) {
-                auto.initVisionProvider(); //this is blocking
-            } else if (auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up,1)) {
-                auto.deinitVisionProvider(); //also blocking, but should be very quick
-            }
-            if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_down, dpad_down,1)) {
-                auto.enableTelemetry = !auto.enableTelemetry; //enable/disable FtcDashboard telemetry
+                if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
+                    auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; //switch vision provider
+                }
+                if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up, 1)) {
+                    auto.initVisionProvider(); //this is blocking
+                } else if (auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up, 1)) {
+                    auto.deinitVisionProvider(); //also blocking, but should be very quick
+                }
+                if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
+                    auto.enableTelemetry = !auto.enableTelemetry; //enable/disable FtcDashboard telemetry
 //                CenterOfGravityCalculator.drawRobotDiagram = !CenterOfGravityCalculator.drawRobotDiagram;
-            }
-            if (auto.visionProviderFinalized && gamepad1.left_trigger > 0.3) {
-                GoldPos gp = auto.vp.detect();
-                if (gp != GoldPos.HOLD_STATE)
-                    initGoldPosTest = gp;
-                telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest, gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
-            }
+                }
+                if (auto.visionProviderFinalized && gamepad1.left_trigger > 0.3) {
+                    GoldPos gp = auto.vp.detect();
+                    if (gp != GoldPos.HOLD_STATE)
+                        initGoldPosTest = gp;
+                    telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest, gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
+                }
 
-            if (soundState == 0 && toggleAllowed(gamepad1.right_stick_button, right_stick_button,1)) {
-                initialization_initSound();
-            }
+                if (soundState == 0 && toggleAllowed(gamepad1.right_stick_button, right_stick_button, 1)) {
+                    initialization_initSound();
+                }
 
 
 //            telemetry.addData("Vision", "Backend: %s (%s)", auto.visionProviders[auto.visionProviderState].getSimpleName(), auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500 % 2 == 0 ? "**NOT FINALIZED**" : "  NOT FINALIZED  ");
@@ -444,13 +453,13 @@ public class Skystone_6832 extends LinearOpMode {
 //            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
 //            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
 
-            telemetry.update();
+                telemetry.update();
 
-            robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
+                robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
 
-            robot.updateSensors(active);
+                robot.updateSensors(active);
 
-
+            }
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
