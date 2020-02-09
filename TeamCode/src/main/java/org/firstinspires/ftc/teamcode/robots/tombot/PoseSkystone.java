@@ -39,8 +39,8 @@ public class PoseSkystone {
     PIDController drivePID = new PIDController(0, 0, 0);
 
     public double kpDrive = 0.01; //proportional constant multiplier
-    public double kiDrive = 0.001; //integral constant multiplier
-    public double kdDrive = 0.001; //derivative constant multiplier
+    public double kiDrive = 0.0000; //integral constant multiplier
+    public double kdDrive = 0.003; //derivative constant multiplier //increase
 
 
     public static double headingP = 0.007;
@@ -614,6 +614,8 @@ public class PoseSkystone {
         //send the PWM value to the servo regardless of if it is altered or not
     }
 
+
+
 //todo - All Articulations need to be rebuilt - most of these are from icarus and will be removed
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -939,6 +941,51 @@ public class PoseSkystone {
             return false;
 }
 
+    int blockNum = 0;
+    public boolean setBlockToGoTo(int blockFromWall){
+        blockNum = blockFromWall;
+        return true;
+    }
+
+    public boolean goToBlock(){
+        switch(blockNum)
+        {
+            case 0:
+                if (driveIMUDistance(.4,0.0,false,2.6)) {
+                    //miniTimer = futureTime(1);
+                    return true;
+                }
+                break;
+            case 1:
+                if (driveIMUDistance(.4,0.0,false,2.6)) {
+                    return true;
+                }
+                break;//ur mom gae lol
+            case 2://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                if(driveIMUDistance(.4,0.0,false,2.6)) {
+                    return true;
+                }
+                break;
+            case 3:
+                if (driveIMUDistance(.4,0.0,false,2)) {
+                    return true;
+                }
+                break;
+            case 4:
+                if (driveIMUDistance(.4,0.0,false,2)) {
+                    return true;
+                }
+                break;
+            case 5:
+                if (driveIMUDistance(.4,0.0,false,2)) {
+                    return true;
+                }
+                break;
+
+        }
+        return false;
+    }
+
     public boolean calibrateBasic(){
         setZeroHeading();
         return true;
@@ -1007,7 +1054,7 @@ public class PoseSkystone {
     public boolean retrieveStone(){
         switch(craneArticulation){
             case 0:
-                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
+                //if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
                 crane.extendToPosition(445,1.0,20);
                 retreiveTimer = futureTime(1);
                 craneArticulation++;
@@ -1024,7 +1071,7 @@ public class PoseSkystone {
                 break;
             case 2:
                 if (System.nanoTime() >= retreiveTimer) {
-                    crane.setElbowTargetPos(0, 1);
+                    crane.setElbowTargetPos(10, 1);
                     craneArticulation = 0;
                     return true;
                 }
@@ -1126,7 +1173,7 @@ public class PoseSkystone {
         switch(miniStateRetTow) {
             case (0):
                 crane.toggleGripper();
-                retractTimer = futureTime(.01f);
+                retractTimer = futureTime(.1f);
                 miniStateRetTow++;
                 break;
             case (1):
@@ -1164,7 +1211,7 @@ public class PoseSkystone {
 
                 if (System.nanoTime() >= retractTimer2) {
                     retractTimer2 = futureTime(0f);
-                    crane.setElbowTargetAngle(1100);
+                    //crane.setElbowTargetAngle(200);
                     miniStateRetTow2++;
                 }
 

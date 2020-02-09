@@ -92,8 +92,8 @@ public class Crane {
     public  int extendPreLatch = extendMax;
 
     //foundation hook servo values
-    public int foundation_hook_open = 1740;
-    public int foundation_hook_closed = 2200;
+    public int foundation_hook_up = 1665;
+    public int foundation_hook_down = 1163;
 
     public int stow = 650;
 
@@ -267,11 +267,11 @@ public class Crane {
 
     public void hookOn(){
 
-        hook.setPosition(servoNormalize(foundation_hook_open));
+        hook.setPosition(servoNormalize(foundation_hook_down));
         hookUp = false;
     }
     public void hookOff(){
-        hook.setPosition(servoNormalize(foundation_hook_closed));
+        hook.setPosition(servoNormalize(foundation_hook_up));
         hookUp = true;
     }
 
