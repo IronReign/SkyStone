@@ -251,7 +251,7 @@ public class Crane {
         return currentTowerHeight;
     }
 
-
+    public int getElbowMax() {return elbowMax;}
 
     public void extendToTowerHeight(){
         hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2));//in meters

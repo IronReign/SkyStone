@@ -160,6 +160,7 @@ public class PoseSkystone {
         extendToTowerHeightArticulation,
         retractFromTower,
         retractFromBlock,
+        retractFromBlockAuton,
         shootOut,
         shootOutII,
         recockGripper,
@@ -698,6 +699,9 @@ public class PoseSkystone {
             case retractFromBlock:
                 retractFromBlock();
                 break;
+            case retractFromBlockAuton:
+                retractFromBlockAuton();
+                break;
             case deploying:
                 //auton unfolding after initial hang - should only be called from the hanging position during auton
                 // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -941,43 +945,75 @@ public class PoseSkystone {
             return false;
 }
 
-    int blockNum = 0;
-    public boolean setBlockToGoTo(int blockFromWall){
-        blockNum = blockFromWall;
-        return true;
-    }
 
-    public boolean goToBlock(){
+    public boolean goToBlock(int blockNum){
         switch(blockNum)
         {
-            case 0:
-                if (driveIMUDistance(.4,0.0,false,2.6)) {
-                    //miniTimer = futureTime(1);
+            case 1:
+                if (driveIMUDistance(.4,0.0,false,2.4)) {
                     return true;
                 }
                 break;
-            case 1:
-                if (driveIMUDistance(.4,0.0,false,2.6)) {
+            case 2:
+                if (driveIMUDistance(.4,0.0,false,2.2)) {
                     return true;
                 }
                 break;//ur mom gae lol
-            case 2://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
-                if(driveIMUDistance(.4,0.0,false,2.6)) {
-                    return true;
-                }
-                break;
-            case 3:
-                if (driveIMUDistance(.4,0.0,false,2)) {
+            case 3://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                if(driveIMUDistance(.4,0.0,false,2)) {
                     return true;
                 }
                 break;
             case 4:
-                if (driveIMUDistance(.4,0.0,false,2)) {
+                if (driveIMUDistance(.4,0.0,false,1.8)) {
                     return true;
                 }
                 break;
             case 5:
-                if (driveIMUDistance(.4,0.0,false,2)) {
+                if (driveIMUDistance(.4,0.0,false,1.6)) {
+                    return true;
+                }
+                break;
+            case 6:
+                if (driveIMUDistance(.4,0.0,false,1.4)) {
+                    return true;
+                }
+                break;
+
+        }
+        return false;
+    }
+
+    public boolean returnFromBlock(int blockNum){
+        switch(blockNum)
+        {
+            case 1:
+                if (driveIMUDistance(.4,0.0,false,2.4)) {
+                    return true;
+                }
+                break;
+            case 2:
+                if (driveIMUDistance(.4,0.0,false,2.2)) {
+                    return true;
+                }
+                break;//ur mom gae lol
+            case 3://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                if(driveIMUDistance(.4,0.0,false,2)) {
+                    return true;
+                }
+                break;
+            case 4:
+                if (driveIMUDistance(.4,0.0,false,1.8)) {
+                    return true;
+                }
+                break;
+            case 5:
+                if (driveIMUDistance(.4,0.0,false,1.6)) {
+                    return true;
+                }
+                break;
+            case 6:
+                if (driveIMUDistance(.4,0.0,false,1.4)) {
                     return true;
                 }
                 break;
@@ -1054,7 +1090,7 @@ public class PoseSkystone {
     public boolean retrieveStone(){
         switch(craneArticulation){
             case 0:
-                //if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
+                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
                 crane.extendToPosition(445,1.0,20);
                 retreiveTimer = futureTime(1);
                 craneArticulation++;
@@ -1209,9 +1245,8 @@ public class PoseSkystone {
                 break;
             case (1):
 
-                if (System.nanoTime() >= retractTimer2) {
+                if (crane.setElbowTargetAngle(crane.getElbowMax()-100)) {
                     retractTimer2 = futureTime(0f);
-                    //crane.setElbowTargetAngle(200);
                     miniStateRetTow2++;
                 }
 
@@ -1222,6 +1257,38 @@ public class PoseSkystone {
 
                     articulation = Articulation.retrieving;
                     miniStateRetTow2=0;
+                    return true;
+                }
+
+        }
+        return false;
+    }
+
+
+    int retractBlockAutonStage = 0;
+    double retractTimer3;
+    public boolean retractFromBlockAuton(){
+        switch(retractBlockAutonStage) {
+            case (0):
+                //crane.toggleGripper();
+                retractTimer3 = futureTime(0);
+                retractBlockAutonStage++;
+                break;
+            case (1):
+
+                if (crane.setElbowTargetAngle(450)) {
+                    retractTimer3 = futureTime(0f);
+
+                    retractBlockAutonStage++;
+                }
+
+                break;
+            case (2):
+
+                if (System.nanoTime() >= retractTimer3) {
+
+                    articulation = Articulation.retriving2;
+                    retractBlockAutonStage=0;
                     return true;
                 }
 
