@@ -39,7 +39,7 @@ public class PoseSkystone {
     PIDController drivePID = new PIDController(0, 0, 0);
 
     public double kpDrive = 0.01; //proportional constant multiplier
-    public double kiDrive = 0.0000; //integral constant multiplier
+    public double kiDrive = 0.0; //integral constant multiplier
     public double kdDrive = 0.003; //derivative constant multiplier //increase
 
 
@@ -91,6 +91,8 @@ public class PoseSkystone {
 
     //PID values
     public static int forwardTPM = 1304;//todo- use drive IMU to get this perfect
+    int rightTPM = 1304; //todo - these need to be tuned for each robot
+    int leftTPM = 1304; //todo - these need to be tuned for each robot
     private int strafeTPM = 1909; //todo - fix value high priority this current value is based on Kraken - minimech will be different
     private double poseX;
     private double poseY;
@@ -1813,6 +1815,7 @@ public class PoseSkystone {
 
         //initialization of the PID calculator's output range, target value and multipliers
         drivePID.setOutputRange(-.5,.5);
+        drivePID.seIntegralCutIn(4.0);
         drivePID.setPID(Kp, Ki, Kd);
         drivePID.setSetpoint(targetAngle);
         drivePID.enable();
@@ -2014,10 +2017,10 @@ public class PoseSkystone {
         motorBackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motorBackRight.setTargetPosition((int)arcright);
-        motorBackLeft.setTargetPosition((int)arcleft);
+        motorBackRight.setTargetPosition((int)arcright*rightTPM);
+        motorBackLeft.setTargetPosition((int)arcleft*leftTPM);
 
-        //start movinvg
+        //start moving
         motorBackRight.setPower(speedleft);
         motorBackLeft.setPower((speedright));
 

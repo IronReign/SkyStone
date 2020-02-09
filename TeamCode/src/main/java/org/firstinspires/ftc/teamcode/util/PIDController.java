@@ -30,6 +30,9 @@ import android.util.Log;
 // so much to the frequency of the calculations
 // a pretty definitive look at timing on android suggests using System.nanoTime:
 // http://gamasutra.com/view/feature/171774/getting_high_precision_timing_on_.php?print=1
+// Iron Reign has also added integral windup prevention by resetting accumulated error on zero crossings and when current error is larger than the integral cut-in
+// An example of integral cut-in might be +-5 degrees (depending on physical sysatem) when steering based on an IMU
+// A summary of windup issues can be found at https://en.wikipedia.org/wiki/Integral_windup
 // ----------------------------------------------------------------------------
 
 
@@ -43,8 +46,10 @@ public class PIDController {
     private double m_minimumOutput = -1.0;      // |minimum output|
     private double m_maximumInput = 0.0;                // maximum input - limit setpoint to this
     private double m_minimumInput = 0.0;                // minimum input - limit setpoint to this
-    private boolean m_continuous = false;       // do the endpoints wrap around? eg. Absolute encoder
+    private boolean m_continuous = false;       // do the endpoints wrap around? eg. Absolute encoder or imu
     private boolean m_enabled = false;                  //is the pid controller enabled
+    private double m_integralCutIn = 0.0; //this is the value for instantaneos error at which integral
+    private boolean m_integralCrossingReset = true; //when enabled, zero total error when error crosses zero
     private double m_prevError = 0.0;   // the prior sensor input (used to compute velocity)
     private double m_totalError = 0.0; //the sum of the errors for use in the integral calc
     private double m_deltaError = 0.0; //the latest change in error
@@ -105,24 +110,34 @@ public class PIDController {
                 }
             }
 
+
             //time since last iteration
             m_currentTime = System.nanoTime();
             m_deltaTime=(m_currentTime-m_prevTime)/1E9;
             m_prevTime=m_currentTime;
-            /* Integrate the errors as long as the upcoming integrator does
-               not exceed the minimum and maximum output thresholds */
-//            if (((m_totalError + m_error) * m_deltaTime * m_I < m_maximumOutput) &&
-//                    ((m_totalError + m_error) * m_deltaTime * m_I > m_minimumOutput)) {
-//                m_totalError += m_error;
-//            }
+
             if(m_deltaTime > .15)
             {
                 Log.e("", "Laggy Loop! " + m_deltaTime  + "  sec");
                 //m_deltaTime = 0;
             }
 
-            //integral calculation factored for time
-            m_totalError += (m_error * m_deltaTime);
+            //integrate with windup prevention
+            //reset total error if we are outside the integral control regime or if current error crosses zero
+            if (Math.abs(m_integralCutIn) < 2 * Double.MIN_VALUE) { //this is just a check if integralCutIn is zero - zero actually means we ignore cut-in and allow total error to accumulate regardless of current error magnitude
+                if (Math.abs(m_integralCutIn) > Math.abs(m_error)) //we are outside of intended integral regime - reset accumulated error
+                    m_totalError = 0.0;
+            }
+            else {
+                //integral calculation factored for time
+                m_totalError += (m_error * m_deltaTime);
+            }
+
+            //also reset accumulated error on zero crossing
+            if (m_integralCrossingReset) {
+                if (m_error * m_prevError <= 0.0) //current error and previous error have different signs when crossing zero regardless of direction
+                    m_totalError = 0;
+            }
 
             //derivative calculation factored for time
             m_deltaError = (m_error - m_prevError) * m_deltaTime;
@@ -144,8 +159,6 @@ public class PIDController {
             } else if (m_result < m_minimumOutput) {
                 m_result = m_minimumOutput;
             }
-
-
         }
     }
 
@@ -185,8 +198,6 @@ public class PIDController {
     public synchronized double getD() {
         return m_D;
     }
-
-
 
 
     /**
@@ -241,6 +252,26 @@ public class PIDController {
     public void setOutputRange(double minimumOutput, double maximumOutput) {
         m_minimumOutput = minimumOutput;
         m_maximumOutput = maximumOutput;
+    }
+
+    /**
+     * Sets the regime around zero error in which errors will be integrated
+     * This assumes that we want to prevent integral wind-up while the proportional constant can do the correction
+     * But when the error is small, the proportional response is weak and the integral should come into play
+     * if zero, then the error will always be integrated regardless of current error size - almost guaranteed to lead to wind-up
+     * @param cutIn
+     */
+    public void seIntegralCutIn(double cutIn){
+        m_integralCutIn = cutIn;
+    }
+
+    /**
+     * By default integral zero-crossing windup is enabled - this will help prevent oscillations around the setpoint
+     * This is really here only so it can be turned of for special cases
+     * @param reset
+     */
+    public void enableIntegralZeroCrossingReset(boolean reset){
+        m_integralCrossingReset = reset;
     }
 
     /**
