@@ -50,6 +50,10 @@ public class PoseSkystone {
     public double balanceD = 3.1444;
 
 
+    public double stoneLengthMeters = 8 * 25.4 / 1000;
+    public long stoneLengthTicks = (long) stoneLengthMeters * forwardTPM;
+    public double foundationToNearestStoneMeters =  1.75; //tune depending on final arm position.
+
     //All Actuators
     private DcMotor motorFrontRight = null;
     private DcMotor motorBackLeft = null;
@@ -938,8 +942,8 @@ public class PoseSkystone {
                     miniTimer = futureTime(1f);
                     calibrateStage++;
                 }
-                break;//ur mom gae lol
-            case 2://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                break;
+            case 2:
                 if(System.nanoTime() > miniTimer) {
                     if(turret.rotateIMUTurret(270.0, 2))
                     calibrateStage++;
@@ -953,7 +957,31 @@ public class PoseSkystone {
                 break;
         }
             return false;
-}
+    }
+
+    public boolean StoneToFoundation(int stoneNumber){
+
+        //drive North (forward)
+        double dist = stoneNumber * stoneLengthMeters +foundationToNearestStoneMeters;
+        if (driveIMUDistance(.6,0.0,true, dist)) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public boolean FoundationToStone(int stoneNumber){
+
+        //drive South (reverse)
+        double dist = stoneNumber * stoneLengthMeters +foundationToNearestStoneMeters;
+        if (driveIMUDistance(.6,0.0,false, dist)) {
+            return true;
+        }
+
+        return false;
+
+    }
 
 
     public boolean goToBlock(int blockNum){
@@ -993,6 +1021,8 @@ public class PoseSkystone {
         }
         return false;
     }
+
+
 
     public boolean returnFromBlock(int blockNum){
         switch(blockNum)

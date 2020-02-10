@@ -131,6 +131,9 @@ public class Autonomous {
             //grab stone
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlockAuton))
 
+            //return to foundation with 2nd stone todo: not tested yet
+            .addState(() -> (robot.StoneToFoundation(nextAutonStone(1))))
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //retract to go back to foundation
             .addTimedState(20f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
@@ -966,4 +969,30 @@ public class Autonomous {
         visionProviderFinalized = true;
     }
 
+    int stoneCount = 0;
+    boolean[] quarryStones = new boolean[6];
+
+    public int nextAutonStone(int firstStone){
+        if (stoneCount == 0) {
+            quarryStones[firstStone] = true;
+            stoneCount++;
+            return firstStone;
+        }
+        if (stoneCount == 1) {
+            quarryStones[firstStone+3] = true;
+            stoneCount++;
+            return firstStone+3;
+        }
+        if (stoneCount>1 && stoneCount <6){
+            for (int i = 0; i < quarryStones.length; i++){
+                if (!quarryStones[i]) //this is the first stone still false
+                {   stoneCount++;
+                    quarryStones[i] = true;
+                    return i;
+                }
+            }
+
+        }
+        return -1; //this would be a fail
+    }
 }
