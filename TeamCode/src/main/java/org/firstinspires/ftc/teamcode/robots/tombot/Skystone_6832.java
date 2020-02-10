@@ -304,8 +304,28 @@ public class Skystone_6832 extends LinearOpMode {
             if (active) {
 
                 //we can do very basic driving to get to calibration position
+                //turret and drive controls on gamepad1 only since we don't always have 2 pads for auton testing
 
-                joystickDriveEndgameMode();
+                //this test suppresses pregame driving while a calibration articulation is active
+                if (robot.articulation == PoseSkystone.Articulation.manual) joystickDrivePregameMode();
+
+                //red alliance
+                if (toggleAllowed(gamepad1.b, b, 1)) {
+                    robot.setIsBlue(false);
+
+                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                        robot.articulate(PoseSkystone.Articulation.calibrate);
+                    }
+                }
+
+                //blue alliance
+                if (toggleAllowed(gamepad1.x, x, 1)) {
+                    robot.setIsBlue(true);
+
+                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                        robot.articulate(PoseSkystone.Articulation.calibrateBlue);
+                    }
+                }
 
             }
 
@@ -314,104 +334,25 @@ public class Skystone_6832 extends LinearOpMode {
                 float initTimer = 0f;
                 int setupStage = 0;
                 //red alliance
-                //reset the elbow, lift and supermanLeft motors - operator must make sure robot is in the stowed position, flat on the ground
                 if (toggleAllowed(gamepad1.b, b, 1)) {
-//                robot.crane.toggleSwivel();
                     robot.setIsBlue(false);
-//                robot.setAutonomousIMUOffset(0); //against lander
-//
-//                if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-//                    robot.setZeroHeading();
-//                    robot.turret.rotateCardinal(false);
-//                    robot.crane.setMotorsForCalibration(true);
-//                    robot.crane.setExtendABobPwr(-.1);
-//                    initTimer = futureTime(3.0f);
-//                    if(initTimer > 6.0f){
-//                        initTimer = 0f;
-//                        robot.crane.setExtendABobPwr(0);
-//                        robot.crane.setElbowPwr(-.1);
-//                        initTimer = futureTime(3.0f);
-//                        if(initTimer > 6.0f){
-//                            robot.crane.setMotorsForCalibration(false);
-//                            robot.resetEncoders();
-//                        }
-//                    }
-//
-//                }
-//
+
                     if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-//                    robot.setZeroHeading();
-//                    robot.crane.setElbowTargetPos(354);
-//                    robot.crane.toggleSwivel();
-//                    robot.turret.rotateCardinal(false);
-                        //robot.crane.setElbowTargetPos(154);
                         robot.articulate(PoseSkystone.Articulation.calibrate);
-
-//                    robot.crane.setElbowTargetPos(354);
-//                    robot.rotateIMU(270,3);
-//                    robot.turret.rotateCardinal(false);
-//                    robot.driveIMUDistance(.01,270,false,.1);
-
-
                     }
                 }
 
-            if (toggleAllowed(gamepad1.y,y,1)) {
+                if (toggleAllowed(gamepad1.y,y,1)) {
                 robot.articulate(PoseSkystone.Articulation.calibrateBasic);
-
             }
-
+                //blue alliance
                 if (toggleAllowed(gamepad1.x, x, 1)) {
-//                switch(setupStage){
-//                    case 0:
-//                        robot.setAutonomousIMUOffset(0); //against lander
                     robot.setIsBlue(true);
-//                        if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
-//                            robot.crane.setMotorsForCalibration(true);
-//                            robot.setZeroHeading();
-//                            robot.crane.setElbowPwr(-.1);
-//                            initTimer = futureTime(3.0f);
-//                            setupStage++;
-//                        }
-//                        else {
-//                            setupStage = 0;
-//                        }
-//                    case 1:
-//                        if(initTimer > 3.0f) {
-//                            robot.crane.setMotorsForCalibration(false);
-//                            robot.resetEncoders();
-//                            robot.crane.setElbowTargetPos(154);
-//                            robot.turret.rotateCardinal(true);
-//                            robot.crane.toggleSwivel();
-//                        }
-//                }
-                    //robot.crane.toggleGripper();
 
                     if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
                         robot.articulate(PoseSkystone.Articulation.calibrateBlue);
-
-                        //robot.crane.setElbowTargetPos(354);
-                        //robot.crane.toggleSwivel();
-                        //robot.turret.rotateCardinal(true);
-                        //robot.crane.setElbowTargetPos(154);
                     }
                 }
-
-//            if (toggleAllowed(gamepad1.x, x,1   )) {
-//                isHooked = !isHooked;
-//                if (isHooked)
-//                    robot.crane.hookOff();
-//                else
-//                    robot.crane.hookOn();
-//            }
-//
-//            if (toggleAllowed(gamepad1.y, y,1)) {
-//                auto.autoDelay++;
-//                if (auto.autoDelay > 20) auto.autoDelay = 0;
-//            }
-//
-//            if (toggleAllowed(gamepad1.left_stick_button, left_stick_button,1))
-//                enableHookSensors = !enableHookSensors;
 
                 //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
                 //robot.crane.hookOn();
@@ -456,13 +397,13 @@ public class Skystone_6832 extends LinearOpMode {
 //            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
 //            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
 
-                telemetry.update();
-
-                robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
-
-                robot.updateSensors(active);
 
             }
+            telemetry.update();
+
+            robot.ledSystem.setColor(LEDSystem.Color.GAME_OVER);
+
+            robot.updateSensors(active);
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
@@ -759,24 +700,25 @@ public class Skystone_6832 extends LinearOpMode {
 
 
     private void joystickDrivePregameMode() {
-        robot.setAutonSingleStep(true); //single step through articulations having to do with deploying
+        //robot.setAutonSingleStep(true); //single step through articulations having to do with deploying
 
         robot.ledSystem.setColor(LEDSystem.Color.CALM);
         reverse = -1;
 
-        pwrDamper = .50;
+        pwrDamper = .70;
 
         //drive joysticks
         pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
         pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
+
         robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
 
         //turret controls  - this is on gamepad2 in teleop - but on gamepad 1 for prematch setup
         if (notdeadzone(gamepad1.right_trigger))
-            robot.turret.rotateRight(gamepad2.right_trigger * 5);
+            robot.turret.rotateRight(gamepad1.right_trigger * 5);
         if (notdeadzone(gamepad1.left_trigger))
-            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+            robot.turret.rotateLeft(gamepad1.left_trigger * 5);
 
         //Pad1 Bumbers - Rotate Cardinal
         if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
@@ -787,7 +729,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         }
         //fine adjustment of turret - this is on gamepad2 right stick in teleop - but on gamepad 1 for prematch setup
-        if (notdeadzone(gamepad2.right_stick_x)) {
+        if (notdeadzone(gamepad1.left_stick_x)) {
             robot.turret.adjust(gamepad1.left_stick_x);
         }
     }

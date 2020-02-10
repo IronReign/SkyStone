@@ -74,13 +74,12 @@ public class Turret{
         //this.magSensor = magSensor;
 
         this.motor = motor;
-        targetRotationTicks = 0;
         ticksPerDegree = 170/90;
         targetRotationTicks= 0;
         a90degrees= (int) (ticksPerDegree*90);
         a180degrees= (int) (ticksPerDegree*180);
         a360degrees= (int) (ticksPerDegree*360);
-        setActive(true);
+        //setActive(true);
 
         turretTargetHeading=0;
         turretPID = new PIDController(0,0,0);
@@ -117,19 +116,19 @@ public class Turret{
 
         turretHeading = wrapAngle((360-imuAngles.firstAngle), offsetHeading);
 
-
-//            offsetHeading = wrapAngleMinus(360-imuAngles.firstAngle, turretHeading);
-        if(isActive) {
-            motor.setTargetPosition(targetRotationTicks);
-            motor.setPower(motorPwr);
-        }
-
-
-
-        //experiment code
+        //execute PID calcs
         if(isMaintainingHeading)
             maintainHeadingTurret(true);
 
+    }
+
+    /**
+     * assign the current heading of the robot to a specific angle
+     * @param angle the value that the current heading will be assigned to
+     */
+    public void setHeading(double angle){
+        turretHeading = angle;
+        initialized = false; //triggers recalc of heading offset at next IMU update cycle
     }
 
     //public boolean getMagSensorVal() {return magSensor.getState(); }
@@ -140,8 +139,7 @@ public class Turret{
     public void setActive(boolean active){
         this.active = active;
         if(active == true)
-            if(motor.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
-                motor.setPower(.5);
+            if(motor.getMode() == DcMotor.RunMode.RUN_TO_POSITION) motor.setPower(.5);
         else
             motor.setPower(0);
     }
@@ -172,14 +170,6 @@ public class Turret{
     public void rotateCardinal(boolean right){
 
         setTurntableAngle(nextCardinal(getHeading(),right,10));
-
-    /*    int pos = (int) (turretTargetHeading/90.0);
-        if(right)
-            setTurntableAngle((pos+1)*90 % 360);
-        else
-            setTurntableAngle(pos-1*90 % 360);
-
-     */
     }
 
     public void setTurntableAngle(double currentAngle, double adjustAngle){
@@ -191,8 +181,8 @@ public class Turret{
     }
 
     public void setPower(double pwr){
-        motorPwr =pwr;
-        //motor.setPower(pwr);
+        motorPwr = pwr;
+        motor.setPower(pwr);
     }
 
     public boolean setRotation90(boolean right) {

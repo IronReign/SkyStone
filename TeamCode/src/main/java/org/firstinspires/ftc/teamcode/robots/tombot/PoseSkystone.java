@@ -39,7 +39,7 @@ public class PoseSkystone {
     PIDController drivePID = new PIDController(0, 0, 0);
 
     public double kpDrive = 0.01; //proportional constant multiplier
-    public double kiDrive = 0.0; //integral constant multiplier
+    public double kiDrive = 0.01; //integral constant multiplier
     public double kdDrive = 0.003; //derivative constant multiplier //increase
 
 
@@ -540,15 +540,27 @@ public class PoseSkystone {
 
     /**
      * Drive with a set power for a set distance while maintaining an IMU heading using PID
+     * This is a relative version
      *
      * @param pwr           set the forward power
      * @param targetAngle   the heading the robot will try to maintain while driving
      * @param forward is the robot driving in the forwards/left (positive) directions or backwards/right (negative) directions
      * @param targetMeters  the target distance (in meters)
      */
+    boolean driveIMUDistanceInitialzed = false;
+    long driveIMUDistanceTarget=0;
+
     public boolean driveIMUDistance(double pwr, double targetAngle, boolean forward, double targetMeters) {
 
-        //set what direction the robot is supposed to be moving in for the purpose of the field position calculator
+
+        if (!driveIMUDistanceInitialzed){
+            //set what direction the robot is supposed to be moving in for the purpose of the field position calculator
+
+            //calculate the target position of the drive motors
+            driveIMUDistanceTarget = (long) Math.abs((targetMeters * forwardTPM)) + Math.abs(getAverageTicks());
+            driveIMUDistanceInitialzed = true;
+        }
+
         if (!forward) {
             moveMode = moveMode.backward;
             targetMeters = -targetMeters;
@@ -556,13 +568,8 @@ public class PoseSkystone {
         }
         else moveMode = moveMode.forward;
 
-        //calculates the target position of the drive motors
-        long targetPos;
-        targetPos = (long) (targetMeters * forwardTPM);
-
-
         //if this statement is true, then the robot has not achieved its target position
-        if (Math.abs(targetPos) > Math.abs(getAverageTicks())) {
+        if (Math.abs(driveIMUDistanceTarget) > Math.abs(getAverageTicks())) {
             //driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
             driveIMU(kpDrive, kiDrive, kdDrive, pwr, targetAngle, false);
             return false;
@@ -570,6 +577,7 @@ public class PoseSkystone {
         else {
 //            stopAll();
             driveMixerDiffSteer(0,0);
+            driveIMUDistanceInitialzed=false;
             return true;
         }
 
@@ -1815,7 +1823,7 @@ public class PoseSkystone {
 
         //initialization of the PID calculator's output range, target value and multipliers
         drivePID.setOutputRange(-.5,.5);
-        drivePID.seIntegralCutIn(4.0);
+        drivePID.seIntegralCutIn(3.0);
         drivePID.setPID(Kp, Ki, Kd);
         drivePID.setSetpoint(targetAngle);
         drivePID.enable();
@@ -2057,7 +2065,7 @@ public class PoseSkystone {
      */
     public void setZeroHeading(){
         setHeading(0);
-        turret.setTurntableAngle(0);
+        turret.setHeading(0);
     }
 
     /**

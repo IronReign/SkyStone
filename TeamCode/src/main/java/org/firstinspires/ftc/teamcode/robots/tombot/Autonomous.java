@@ -80,9 +80,9 @@ public class Autonomous {
 
             //adjust turret if needed to point to correct stone
             .addMineralState(mineralStateProvider,
-                    () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
+                    () -> { robot.turret.rotateIMUTurret(270+15,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
                     () -> true,
-                    () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+                    () -> { robot.turret.rotateIMUTurret(270-15,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
 
             //position gripper over
             .addState(() ->robot.crane.extendToPosition(2160,.7,90))
@@ -99,8 +99,8 @@ public class Autonomous {
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //rotate north
-            .addState(() -> (robot.rotateIMU(0.0, 3)))
-            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(350.0, 3)))
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //drive to foundation
             .addState(() -> (robot.driveIMUDistance(.6,0.0,true,1.95)))
@@ -133,7 +133,7 @@ public class Autonomous {
 
 
             //retract to go back to foundation
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addTimedState(20f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> (robot.returnFromBlock(2)))
 
             //slam duncc
