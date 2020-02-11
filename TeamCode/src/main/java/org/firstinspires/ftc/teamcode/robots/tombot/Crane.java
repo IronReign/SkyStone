@@ -583,7 +583,7 @@ public class Crane {
         else return false;
     }
     public boolean nearTargetElbow(){
-        if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<15) return true;
+        if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<55) return true;
         else return false;
     }
     public boolean nearTarget(){

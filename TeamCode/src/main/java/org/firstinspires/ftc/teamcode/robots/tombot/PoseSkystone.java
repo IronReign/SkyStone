@@ -963,7 +963,7 @@ public class PoseSkystone {
 
         //drive North (forward)
         double dist = stoneNumber * stoneLengthMeters +foundationToNearestStoneMeters;
-        if (driveIMUDistance(.6,0.0,true, dist)) {
+        if (driveIMUDistance(.6,0.0,true, dist+.2)) {
             return true;
         }
 
@@ -996,8 +996,8 @@ public class PoseSkystone {
                 if (driveIMUDistance(.4,0.0,false,2.2)) {
                     return true;
                 }
-                break;//ur mom gae lol
-            case 3://NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
+                break;
+            case 3:
                 if(driveIMUDistance(.4,0.0,false,2)) {
                     return true;
                 }
@@ -1159,7 +1159,7 @@ public class PoseSkystone {
     public boolean retrieveStoneTower(){
         switch(craneArticulation){
             case 0:
-                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
+                //if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
                 crane.extendToPosition(445,1.0,20);
                 retreiveTimer2 = futureTime(1);
                 craneArticulation++;
@@ -1315,12 +1315,11 @@ public class PoseSkystone {
                 retractBlockAutonStage++;
                 break;
             case (1):
-
-                if (crane.setElbowTargetAngle(450)) {
+                //if (crane.setElbowTargetAngle(450)) {
                     retractTimer3 = futureTime(0f);
 
                     retractBlockAutonStage++;
-                }
+                //}
 
                 break;
             case (2):

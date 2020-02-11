@@ -284,7 +284,9 @@ public class Turret{
             turnTimer = System.nanoTime() + (long)(maxTime * (long) 1e9);
             turnTimerInit = true;
         }
-        movePIDTurret(kpTurret, kiTurret, kdTurret, turretHeading, targetAngle);
+        if (isMaintainingHeading) setTurntableAngle(targetAngle);
+        else movePIDTurret(kpTurret, kiTurret, kdTurret, turretHeading, targetAngle);
+
         //check to see if the robot turns within a threshold of the target
         if(Math.abs(turretHeading - targetAngle) < minTurnError) {
             turnTimerInit = false;

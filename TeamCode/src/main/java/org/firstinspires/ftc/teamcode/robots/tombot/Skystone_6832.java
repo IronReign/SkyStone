@@ -424,14 +424,15 @@ public class Skystone_6832 extends LinearOpMode {
             stateSwitch();
             if (active) {
                 switch (state) {
-                    case 0: //code for tele-op control
-                        joystickDrive();
+                    case 0: //auton full
+                        if (auto.redAutoFull.execute()) active = false;
+
                         break;
 //                    case 1: //autonomous that goes to opponent's crater
 //                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
 //                        break;
-                    case 1: //autonomous that only samples
-                        if (auto.redAutoFull.execute()) active = false;
+                    case 1: //teleop
+                        joystickDrive();
                         //if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
