@@ -12,7 +12,19 @@ public class SkystoneTargetInfo {
     double errorY;
     boolean finished = false;
 
-    public SkystoneTargetInfo(){
+    public SkystoneTargetInfo() {
 
+    }
+
+    public SkystoneTargetInfo(double centroidX, double centroidY, double width, double height, StonePos quarryPosition){
+        this.centroidX = centroidX;
+        this.centroidY = centroidY;
+        this.width = width;
+        this.height = height;
+        this.quarryPosition = quarryPosition;
+    }
+
+    public String toString() {
+        return String.format("x: %.2f, y: %.2f, width: %.2f, height: %.2f, quarryPosition: %s", centroidX, centroidY, width, height, quarryPosition);
     }
 }
