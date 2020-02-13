@@ -35,6 +35,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.ftccommon.SoundPlayer;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -51,7 +52,7 @@ import static org.firstinspires.ftc.teamcode.PoseBigWheel.servoNormalize;
 /**
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
  */
-
+@Disabled
 @TeleOp(name = "Game_6832", group = "Challenge")  // @Autonomous(...) is the other common choice
 //  @Autonomous
 public class Game_6832 extends LinearOpMode {

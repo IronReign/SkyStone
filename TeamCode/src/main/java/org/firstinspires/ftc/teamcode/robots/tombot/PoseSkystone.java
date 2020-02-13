@@ -720,12 +720,12 @@ public class PoseSkystone {
                 retractFromBlockAuton();
                 break;
             case cardinalBaseLeft:
-                if (quadrentBaseLeft()) {
+                if (cardinalBaseTurn(false)) {
                     articulation = Articulation.manual;
                 }
                 break;
             case cardinalBaseRight:
-                if (quadrentBaseRight()) {
+                if (cardinalBaseTurn(true)) {
                     articulation = Articulation.manual;
                 }
                 break;
@@ -1349,24 +1349,29 @@ public class PoseSkystone {
     }
 
 
-    boolean isInProgress = false;
-    public boolean quadrentBaseRight(){
-        isInProgress = true;
-        if(rotateIMU(nextCardinal(getHeading(),true, 10),3)){
-            isInProgress = false;
+    boolean isNavigating = false;
+    boolean autonTurnInitialized = false;
+    double autonTurnTarget = 0.0;
+
+    //this is driver interruptible if they set isNavigating back to false
+    public boolean cardinalBaseTurn(boolean isRightTurn){
+        if (!autonTurnInitialized) {
+            autonTurnTarget = nextCardinal(getHeading(),isRightTurn, 10);
+            autonTurnInitialized = true;
+            isNavigating = true;
+        }
+
+        if (isNavigating==false) return true; //abort if drivers override
+
+        if(rotateIMU(autonTurnTarget,3.0)){
+            isNavigating = false;
+            autonTurnInitialized = false;
             return true;
         }
         return false;
     }
 
-    public boolean quadrentBaseLeft(){
-        isInProgress = true;
-        if(rotateIMU(nextCardinal(getHeading(),false, 10),3)){
-            isInProgress = false;
-            return true;
-        }
-        return false;
-    }
+
 
     public int getMiniStateRetTow(){return miniStateRetTow;}
 

@@ -33,6 +33,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode.robots.TestBot;
 
 import com.qualcomm.ftccommon.SoundPlayer;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -50,6 +51,7 @@ import org.firstinspires.ftc.teamcode.util.Conversions;
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
  */
 
+@Disabled
 @TeleOp(name = "Skystone_6832_old", group = "Challenge")  // @Autonomous(...) is the other common choice
 //  @Autonomous
 public class Skystone_6832 extends LinearOpMode {

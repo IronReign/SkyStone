@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.robots.handprosthetic;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -53,7 +54,8 @@ import static org.firstinspires.ftc.teamcode.robots.kraken.PoseKraken.servoNorma
  */
 
 @TeleOp(name="RoBoPoGlo", group="Linear Opmode")
-//@Disabled
+
+@Disabled
 public class robopoglo extends LinearOpMode {
 
     // Declare OpMode members.

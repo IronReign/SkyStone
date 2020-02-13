@@ -42,6 +42,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
+import static org.firstinspires.ftc.teamcode.util.Conversions.nearZero;
 import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
 
@@ -596,8 +597,15 @@ public class Skystone_6832 extends LinearOpMode {
         pwrFwd = 0;
         pwrRot = 0;
 
-        pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
-        pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+        if (notdeadzone(gamepad1.left_stick_y)) pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
+        if (notdeadzone(gamepad1.right_stick_x)) pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+
+        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating){}
+        else {
+            robot.isNavigating=false; //take control back if any joystick input is running
+            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
+        }
+
 
         //old mecanum controls
 //        pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
@@ -606,26 +614,8 @@ public class Skystone_6832 extends LinearOpMode {
 //        pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
 //        pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-        boolean pset = false;
-        if(robot.isInProgress) {
-            if(!pset)
-                robot.driveMixerDiffSteer(0, 0);
-        }
-        else {
-            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
-             pset = false;
-        }
-
-
-
-
-
 
         //gamepad1 controls
-
-
-
-
 
 //trigger retractFromTower articulation
         if(toggleAllowed(gamepad1.a,a,1)){
@@ -645,6 +635,7 @@ public class Skystone_6832 extends LinearOpMode {
         //Pad1 Bumbers - Rotate Cardinal
         if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
             robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
+
         }
 
         if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
@@ -653,18 +644,7 @@ public class Skystone_6832 extends LinearOpMode {
 
 
 
-
-
-
-
-
-
-
-
         //gamepad2 controls
-
-
-
 
 
 

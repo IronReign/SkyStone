@@ -3,6 +3,7 @@
 
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,7 +19,7 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
-
+@Config
 public class Turret{
     //motor
     private  DcMotor motor = null;
@@ -40,9 +41,9 @@ public class Turret{
 
     //PID
     PIDController turretPID;
-    private double kpTurret = 0.04; //proportional constant multiplier
-    private double kiTurret = 0.01; //integral constant multiplier
-    private double kdTurret= 0.05; //derivative constant multiplier
+    public static double kpTurret = 0.04; //proportional constant multiplier
+    public static  double kiTurret = 0.08; //integral constant multiplier
+    public static  double kdTurret= 2.05; //derivative constant multiplier
     double correction = 0.00; //correction to apply to turret motor
 
     //IMU

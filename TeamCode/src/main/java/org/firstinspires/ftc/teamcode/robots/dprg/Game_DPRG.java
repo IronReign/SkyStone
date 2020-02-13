@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.robots.dprg;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /**
  * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
  */
-
+@Disabled
 @TeleOp(name = "Game_DPRG", group = "Challenge")  // @Autonomous(...) is the other common choice
 public class Game_DPRG extends LinearOpMode {
 

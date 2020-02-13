@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.RC;
 public class Conversions {
 
     private static double deadzone = 0.2;
+    private static double nearzero = .0000001;
 
     public Conversions(){}
 
@@ -102,6 +103,11 @@ public class Conversions {
     public static boolean notdeadzone(double value){
         if (value> -deadzone && value < deadzone) return false;
         else return true;
+    }
+
+    public static boolean nearZero(double value){
+        if (value> -nearzero && value < nearzero) return true;
+        else return false;
     }
 
     public static double nextCardinal(double currentAngle, boolean right, double hop){

@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.RC;
  * @since 2018-11-02
  */
 
-@Config
+
 public class PoseBigWheel
 {
 
