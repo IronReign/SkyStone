@@ -94,12 +94,12 @@ public class Autonomous {
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //pull away from wall half a meter
-            .addState(() -> (robot.driveIMUDistance(.6,270,true,.530)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.driveIMUDistance(.6,270,true,.520)))//this and ^^^^ put the robot in front of the build plate
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //rotate north
-            .addState(() -> (robot.rotateIMU(350.0, 4)))
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(0.0, 4)))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
 
             //drive to foundation

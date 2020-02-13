@@ -167,7 +167,7 @@ public class Turret{
         motorPwr = power;
     }
 
-    public void rotateCardinal(boolean right){
+    public void rotateCardinalTurret(boolean right){
 
         setTurntableAngle(nextCardinal(getHeading(),right,10));
     }

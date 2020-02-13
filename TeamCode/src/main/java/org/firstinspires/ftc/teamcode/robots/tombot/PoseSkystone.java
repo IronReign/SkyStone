@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController;
 
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
+import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
 /**
@@ -38,9 +39,9 @@ public class PoseSkystone {
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
 
-    public double kpDrive = 0.01; //proportional constant multiplier
+    public double kpDrive = 0.02; //proportional constant multiplier
     public double kiDrive = 0.01; //integral constant multiplier
-    public double kdDrive = 0.003; //derivative constant multiplier //increase
+    public double kdDrive = 2.3; //derivative constant multiplier //increase
 
 
     public static double headingP = 0.007;
@@ -167,6 +168,8 @@ public class PoseSkystone {
         retractFromTower,
         retractFromBlock,
         retractFromBlockAuton,
+        cardinalBaseRight,
+        cardinalBaseLeft,
         shootOut,
         shootOutII,
         recockGripper,
@@ -716,6 +719,16 @@ public class PoseSkystone {
             case retractFromBlockAuton:
                 retractFromBlockAuton();
                 break;
+            case cardinalBaseLeft:
+                if (quadrentBaseLeft()) {
+                    articulation = Articulation.manual;
+                }
+                break;
+            case cardinalBaseRight:
+                if (quadrentBaseRight()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case deploying:
                 //auton unfolding after initial hang - should only be called from the hanging position during auton
                 // ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
@@ -914,7 +927,7 @@ public class PoseSkystone {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    ////                                                                                  ////
+    ////                                                                                             ////
     ////                        Superman/Elbow control functions                          ////
     ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -1335,6 +1348,26 @@ public class PoseSkystone {
         return false;
     }
 
+
+    boolean isInProgress = false;
+    public boolean quadrentBaseRight(){
+        isInProgress = true;
+        if(rotateIMU(nextCardinal(getHeading(),true, 10),3)){
+            isInProgress = false;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean quadrentBaseLeft(){
+        isInProgress = true;
+        if(rotateIMU(nextCardinal(getHeading(),false, 10),3)){
+            isInProgress = false;
+            return true;
+        }
+        return false;
+    }
+
     public int getMiniStateRetTow(){return miniStateRetTow;}
 
     //start pos for this is going to be turret 90 degrees left, where the arm is facing the left side of the board
@@ -1746,7 +1779,7 @@ public class PoseSkystone {
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
     ////                                                                                  ////
-    ////                         Drive Platform Differential Mixing Methods                            ////
+    ////                         Drive Platform Differential Mixing Methods               ////
     ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -1797,6 +1830,8 @@ public class PoseSkystone {
     public int getRightMotorTicks(){
         return motorBackRight.getCurrentPosition();
     }
+
+
 
     /**
      * Moves the tank platform under PID control applied to the rotation of the robot. This version can either drive forwards/backwards or strafe.

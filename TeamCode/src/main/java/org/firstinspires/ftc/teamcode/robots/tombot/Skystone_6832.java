@@ -42,9 +42,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 
-import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
+import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
-import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
 
 /**
@@ -562,11 +561,17 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.b,b,1))
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
 
-        if(gamepad1.left_bumper) {
+        if(gamepad1.left_trigger > 0) {
             robot.crane.swivelGripper(false);
         }
-        if(gamepad1.right_bumper) {
+        if(gamepad1.right_trigger > 0) {
             robot.crane.swivelGripper(true);
+        }
+        if(gamepad1.left_bumper) {
+            robot.rotateIMU(nextCardinal(robot.getHeading(),false, 10),1);
+        }
+        if(gamepad1.right_bumper ) {
+            robot.rotateIMU(nextCardinal(robot.getHeading(),true, 10),1);
         }
     }
 
@@ -588,6 +593,9 @@ public class Skystone_6832 extends LinearOpMode {
         reverse=-1;
         pwrDamper = .70;
 
+        pwrFwd = 0;
+        pwrRot = 0;
+
         pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
         pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
@@ -598,20 +606,35 @@ public class Skystone_6832 extends LinearOpMode {
 //        pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
 //        pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-        robot.driveMixerDiffSteer(pwrFwd*pwrDamper, pwrRot);
-
-        //turret controls
-        if(notdeadzone(gamepad2.right_trigger))
-                robot.turret.rotateRight(gamepad2.right_trigger * 5);
-        if(notdeadzone(gamepad2.left_trigger))
-                robot.turret.rotateLeft(gamepad2.left_trigger * 5);
-
-        //Pad1 Bumbers - Rotate Cardinal
-        if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
-                robot.turret.rotateCardinal(true);
+        boolean pset = false;
+        if(robot.isInProgress) {
+            if(!pset)
+                robot.driveMixerDiffSteer(0, 0);
         }
-        if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
-            robot.turret.rotateCardinal(false);
+        else {
+            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
+             pset = false;
+        }
+
+
+
+
+
+
+        //gamepad1 controls
+
+
+
+
+
+//trigger retractFromTower articulation
+        if(toggleAllowed(gamepad1.a,a,1)){
+            robot.articulate(PoseSkystone.Articulation.retractFromTower);
+        }
+
+        if(toggleAllowed(gamepad1.b,b,1)){
+            robot.crane.setElbowTargetPos(250);
+            robot.crane.extendToPosition(1500,1.0,20);
         }
 
         //Foundation Gripper
@@ -619,50 +642,54 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.hookToggle();
         }
 
-        //presets a quick extend out on the arm to get near a stone
-        if(toggleAllowed(gamepad1.b,b,1)){
-            robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(1500,1.0,20);
-            //robot.crane.servoGripper.setPosition(servoNormalize(2200));
+        //Pad1 Bumbers - Rotate Cardinal
+        if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
         }
 
-        //trigger retractFromTower articulation
-        if(toggleAllowed(gamepad1.a,a,1)){
-//            if(robot.crane.getCurrentAngle() < 20)
-//                    robot.articulate(PoseSkystone.Articulation.retrieving);
-//            else
-                robot.articulate(PoseSkystone.Articulation.retractFromTower);
+        if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
         }
 
 
-        if(toggleAllowed(gamepad1.y,y,1)){
-            robot.crane.toggleGripper();
-            //robot.crane.servoGripper.setPosition(servoNormalize(1500));
-        }
 
-        if(toggleAllowed(gamepad2.y,y,2)) {
-            //robot.crane.changeTowerHeight(1);
-        }
 
-        if(toggleAllowed(gamepad2.x,x,2)) {
-            //robot.crane.changeTowerHeight(-1);
-        }
+
+
+
+
+
+
+
+        //gamepad2 controls
+
+
+
+
+
 
         if(toggleAllowed(gamepad2.a,a,2)) {
-            //robot.crane.extendToTowerHeight();
             robot.crane.toggleGripper();
-        }
-
-        if(gamepad2.left_bumper) {
-            robot.crane.swivelGripper(false);
-        }
-
-        if(gamepad2.right_bumper) {
-            robot.crane.swivelGripper(true);
         }
 
         if(toggleAllowed(gamepad2.b,b,2)) {
+            robot.crane.swivelGripper(true);
+        }
+
+        if(toggleAllowed(gamepad2.y,y,2)) {
             robot.crane.toggleSwivel();
+        }
+
+        if(toggleAllowed(gamepad2.x,x,2)) {
+            robot.crane.swivelGripper(false);
+        }
+
+        if(gamepad2.left_bumper) {
+            robot.turret.rotateCardinalTurret(false);
+        }
+
+        if(gamepad2.right_bumper) {
+            robot.turret.rotateCardinalTurret(true);
         }
 
         if (toggleAllowed(gamepad2.dpad_right,dpad_right,2)) {
@@ -693,6 +720,18 @@ public class Skystone_6832 extends LinearOpMode {
         if (notdeadzone(gamepad2.right_stick_x)) {
             robot.turret.adjust(gamepad2.right_stick_x);
         }
+        //turret controls
+        if(notdeadzone(gamepad2.right_trigger))
+            robot.turret.rotateRight(gamepad2.right_trigger * 5);
+
+        if(notdeadzone(gamepad2.left_trigger))
+            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+
+
+
+
+
+
 
 
         robot.crane.update();
@@ -723,10 +762,10 @@ public class Skystone_6832 extends LinearOpMode {
 
         //Pad1 Bumbers - Rotate Cardinal
         if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
-            robot.turret.rotateCardinal(true);
+            robot.turret.rotateCardinalTurret(true);
         }
         if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
-            robot.turret.rotateCardinal(false);
+            robot.turret.rotateCardinalTurret(false);
 
         }
         //fine adjustment of turret - this is on gamepad2 right stick in teleop - but on gamepad 1 for prematch setup
