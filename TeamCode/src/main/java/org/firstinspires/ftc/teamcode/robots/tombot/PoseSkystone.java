@@ -39,13 +39,13 @@ public class PoseSkystone {
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
 
-    public double kpDrive = 0.02; //proportional constant multiplier
-    public double kiDrive = 0.01; //integral constant multiplier
-    public double kdDrive = 2.3; //derivative constant multiplier //increase
+    public static double kpDrive = 0.02; //proportional constant multiplier
+    public static double kiDrive = 0.01; //integral constant multiplier
+    public static double kdDrive = 2.3; //derivative constant multiplier //increase
 
 
-    public static double headingP = 0.007;
-    public static double headingD = 0;
+    public double headingP = 0.007;
+    public double headingD = 0;
 
     public double balanceP = .35;
     public double balanceD = 3.1444;
