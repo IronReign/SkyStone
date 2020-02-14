@@ -436,30 +436,28 @@ public class Skystone_6832 extends LinearOpMode {
                         //if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
-                        if (auto.walkOfShameRed.execute()) active = false;
+                        if (auto.walkOfShameRight.execute()) active = false;
                         break;
                     case 4:
-                        if (auto.walkOfShameBlue.execute()) active = false;
+                        if (auto.walkOfShameLeft.execute()) active = false;
                         break;
                     case 5:
                         if (auto.autoMethodTesterTool.execute()) active = false;
                         break;
                     case 6:
-//                        if(auto.visionTest.execute()) active = false;
-                        break;
-                    case 7:
-                        tpmtuning();
-                        break;
-                    case 8: //turn to IMU
                         demo();
                         break;
+                    case 7:
+
+                        break;
+                    case 8:
+
+                        break;
                     case 9:
-//                        if (auto.craterSide_extend_reverse.execute()) active = false;
-                        ledTest();
+
                         break;
                     case 10:
-//                        if (auto.depotSide_worlds.execute()) active = false;
-                        servoTest();
+
                         break;
                     default:
                         robot.stopAll();

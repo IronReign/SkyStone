@@ -106,8 +106,7 @@ public class Autonomous {
 
             //deposit stone
             .addState(() -> robot.turret.rotateIMUTurret(270,3))//deposit stone
-            .addState(() ->robot.crane.extendToPosition(400,1,10))
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() ->robot.crane.extendToPosition(700,1,10))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
@@ -142,211 +141,56 @@ public class Autonomous {
             .addState(() -> (robot.crane.setElbowTargetPos(80,1)))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
 
-//            //drive to and hook onto foundation
-//            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-//            .addState(() -> (robot.rotateIMU(270.0, 6)))
-//            .addSingleState(() -> robot.crane.hookOff()) //makes sure the hook is up properly
-//            .addState(() -> (robot.driveForward(true, .09, .30)))
-//            .addSingleState(() -> robot.crane.hookOn())
-//
-//            //backup and try and turn
-//            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-//            .addState(() -> (robot.driveForward(false, .3, .30)))
-//            .addState(() -> (robot.driveIMUDistance(1,0.0,false,.5)))
-//            .addState(() -> (robot.driveIMUDistance(1,0.0,true,.5)))
-//            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-//
-//            //hook off and drive back into the bridge
-//            .addSingleState(() -> robot.crane.hookOff())
-//            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-//            .addState(() -> (robot.driveIMUDistance(.4,0.0,false,1)))
+            //drive to and hook onto foundation
+            .addSingleState(() -> robot.crane.hookOff()) //makes sure the hook is up properly
+            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.driveIMUUntilDistance(.3,0,true,.5)))
+            .addState(() -> (robot.rotateIMU(270.0, 6)))
+            .addState(() -> (robot.driveForward(true, robot.getDistForwardDist(), .30)))
+            .addSingleState(() -> robot.crane.hookOn())
+
+            //backup and try and turn
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            //.addState(() -> (robot.driveForward(false, .3, .30)))
+            .addState(() -> (robot.rotateIMU(0.0, 10)))
+            .addState(() -> (robot.driveIMUDistance(1,0.0,true,.7)))
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            //hook off and drive back into the bridge
+            .addSingleState(() -> robot.crane.hookOff())
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.driveIMUDistance(.4,0.0,false,1)))
             .build();
 
 
-
-    public StateMachine redAutoFullSecondary = getStateMachine(autoStage)
-//            .addTimedState(autoDelay, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-//            .addState(() -> sample())
-            .addState(() -> (robot.crane.setElbowTargetPos(300,.8)))
-            .addState(() -> robot.crane.toggleGripper())
-            .addMineralState(mineralStateProvider,
-                    () -> { robot.turret.rotateIMUTurret(340,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
-            () -> true,
-            () -> { robot.turret.rotateIMUTurret(20,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
-            .addState(() ->robot.crane.extendToPosition(2040,.7,90))
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1))
-            .addState(() -> robot.crane.toggleGripper())
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlock))
-
-            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))// so we make sure everything is stopped
-            .addState(() ->robot.rotateIMU(75, 8))//todo- make this a curve instead of following the hypotenuse
-            .addState(() -> (robot.driveForward(true, 1.91008, .80)))//this and ^^^^ put the robot in front of the build plate
-            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.rotateIMU(90,3);}) //gets the arm and the robot in their correct orientation for depositing
-            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
-            .addState(() -> robot.crane.toggleGripper())//deposit stone
-            .addSingleState(() -> robot.crane.changeTowerHeight(1))
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //note for now this puts the arm at 90
-
-            //todo - this is the first block
-            //this is the stuff that can be copied for each stone sequentially, just adjust the values
-            .addState(() -> (robot.driveForward(false, 1.651, .80)))//puts the robot in front of the block in the quarry
-            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
-            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
-            .addState(() -> robot.crane.toggleGripper()) // yum!
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
-            .addState(() -> (robot.driveForward(true, 1.651, .80))) //goes back to the build platform
-            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
-            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
-            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
-            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
-
-            //todo- this is the second block
-            .addState(() -> (robot.driveForward(false, 2.21996, .80)))//puts the robot in front of the block in the quarry
-            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
-            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
-            .addState(() -> robot.crane.toggleGripper()) // yum!
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
-            .addState(() -> (robot.driveForward(true, 2.21996, .80))) //goes back to the build platform
-            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
-            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
-            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
-            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
-
-            //todo- this is the third block
-            .addState(() -> (robot.driveForward(false, 2.39776, .80)))//puts the robot in front of the block in the quarry
-            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
-            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
-            .addState(() -> robot.crane.toggleGripper()) // yum!
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
-            .addState(() -> (robot.driveForward(true, 2.39776, .80))) //goes back to the build platform
-            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
-            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
-            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
-            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
-
-            //todo- this is the 4th block
-            .addState(() -> (robot.driveForward(false, 2.62636, .80)))//puts the robot in front of the block in the quarry
-            .addState(() ->{robot.turret.rotateIMUTurret(0,3); return robot.crane.setElbowTargetPos(40,.1);})//sets the arm up to be extended over the block
-            .addState(() ->robot.crane.extendToPosition(2200,.7,90)) //puts the arm over the bolck
-            .addState(() ->robot.crane.setElbowTargetPos(40,.1)) //crumch block
-            .addState(() -> robot.crane.toggleGripper()) // yum!
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE")) //note that this is necessary for the toggle gripper to work
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //see line 135
-            .addState(() -> (robot.driveForward(true, 2.62636, .80))) //goes back to the build platform
-            .addState(() ->robot.turret.rotateIMUTurret(0,3)) //makes the turret face the build plate
-            .addTimedState(10f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation))
-            .addState(() -> robot.crane.toggleGripper()) //de-crompvch
-            .addSingleState(() -> robot.crane.changeTowerHeight(1)) //incements the tower height by 1 for the next block
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower)) //restarts it in the original position of this block
-
-            //the ending sequnce todo- test how this actually should funtion
-            .addState(() ->{robot.turret.rotateIMUTurret(270,3); return robot.rotateIMU(0,3);}) // sets the robot facing the build plate and the arm in the most convinent position
-            .addState(() -> (robot.driveForward(true, .1, .2))) //goes up to the build plate
-            .addSingleState(() -> robot.crane.hookOn()) //idk what this does
-            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveForward(false, 1, .2)))//drives back to the edge of the field
-            .addState(() ->robot.rotateIMU(90, 8))//yeets the build plate in the corner
-            .addSingleState(() -> robot.crane.hookOff())//seriously what does this do? if only the name of the method gave me some sort of indication
-            .addState(() ->robot.rotateIMU(90, 8)) //faces the back of the robot to the bridge
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))//puts it in position to go under the bridge
-            .addState(() -> (robot.driveForward(false, 1, .2))) // drives back and parks
+    public StateMachine walkOfShameLeft = getStateMachine(autoStage)
+            .addState(() -> (robot.turret.rotateIMUTurret(robot.turret.getHeading()-90,3)))
             .build();
 
-    public StateMachine primaryRedOld = getStateMachine(autoStage)
-            //pick up stone
-            .addState(() -> (robot.driveForward(true, .106, .80)))
-            .addState(() ->robot.crane.setElbowTargetPos(340,1.0))
-            .addState(() ->{robot.crane.extendToPosition(2000,1,8); return robot.crane.ejectStone();})
-            .addState(() ->robot.crane.setElbowTargetPos(40,1.0))
-            .addTimedState(5, //yeet ducky
-                    () -> robot.crane.grabStone(),
-                    () -> robot.crane.grabStone())
-            .addState(() ->robot.crane.extendToPosition(100,1,20))
-            .addState(() ->robot.crane.setElbowTargetPos(340,1))
 
-            .addState(() -> (robot.rotateIMU(90, 4))) //rotate back toward building zone - stay in 2nd column
-            .addState(() -> (robot.driveForward(true, .14, .80))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
-            .addState(() -> (robot.rotateIMU(0, 3))) //turn back to foundation
-            //deposit stones
-            .addState(() -> {robot.crane.extendToPosition(100,.8,5); return robot.crane.setElbowTargetPos(100,1.0);})
-            .addState(() ->robot.crane.ejectStone())
-
-//            //park
-//            .addState(() -> (robot.rotateIMU(270, 3)))
-//            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
-//            .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
-//            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
-            .build();
-
-    public StateMachine walkOfShameRed = getStateMachine(autoStage)
-            .addState(() -> (robot.rotateIMU(270, 3)))
+    public StateMachine walkOfShameRight = getStateMachine(autoStage)
+            .addState(() -> (robot.turret.rotateIMUTurret(robot.turret.getHeading()+90,3)))
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage)
-//            .addState(() -> (robot.rotateIMU(90, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(180, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(270, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(0, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(270, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(180, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(90, 4)))
-////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-////            .addState(() -> (robot.rotateIMU(0, 4)))
-            //.addState(() -> (robot.driveIMUDistance(1,0,false,2.5)))
-            .addState(() -> (robot.rotateIMU(0, 10)))
-            .addState(() -> (robot.driveIMUDistance(1,0,true,2.5)))
-            .build();
-
-    public StateMachine walkOfShameBlue = getStateMachine(autoStage)
-            //.addState(() -> (robot.driveForward(true, 68.8, .80))) //forward to 2nd column of tiles
-            .addState(() ->robot.crane.setElbowTargetPos(-10,1))
             .addState(() -> (robot.rotateIMU(90, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(180, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(270, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(0, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(270, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(180, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(90, 4)))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(0, 4)))
             .build();
 
-    public StateMachine primaryBlueOld = getStateMachine(autoStage)
-            .addState(() -> (robot.driveForward(true, .608, .80))) //forward to 2nd column of tiles
-            .addState(() -> (robot.rotateIMU(90, 4))) // rotate toward audience
-            .addState(() -> (robot.driveForward(true, .5, .80))) //forward to wall - todo: change to stop with distance sensor insteasd of odometry
-            .addState(() -> (robot.rotateIMU(0, 4))) //rotate back toward facing quarry
-            //pick up skystone
-            .addState(() -> (robot.rotateIMU(270, 4))) //rotate back toward building zone - stay in 2nd column
-            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
-            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until upward sensor detect transit of sky bridge - for now continuing until we are past bridge under odometry
-            .addState(() ->robot.crane.setElbowTargetPos(1500,1.0)) //todo: should be an articulation to raise crane to current tower level - for now just raising a fair bit
-            .addState(() -> (robot.driveForward(true, 1.3, .80))) //todo: should continue until proximity from back wall detected
-            .addState(() -> (robot.rotateIMU(0, 3))) //turn back to foundation
-            //deposit stones
-            .addState(() -> (robot.rotateIMU(90, 3)))
-            .addState(() ->robot.crane.setElbowTargetPos(3200,1.0)) //todo: should be an articulation to bridgetransit - for now lowering arm to known position to go under bridge
-            .addState(() -> (robot.driveForward(true, 2.5, .80))) //return to center set of quarry stones
-            .addState(() -> (robot.rotateIMU(0, 3))) //turn toward stones - should be a turret operation
-            .build();
+
 
 
 

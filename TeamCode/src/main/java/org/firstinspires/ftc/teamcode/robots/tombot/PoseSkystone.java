@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
@@ -520,9 +521,18 @@ public class PoseSkystone {
 
     public void updateSensors(boolean isActive) {
         update(imu, 0, 0, isActive);
+
     }
 
-
+    public double getDistForwardDist() {
+        return distForward.getDistance(DistanceUnit.METER);
+    }
+    public double getDistLeftDist() {
+        return distLeft.getDistance(DistanceUnit.METER);
+    }
+    public double getDistRightDist() {
+        return distRight.getDistance(DistanceUnit.METER);
+    }
 
     /**
      * Stops all motors on the robot
@@ -561,7 +571,7 @@ public class PoseSkystone {
     public boolean driveIMUDistance(double pwr, double targetAngle, boolean forward, double targetMeters) {
 
 
-        if (!driveIMUDistanceInitialzed){
+        if (!driveIMUDistanceInitialzed) {
             //set what direction the robot is supposed to be moving in for the purpose of the field position calculator
 
             //calculate the target position of the drive motors
@@ -573,8 +583,7 @@ public class PoseSkystone {
             moveMode = moveMode.backward;
             targetMeters = -targetMeters;
             pwr = -pwr;
-        }
-        else moveMode = moveMode.forward;
+        } else moveMode = moveMode.forward;
 
         //if this statement is true, then the robot has not achieved its target position
         if (Math.abs(driveIMUDistanceTarget) > Math.abs(getAverageTicks())) {
@@ -584,12 +593,32 @@ public class PoseSkystone {
         }//destination achieved
         else {
 //            stopAll();
-            driveMixerDiffSteer(0,0);
-            driveIMUDistanceInitialzed=false;
+            driveMixerDiffSteer(0, 0);
+            driveIMUDistanceInitialzed = false;
             return true;
         }
+    }
 
+        public boolean driveIMUUntilDistance(double pwr, double targetAngle, boolean forward, double targetMetersAway) {
 
+            if (!forward) {
+                moveMode = moveMode.backward;
+                pwr = -pwr;
+            }
+            else moveMode = moveMode.forward;
+
+            //if this statement is true, then the robot has not achieved its target position
+            if (Math.abs(targetMetersAway) > Math.abs(getDistForwardDist())) {
+                //driveIMU(Kp, kiDrive, kdDrive, pwr, targetAngle);
+                driveIMU(kpDrive, kiDrive, kdDrive, pwr, targetAngle, false);
+                return false;
+            }//destination achieved
+            else {
+//            stopAll();
+                driveMixerDiffSteer(0,0);
+                driveIMUDistanceInitialzed=false;
+                return true;
+            }
 //        long targetPos = (long)(targetMeters * forwardTPM);
 //        if(Math.abs(targetPos) > Math.abs(getAverageTicks())){//we've not arrived yet
 //            driveMixerDiffSteer(power,0);
@@ -1933,6 +1962,12 @@ public class PoseSkystone {
     }
 
 
+    public void driveDriftCorrect(double driftance, double origialDist, double pwr, boolean forward){
+        double correctionAngle;
+        if(forward) correctionAngle = Math.acos(origialDist/driftance);
+        else correctionAngle = 360.0 - Math.acos(origialDist/driftance);
+        driveIMUDistance(pwr,correctionAngle,forward, Math.sqrt(  Math.pow(origialDist,2)+Math.pow(driftance,2)  ));
+    }
 
 
         /**
