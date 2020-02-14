@@ -103,8 +103,7 @@ public class SkystoneOpenCVTest extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        initializeVision(hardwareMap, Viewpoint.WEBCAM);
-        pipeline = new SkystoneGripPipeline();
+        pipeline = new SkystoneGripPipeline(hardwareMap);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -115,29 +114,15 @@ public class SkystoneOpenCVTest extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            if (!q.isEmpty()) {
-
-                try {
-                    frame = q.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                Image img = VisionUtils.getImageFromFrame(frame, PIXEL_FORMAT.RGB565);
-                Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
-                bm.copyPixelsFromBuffer(img.getPixels());
-
-                Mat mat = new Mat(bm.getWidth(), bm.getHeight(), CvType.CV_8UC4);
-                Utils.bitmapToMat(bm, mat);
-
-                mat = pipeline.process(mat);
+            Mat output = pipeline.process();
+            if(!(output == null)) {
+                Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
+                Utils.matToBitmap(output, bm);
 
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Position", pipeline.info.toString());
 
-                Bitmap final_bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
-                Utils.matToBitmap(mat, final_bm);
-
-                dashboard.sendImage(final_bm);
+                dashboard.sendImage(bm);
                 dashboard.sendTelemetryPacket(packet);
             }
 

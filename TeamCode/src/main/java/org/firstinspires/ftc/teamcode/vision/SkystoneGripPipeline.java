@@ -1,6 +1,21 @@
 package org.firstinspires.ftc.teamcode.vision;
 
+import android.graphics.Bitmap;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.vuforia.Image;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
+
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.BlobStats;
+import org.firstinspires.ftc.teamcode.util.VisionUtils;
+import org.opencv.android.Utils;
 import org.opencv.core.*;
 import org.opencv.features2d.Features2d;
 import org.opencv.features2d.SimpleBlobDetector;
@@ -9,6 +24,7 @@ import org.opencv.imgproc.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * GripPipeline class.
@@ -25,81 +41,121 @@ public class SkystoneGripPipeline {
     private Mat hsvThresholdOutput = new Mat();
     private Mat contoursOutput = new Mat();
 
+    //vuforia
+    private VuforiaLocalizer vuforia;
+    private BlockingQueue<VuforiaLocalizer.CloseableFrame> q;
+    private FtcDashboard dashboard;
+    VuforiaLocalizer.CloseableFrame frame;
+
     //Statistics
-    List<BlobStats> blobs = new ArrayList<BlobStats>();
-    List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-    SkystoneTargetInfo info = new SkystoneTargetInfo();
+    public List<BlobStats> blobs = new ArrayList<BlobStats>();
+    public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
+    public SkystoneTargetInfo info = new SkystoneTargetInfo();
 
     //need to be tuned
     private static final int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
 
+    public SkystoneGripPipeline(HardwareMap hardwareMap) {
+        initVuforia(hardwareMap, Viewpoint.WEBCAM);
+        q = vuforia.getFrameQueue();
+        dashboard = FtcDashboard.getInstance();
+    }
+
+    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+        if (viewpoint == Viewpoint.BACK)
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        else if (viewpoint == Viewpoint.WEBCAM)
+            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        else
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(1);
+    }
+
     /**
      * This is the primary method that runs the entire pipeline and updates the outputs.
      */
-    public Mat process(Mat source0) {
-
-        // Step Blur0:
-        Mat blurInput = source0;
-        BlurType blurType = BlurType.get("Gaussian Blur");
-        double blurRadius = 19.81981981981982;
-        blur(blurInput, blurType, blurRadius, blurOutput);
-
-        // Step crop:
-        Mat cropInput = blurOutput.clone();
-        cropOutput = crop(cropInput, new Point(161, 181), new Point(600, 328));
-
-        // Step HSV_Threshold0:
-        Mat hsvThresholdInput = cropOutput;
-        double[] hsvThresholdHue = {0.0, 180.0};
-        double[] hsvThresholdSaturation = {0.0, 255.0};
-        double[] hsvThresholdValue = {4.586330935251798, 91.86868686868685};
-        hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
-
-        // Filter contours by area and resize to fit the original image size
-
-        Mat contoursInput = hsvThresholdOutput;
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        List<BlobStats> blobs = new ArrayList<BlobStats>();
-
-        Imgproc.findContours(contoursInput, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        // Find max contour area
-        double maxArea = 0;
-        Iterator<MatOfPoint> each = contours.iterator();
-        while (each.hasNext()) {
-            MatOfPoint wrapper = each.next();
-            double area = Imgproc.contourArea(wrapper);
-            if (area > maxArea)
-                maxArea = area;
-        }
-
-        // Filter contours by area and resize to fit the original image size
-        mContours.clear();
-        each = contours.iterator();
-        while (each.hasNext()) {
-            MatOfPoint contour = each.next();
-            if (Imgproc.contourArea(contour) > 0.1*maxArea) {
-                Core.multiply(contour, new Scalar(4,4), contour);
-                mContours.add(contour);
-                Moments p = Imgproc.moments(contour, false);
-                int x = (int) (p.get_m10() / p.get_m00());
-                int y = (int) (p.get_m01() / p.get_m00());
-                double area = Imgproc.contourArea(contour);
-                org.opencv.core.Rect blobBox = Imgproc.boundingRect(contour);
-                BlobStats blob = new BlobStats(p,x,y,blobBox.width,blobBox.height,area);
-                blobs.add(blob); //put it in the List
-                Imgproc.circle(hsvThresholdOutput, new Point(x, y), 5, new Scalar(0, 255, 0, 255), 5);
+    public Mat process() {
+        if (!q.isEmpty()) {
+            try {
+                frame = q.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            Imgproc.drawContours(hsvThresholdOutput, mContours, -1, new Scalar(0, 255, 0, 255), 3);
+            Image img = VisionUtils.getImageFromFrame(frame, PIXEL_FORMAT.RGB565);
+            Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
+            bm.copyPixelsFromBuffer(img.getPixels());
+
+            Mat mat = new Mat(bm.getWidth(), bm.getHeight(), CvType.CV_8UC4);
+            Utils.bitmapToMat(bm, mat);
+
+            // Step Blur0:
+            Mat blurInput = mat;
+            BlurType blurType = BlurType.get("Gaussian Blur");
+            double blurRadius = 19.81981981981982;
+            blur(blurInput, blurType, blurRadius, blurOutput);
+
+            // Step crop:
+            Mat cropInput = blurOutput.clone();
+            cropOutput = crop(cropInput, new Point(130, 225), new Point(564, 371));
+
+            // Step HSV_Threshold0:
+            Mat hsvThresholdInput = cropOutput;
+            double[] hsvThresholdHue = {0.0, 180.0};
+            double[] hsvThresholdSaturation = {0.0, 255.0};
+            double[] hsvThresholdValue = {4.586330935251798, 91.86868686868685};
+            hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
+
+            // Filter contours by area and resize to fit the original image size
+
+            Mat contoursInput = hsvThresholdOutput;
+            List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+            List<BlobStats> blobs = new ArrayList<BlobStats>();
+
+            Imgproc.findContours(contoursInput, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            // Find max contour area
+            double maxArea = 0;
+            Iterator<MatOfPoint> each = contours.iterator();
+            while (each.hasNext()) {
+                MatOfPoint wrapper = each.next();
+                double area = Imgproc.contourArea(wrapper);
+                if (area > maxArea)
+                    maxArea = area;
+            }
+
+            // Filter contours by area and resize to fit the original image size
+            mContours.clear();
+            each = contours.iterator();
+            while (each.hasNext()) {
+                MatOfPoint contour = each.next();
+                if (Imgproc.contourArea(contour) > 0.1 * maxArea) {
+                    Core.multiply(contour, new Scalar(4, 4), contour);
+                    mContours.add(contour);
+                    Moments p = Imgproc.moments(contour, false);
+                    int x = (int) (p.get_m10() / p.get_m00());
+                    int y = (int) (p.get_m01() / p.get_m00());
+                    double area = Imgproc.contourArea(contour);
+                    org.opencv.core.Rect blobBox = Imgproc.boundingRect(contour);
+                    BlobStats blob = new BlobStats(p, x, y, blobBox.width, blobBox.height, area);
+                    blobs.add(blob); //put it in the List
+                    Imgproc.circle(hsvThresholdOutput, new Point(x, y), 5, new Scalar(0, 255, 0, 255), 5);
+                }
+                Imgproc.drawContours(hsvThresholdOutput, mContours, -1, new Scalar(0, 255, 0, 255), 3);
+            }
+
+            BlobStats mainBlob = blobs.get(blobs.size() - 1);
+            StonePos pos = (mainBlob.x <= LEFT_BOUND ? StonePos.SOUTH : (mainBlob.x >= RIGHT_BOUND ? StonePos.NORTH : StonePos.MIDDLE));
+
+            info = new SkystoneTargetInfo(mainBlob.x, mainBlob.y, mainBlob.width, mainBlob.height, pos);
+
+            this.blobs = blobs;
+            return hsvThresholdOutput;
         }
-
-        BlobStats mainBlob = blobs.get(blobs.size() - 1);
-        StonePos pos = (mainBlob.x <= LEFT_BOUND ? StonePos.SOUTH : (mainBlob.x >= RIGHT_BOUND ? StonePos.NORTH : StonePos.MIDDLE));
-
-        info = new SkystoneTargetInfo(mainBlob.x, mainBlob.y, mainBlob.width, mainBlob.height, pos);
-
-        this.blobs = blobs;
-        return hsvThresholdOutput;
+        return null;
     }
 
     /**
@@ -203,6 +259,4 @@ public class SkystoneGripPipeline {
         Rect cropRect = new Rect(topLeftCorner, bottomRightCorner);
         return new Mat(image, cropRect);
     }
-
-
 }

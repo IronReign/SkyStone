@@ -1,15 +1,21 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import android.graphics.Bitmap;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
+import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
 import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
 import org.firstinspires.ftc.teamcode.vision.VisionProviderSkystoneByMaheshMaybe;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
@@ -70,6 +76,23 @@ public class Autonomous {
 //            .build();
 
 
+
+    public StateMachine visionTest = getStateMachine(autoStage)
+            .addState(() ->  {
+                Mat output = robot.pipeline.process();
+
+                if(!(output == null)) {
+                    Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
+                    Utils.matToBitmap(output, bm);
+
+                    TelemetryPacket packet = new TelemetryPacket();
+                    packet.put("Position", robot.pipeline.info.toString());
+
+                    robot.dashboard.sendImage(bm);
+                    robot.dashboard.sendTelemetryPacket(packet);
+                }
+                return false;
+            }).build();
 
     public StateMachine redAutoFull = getStateMachine(autoStage)
             //open and align gripper for 1st skystone
