@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
+import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.util.BlobStats;
 import org.firstinspires.ftc.teamcode.util.VisionUtils;
 import org.opencv.android.Utils;
@@ -50,7 +51,7 @@ public class SkystoneGripPipeline {
     //Statistics
     public List<BlobStats> blobs = new ArrayList<BlobStats>();
     public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-    public SkystoneTargetInfo info = new SkystoneTargetInfo();
+    public SkystoneTargetInfo info;
 
     //need to be tuned
     private static final int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
@@ -59,6 +60,8 @@ public class SkystoneGripPipeline {
         initVuforia(hardwareMap, Viewpoint.WEBCAM);
         q = vuforia.getFrameQueue();
         dashboard = FtcDashboard.getInstance();
+        info = new SkystoneTargetInfo();
+        info.setQuarryPosition(StonePos.NONE_FOUND);
     }
 
     private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {

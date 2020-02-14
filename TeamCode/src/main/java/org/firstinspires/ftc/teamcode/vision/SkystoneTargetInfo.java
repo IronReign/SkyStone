@@ -27,4 +27,12 @@ public class SkystoneTargetInfo {
     public String toString() {
         return String.format("x: %.2f, y: %.2f, width: %.2f, height: %.2f, quarryPosition: %s", centroidX, centroidY, width, height, quarryPosition);
     }
+
+    public StonePos getQuarryPosition() {
+        return quarryPosition;
+    }
+
+    public void setQuarryPosition(StonePos quarryPosition) {
+        this.quarryPosition = quarryPosition;
+    }
 }

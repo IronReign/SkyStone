@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
+import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
 import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
@@ -56,16 +57,27 @@ public class Autonomous {
 
 
     private boolean sample() {
-        //Turn on camera to see which is gold
-//        SkystonePos pos = vps.detect();
-        // Hold state lets us know that we haven't finished looping through detection
-            telemetry.addData("Vision Detection", "GoldPos: %.2f", 0.0);
-            //vps.shutdownVision();
+        robot.pipeline.process();
+        StonePos quarryPosition = robot.pipeline.info.getQuarryPosition();
+        if(!quarryPosition.equals(StonePos.NONE_FOUND)) {
+            switch (quarryPosition) {
+                case SOUTH:
+                    mineralState = 0;
+                    break;
+                case MIDDLE:
+                    mineralState = 1;
+                    break;
+                case NORTH:
+                    mineralState = 2;
+                    break;
+                default:
+                    mineralState = 1;
+                    break;
+            }
             return true;
-//        else {
-//            telemetry.addData("Vision Detection", "HOLD_STATE (still looping through internally)");
-//            return false;
-//
+        } else
+            return false;
+
     }
 
 //    public StateMachine visionTest = getStateMachine(autoStage)
