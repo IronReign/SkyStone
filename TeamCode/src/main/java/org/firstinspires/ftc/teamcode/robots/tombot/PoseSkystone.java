@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
@@ -39,6 +41,7 @@ public class PoseSkystone {
     //setup
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
+    FtcDashboard dashboard;
 
     public static double kpDrive = 0.02; //proportional constant multiplier
     public static double kiDrive = 0.01; //integral constant multiplier
@@ -140,9 +143,7 @@ public class PoseSkystone {
     private int craneArticulation = 0;
 
     //vision related
-//    VisionProviderSkystoneByMaheshMaybe vps;
-//    public SkystonePos pos = SkystonePos.NONE_FOUND;
-//    public double xPos = 0;
+    public SkystoneGripPipeline pipeline;
 
     public enum MoveMode {
         forward,
@@ -386,12 +387,10 @@ public class PoseSkystone {
         imu.initialize(parametersIMU);
 
         //initialize vision
-        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
-         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        pipeline = new SkystoneGripPipeline(hwMap);
 
-        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
-        parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
-//        vps = new VisionProviderSkystoneByMaheshMaybe(ClassFactory.getInstance().createVuforia(parameters));
+        //dashboard
+        dashboard = FtcDashboard.getInstance();
     }
 
     public void resetIMU() {

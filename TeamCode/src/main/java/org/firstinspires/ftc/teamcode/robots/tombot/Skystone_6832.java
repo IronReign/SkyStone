@@ -445,7 +445,11 @@ public class Skystone_6832 extends LinearOpMode {
                         if (auto.autoMethodTesterTool.execute()) active = false;
                         break;
                     case 6:
+<<<<<<< HEAD
                         demo();
+=======
+                        if(auto.visionTest.execute()) active = false;
+>>>>>>> origin/master
                         break;
                     case 7:
 
