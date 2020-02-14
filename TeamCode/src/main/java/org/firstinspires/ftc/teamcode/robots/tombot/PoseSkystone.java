@@ -42,6 +42,7 @@ public class PoseSkystone {
     public static double kpDrive = 0.02; //proportional constant multiplier
     public static double kiDrive = 0.01; //integral constant multiplier
     public static double kdDrive = 2.3; //derivative constant multiplier //increase
+    public static double cutout = 1.0;
 
 
     public double headingP = 0.007;
@@ -1892,7 +1893,7 @@ public class PoseSkystone {
 
         //initialization of the PID calculator's output range, target value and multipliers
         drivePID.setOutputRange(-.5,.5);
-        drivePID.seIntegralCutIn(3.0);
+        drivePID.seIntegralCutIn(cutout);
         drivePID.setPID(Kp, Ki, Kd);
         drivePID.setSetpoint(targetAngle);
         drivePID.enable();
@@ -2012,11 +2013,12 @@ public class PoseSkystone {
             turnTimerInit = true;
         }
         driveIMU(kpDrive, kiDrive, kdDrive, 0, targetAngle, false); //check to see if the robot turns within a threshold of the target
-        if(Math.abs(poseHeading - targetAngle) < minTurnError) {
-            turnTimerInit = false;
-            driveMixerMec(0,0,0);
-            return true;
-        }
+//        if(Math.abs(poseHeading - targetAngle) < minTurnError) {
+//            turnTimerInit = false;
+//            driveMixerMec(0,0,0);
+//            return true;
+//        }
+
         if(turnTimer < System.nanoTime()){ //check to see if the robot takes too long to turn within a threshold of the target (e.g. it gets stuck)
             turnTimerInit = false;
             driveMixerMec(0,0,0);

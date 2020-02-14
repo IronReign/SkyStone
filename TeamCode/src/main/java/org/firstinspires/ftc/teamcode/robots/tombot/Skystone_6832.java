@@ -602,7 +602,8 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating){}
         else {
-            robot.isNavigating=false; //take control back if any joystick input is running
+            robot.isNavigating=false; //take control back from any auton navigation if any joystick input is running
+            robot.autonTurnInitialized = false;
             robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
         }
 
