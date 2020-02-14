@@ -591,6 +591,8 @@ public class Skystone_6832 extends LinearOpMode {
             reverse = 1;
         }
 
+
+
         reverse=-1;
         pwrDamper = .70;
 
@@ -631,6 +633,12 @@ public class Skystone_6832 extends LinearOpMode {
         //Foundation Gripper
         if(toggleAllowed(gamepad1.x,x,1)){
             robot.crane.hookToggle();
+        }
+
+
+        if(toggleAllowed(gamepad1.y,y,1) && toggleAllowed(gamepad1.dpad_down,dpad_down,1)){
+            robot.crane.servoGripper.setPosition(800);
+
         }
 
         //Pad1 Bumbers - Rotate Cardinal

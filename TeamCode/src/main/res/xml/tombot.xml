@@ -11,12 +11,10 @@
 			<Servo name="intakeServoBack" port="2" />
 			<Servo name="gripperSwivel" port="1" />
 			<Servo name="blinkin" port="4" />
-
 			<AnalogInput name="leftAnalog" port="0" />
 			<AnalogInput name="rightAnalog" port="1" />
 
 			<LynxEmbeddedIMU name="turretIMU" port="0" bus="0" />
-			<REV_VL53L0X_RANGE_SENSOR name="distRight" port="0" bus="2"/>
 		</LynxModule>
 
 		<LynxModule name="Expansion Hub 2" port="2">
@@ -24,8 +22,9 @@
 			<RevRobotics40HDHexMotor name="motorBackRight" port="0" />
 			<RevRobotics40HDHexMotor name="motorBackLeft" port="1" />
 			<LynxEmbeddedIMU name="baseIMU" port="0" bus="0" />
-			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="0" bus="2"/>
-			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="0" bus="3"/>
+			<REV_VL53L0X_RANGE_SENSOR name="distForward" port="3" bus="3"/>
+			<REV_VL53L0X_RANGE_SENSOR name="distRight" port="0" bus="0"/>
+			<REV_VL53L0X_RANGE_SENSOR name="distLeft" port="1" bus="1"/>
 
 		</LynxModule>
 	</LynxUsbDevice>

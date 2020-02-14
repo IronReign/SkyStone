@@ -85,22 +85,20 @@ public class Autonomous {
                     () -> { robot.turret.rotateIMUTurret(270-15,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
 
             //position gripper over
-            .addState(() ->robot.crane.extendToPosition(2130,1,120))
+            .addState(() ->robot.crane.extendToPosition(2170,1,120))
             //drop and snap gripper
-            .addState(() ->robot.crane.setElbowTargetPos(40,1))
+            .addState(() ->robot.crane.setElbowTargetPos(0,1))
 
             //retrieve stone
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlockAuton))
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //pull away from wall half a meter
-            .addState(() -> (robot.driveIMUDistance(.6,270,true,.520)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.driveIMUDistance(.6,270,true,.460)))//this and ^^^^ put the robot in front of the build plate
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //rotate north
             .addState(() -> (robot.rotateIMU(0.0, 4)))
-            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-
 
             //drive to foundation
             .addState(() -> (robot.driveIMUDistance(.6,0.0,true,1.95)))
@@ -320,8 +318,9 @@ public class Autonomous {
 ////            .addState(() -> (robot.rotateIMU(90, 4)))
 ////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 ////            .addState(() -> (robot.rotateIMU(0, 4)))
-            .addState(() -> (robot.driveIMUDistance(.6,0,true,2.5)))
-            .addState(() -> (robot.driveIMUDistance(.6,0,false,2.5)))
+            //.addState(() -> (robot.driveIMUDistance(1,0,false,2.5)))
+            .addState(() -> (robot.rotateIMU(0, 10)))
+            .addState(() -> (robot.driveIMUDistance(1,0,true,2.5)))
             .build();
 
     public StateMachine walkOfShameBlue = getStateMachine(autoStage)
