@@ -2174,6 +2174,10 @@ public class PoseSkystone {
         turret.setHeading(0);
     }
 
+    public void setHeadingBase(double offset){
+        setHeading(360-offset);
+    }
+
     /**
      * assign the current heading of the robot to 45 (robot on field perimeter wall)
      */

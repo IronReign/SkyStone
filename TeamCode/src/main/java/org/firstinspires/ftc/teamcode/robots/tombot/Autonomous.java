@@ -57,7 +57,22 @@ public class Autonomous {
 
 
     private boolean sample() {
-        robot.pipeline.process();
+        Mat output = robot.pipeline.process();
+
+        if(!(output == null)) {
+            Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(output, bm);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("Position", robot.pipeline.info.toString());
+
+            robot.dashboard.sendImage(bm);
+            robot.dashboard.sendTelemetryPacket(packet);
+        } else {
+            telemetry.addData("Status", "output is null");
+            telemetry.update();
+        }
+
         StonePos quarryPosition = robot.pipeline.info.getQuarryPosition();
         if(!quarryPosition.equals(StonePos.NONE_FOUND)) {
             switch (quarryPosition) {
@@ -72,11 +87,14 @@ public class Autonomous {
                     break;
                 default:
                     mineralState = 1;
+                    telemetry.addData("vision shit", "default");
+                    telemetry.update();
                     break;
             }
             return true;
-        } else
+        } else {
             return false;
+        }
 
     }
 
@@ -102,25 +120,37 @@ public class Autonomous {
 
                     robot.dashboard.sendImage(bm);
                     robot.dashboard.sendTelemetryPacket(packet);
+
+                    telemetry.addData("vision shite", () -> robot.pipeline.info.getQuarryPosition());
                 }
                 return false;
             }).build();
 
     public StateMachine redAutoFull = getStateMachine(autoStage)
             //open and align gripper for 1st skystone
+            .addState(() -> (robot.crane.setElbowTargetPos(500,1)))
+            .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1600))
-            //
             .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
+
 
             //adjust turret if needed to point to correct stone
             .addMineralState(mineralStateProvider,
-                    () -> { robot.turret.rotateIMUTurret(270+15,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_left_Block);},
+                    () -> robot.turret.rotateIMUTurret(260,2),
                     () -> true,
-                    () -> { robot.turret.rotateIMUTurret(270-15,.4); return robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right_Block);})
+                    () -> robot.turret.rotateIMUTurret(285,2))
 
-            //position gripper over
-            .addState(() ->robot.crane.extendToPosition(2190,1,120))
+            .addMineralState(mineralStateProvider,
+                    () -> robot.crane.setGripperSwivelRotation(1450),
+                    () -> true,
+                    () -> robot.crane.setGripperSwivelRotation(1700))
+
+            .addMineralState(mineralStateProvider,
+                    () -> robot.crane.extendToPosition(2230,1,130),
+                    () -> robot.crane.extendToPosition(2190,1,120),
+                    () -> robot.crane.extendToPosition(2190,1,120))
+
             //drop and snap gripper
             .addState(() ->robot.crane.setElbowTargetPos(0,1))
 
@@ -130,7 +160,108 @@ public class Autonomous {
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //pull away from wall half a meter
-            .addState(() -> (robot.driveIMUDistance(.6,270,true,.460)))//this and ^^^^ put the robot in front of the build plate
+            .addState(() -> (robot.driveIMUDistance(.6,270,true,.470)))//this and ^^^^ put the robot in front of the build plate
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            //rotate north
+            .addState(() -> (robot.rotateIMU(0.0, 4)))
+
+            //drive to foundation
+            .addState(() -> (robot.driveIMUDistance(.6,0.0,true,1.95)))
+            .addState(() -> (robot.crane.setElbowTargetPosWithSlop(200,50,1)))
+
+            //deposit stone
+            .addState(() -> robot.turret.rotateIMUTurret(270,3))//deposit stone
+            .addState(() ->robot.crane.extendToPosition(1050,1,60))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+//            //drive south to next stone
+//            .addState(() -> (robot.goToBlock(2)))
+//
+//            //position elbow, arm and gripper for oblique pickup
+//            .addState(() -> (robot.rotateIMU(0.0, 4)))
+//            .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
+//            .addState(() -> robot.turret.rotateIMUTurret(230,3))//deposit stone
+//            .addState(() -> robot.crane.setGripperSwivelRotation(1200))
+//            .addState(() ->robot.crane.extendToPosition(1070,1,30))
+//
+//
+//            //grab stone
+//            .addState(() -> (robot.crane.setElbowTargetPos(0,1)))
+//
+//            //grab stone
+//            .addState(() -> (robot.crane.setElbowTargetPos(400,1)))
+//            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlockAuton))
+//            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//
+//            //return to foundation with 2nd stone todo: not tested yet
+//            .addState(() -> (robot.StoneToFoundation(nextAutonStone(1))))
+//
+//            //slam duncc
+//            .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
+//            .addState(() -> robot.turret.rotateIMUTurret(270,3))
+//            .addState(() -> robot.crane.setGripperSwivelRotation(1600))
+//            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//            .addState(() ->robot.crane.extendToPosition(550,.7,10))
+//            .addState(() -> (robot.crane.setElbowTargetPos(80,1)))
+//            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
+
+            //drive to and hook onto foundation
+            .addSingleState(() -> robot.crane.hookOff()) //makes sure the hook is up properly
+            .addState(() -> (robot.driveIMUUntilDistance(.3,0,true,.35)))
+            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.rotateIMU(270.0, 6)))
+            .addState(() -> (robot.driveForward(true, robot.getDistForwardDist()+.07, .30)))
+            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addSingleState(() -> robot.crane.hookOn())
+
+            //backup and try and turn
+            .addState(() -> (robot.driveIMUDistance(.6,340,false,1)))
+            .addState(() -> (robot.driveIMUDistance(.5,0.0,true,.45)))
+
+            //hook off and drive back into the bridge
+            .addSingleState(() -> robot.crane.hookOff())
+            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.driveIMUDistance(.4,45.0,false,1)))
+            .build();
+
+
+
+
+
+
+
+    public StateMachine blueAutoFull = getStateMachine(autoStage)
+            //open and align gripper for 1st skystone
+            .addState(() -> sample())
+            .addState(() -> robot.crane.toggleGripper())
+            .addState(() -> robot.crane.setGripperSwivelRotation(1600))
+            .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
+
+            //adjust turret if needed to point to correct stone
+            .addMineralState(mineralStateProvider,
+                    () -> robot.turret.rotateIMUTurret(105,2),
+                    () -> true,
+                    () -> robot.turret.rotateIMUTurret(75,2))
+            .addMineralState(mineralStateProvider,
+                    () -> robot.crane.setGripperSwivelRotation(1100),
+                    () -> true,
+                    () -> robot.crane.setGripperSwivelRotation(1900))
+
+            //position gripper over
+            .addState(() ->robot.crane.extendToPosition(2190,1,120))
+
+            //drop and snap gripper
+            .addState(() ->robot.crane.setElbowTargetPos(0,1))
+
+            //retrieve stone
+            .addState(() ->robot.crane.setElbowTargetPos(30,1))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlockAuton))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
+            //pull away from wall half a meter
+            .addState(() -> (robot.driveIMUDistance(.6,90,true,.460)))//this and ^^^^ put the robot in front of the build plate
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //rotate north
@@ -141,8 +272,8 @@ public class Autonomous {
             .addState(() -> (robot.crane.setElbowTargetPos(200,1)))
 
             //deposit stone
-            .addState(() -> robot.turret.rotateIMUTurret(270,3))//deposit stone
-            .addState(() ->robot.crane.extendToPosition(750,1,60))
+            .addState(() -> robot.turret.rotateIMUTurret(90,3))//deposit stone
+            .addState(() ->robot.crane.extendToPosition(1050,1,60))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
@@ -180,22 +311,19 @@ public class Autonomous {
             //drive to and hook onto foundation
             .addSingleState(() -> robot.crane.hookOff()) //makes sure the hook is up properly
             .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUUntilDistance(.3,0,true,.5)))
-            .addState(() -> (robot.rotateIMU(270.0, 6)))
+            .addState(() -> (robot.driveIMUUntilDistance(.3,0,true,.45)))
+            .addState(() -> (robot.rotateIMU(90.0, 6)))
             .addState(() -> (robot.driveForward(true, robot.getDistForwardDist(), .30)))
             .addSingleState(() -> robot.crane.hookOn())
 
             //backup and try and turn
-            .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUDistance(.3,315,false,.5)))
-            .addState(() -> (robot.rotateIMU(0.0, 10)))
-            .addState(() -> (robot.driveIMUDistance(1,0.0,true,.7)))
-            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.driveIMUDistance(.6,340,false,1)))
+            .addState(() -> (robot.driveIMUDistance(.5,0.0,true,.45)))
 
             //hook off and drive back into the bridge
             .addSingleState(() -> robot.crane.hookOff())
             .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUDistance(.4,0.0,false,1)))
+            .addState(() -> (robot.driveIMUDistance(.4,45.0,false,1)))
             .build();
 
 
@@ -224,15 +352,37 @@ public class Autonomous {
 ////            .addState(() -> (robot.rotateIMU(90, 4)))
 ////            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 //            .addState(() -> (robot.rotateIMU(0, 4)))
-            .addState(() -> (robot.driveIMUDistance(.6,340,false,.005)))
-            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUDistance(1,0,true,.9)))
+//            .addState(() -> (robot.driveIMUDistance(.6,340,false,.005)))
+//            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+//            .addState(() -> (robot.driveIMUDistance(1,0,true,.9)))
 
 
-            //.addState(() -> (robot.driveIMUDistance(.6,340,false,.004)))
-            //.addState(() -> (robot.driveIMUDistance(.6,325,false,.025)))
-            //.addState(() -> (robot.driveIMUDistance(.6,0,false,.025)))
-            //.addState(() -> (robot.driveIMUDistance(1,0.0,true,.4)))
+            //open and align gripper for 1st skystone
+            .addState(() -> (robot.crane.setElbowTargetPos(500,1)))
+            .addState(() -> sample())
+            .addState(() -> robot.crane.toggleGripper())
+            .addState(() -> robot.crane.setGripperSwivelRotation(1600))
+            .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
+
+
+            //adjust turret if needed to point to correct stone
+            .addMineralState(mineralStateProvider,
+                    () -> robot.turret.rotateIMUTurret(260,2),
+                    () -> true,
+                    () -> robot.turret.rotateIMUTurret(285,2))
+
+            .addMineralState(mineralStateProvider,
+                    () -> robot.crane.setGripperSwivelRotation(1400),
+                    () -> true,
+                    () -> robot.crane.setGripperSwivelRotation(1700))
+
+            .addMineralState(mineralStateProvider,
+                    () -> robot.crane.extendToPosition(2230,1,130),
+                    () -> robot.crane.extendToPosition(2190,1,120),
+                    () -> robot.crane.extendToPosition(2190,1,120))
+
+            //drop and snap gripper
+            .addState(() ->robot.crane.setElbowTargetPos(0,1))
             .build();
 
 

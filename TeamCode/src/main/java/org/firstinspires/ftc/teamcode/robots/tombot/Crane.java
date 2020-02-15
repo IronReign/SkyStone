@@ -473,6 +473,13 @@ public class Crane {
         else return false;
     }
 
+    public boolean setElbowTargetPosWithSlop(int pos, int slop, double speed){
+        setElbowTargetPos(pos);
+        setElbowPwr(speed);
+        if (nearTargetElbowWithSlop(slop)) return true;
+        else return false;
+    }
+
     public boolean setElbowTargetAngle(double angleDegrees){
         elbowPos =(int) (ticksPerDegree* angleDegrees);
         return true;
@@ -584,6 +591,10 @@ public class Crane {
     }
     public boolean nearTargetElbow(){
         if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<55) return true;
+        else return false;
+    }
+    public boolean nearTargetElbowWithSlop(int Slop){
+        if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<Slop) return true;
         else return false;
     }
     public boolean nearTarget(){

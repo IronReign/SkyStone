@@ -326,6 +326,9 @@ public class Skystone_6832 extends LinearOpMode {
                         robot.articulate(PoseSkystone.Articulation.calibrateBlue);
                     }
                 }
+                if (toggleAllowed(gamepad1.y, y, 1)) {
+                    robot.setHeadingBase(270.0);
+                }
 
             }
 
@@ -1066,7 +1069,11 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine()
                 .addData("avg motor ticks ", ()-> robot.getAverageTicks())
                 .addData("right motor ticks ", ()-> robot.getLeftMotorTicks())
-                .addData("left motor ticks ", ()-> robot.getRightMotorTicks())
+                .addData("left motor ticks ", ()-> robot.getRightMotorTicks());
+        telemetry.addLine()
+                .addData("left sensor ", ()-> robot.getDistLeftDist())
+                .addData("right sensor ", ()-> robot.getDistRightDist())
+                .addData("front sensor ", ()-> robot.getDistForwardDist())
         ;
 
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
