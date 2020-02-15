@@ -993,6 +993,7 @@ public class PoseSkystone {
                 break;
             case 3:
                 if(rotateIMU(270,6.0)) {
+                    driveIMUDistance(.3,270,false,.3);
                     calibrateStage = 0;
                     return true;
                 }
@@ -1201,7 +1202,7 @@ public class PoseSkystone {
     public boolean retrieveStoneTower(){
         switch(craneArticulation){
             case 0:
-                //if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
+                if(crane.getElbowCurrentPos()<32) crane.setElbowTargetPos(32, 1);
                 crane.extendToPosition(445,1.0,20);
                 retreiveTimer2 = futureTime(1);
                 craneArticulation++;

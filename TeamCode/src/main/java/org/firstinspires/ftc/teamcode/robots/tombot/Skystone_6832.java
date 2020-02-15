@@ -661,7 +661,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if(toggleAllowed(gamepad2.b,b,2)) {
-            robot.crane.swivelGripper(true);
+            robot.turret.rotateCardinalTurret(true);
         }
 
         if(toggleAllowed(gamepad2.y,y,2)) {
@@ -669,19 +669,19 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if(toggleAllowed(gamepad2.x,x,2)) {
-            robot.crane.swivelGripper(false);
-        }
-
-        if(gamepad2.left_bumper) {
             robot.turret.rotateCardinalTurret(false);
         }
 
+        if(gamepad2.left_bumper) {
+            robot.crane.swivelGripper(false);
+        }
+
         if(gamepad2.right_bumper) {
-            robot.turret.rotateCardinalTurret(true);
+            robot.crane.swivelGripper(true);
         }
 
         if (toggleAllowed(gamepad2.dpad_right,dpad_right,2)) {
-            robot.articulate(PoseSkystone.Articulation.retractFromBlock);
+            robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
 
         if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
