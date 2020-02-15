@@ -226,7 +226,7 @@ public class Autonomous {
 //            .addState(() -> (robot.rotateIMU(0, 4)))
             .addState(() -> (robot.driveIMUDistance(.6,340,false,.005)))
             .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUDistance(.6,0,true,.5)))
+            .addState(() -> (robot.driveIMUDistance(1,0,true,.9)))
 
 
             //.addState(() -> (robot.driveIMUDistance(.6,340,false,.004)))
