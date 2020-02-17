@@ -53,8 +53,15 @@ public class SkystoneGripPipeline {
     public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
     public SkystoneTargetInfo info;
 
+    //cropping
+    Point topLeftRed = new Point(130, 225);
+    Point bottomRightRed = new Point(564, 371);
+    Point topLeftBlue = new Point(133, 148);
+    Point bottomRightBlue = new Point(420, 234);
+
     //need to be tuned
     private static final int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
+    private boolean isBlue;
 
     public SkystoneGripPipeline(HardwareMap hardwareMap) {
         initVuforia(hardwareMap, Viewpoint.WEBCAM);
@@ -62,6 +69,10 @@ public class SkystoneGripPipeline {
         dashboard = FtcDashboard.getInstance();
         info = new SkystoneTargetInfo();
         info.setQuarryPosition(StonePos.NONE_FOUND);
+    }
+
+    public void setIsBlue(boolean isBlue) {
+        this.isBlue = isBlue;
     }
 
     private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
@@ -103,7 +114,10 @@ public class SkystoneGripPipeline {
 
             // Step crop:
             Mat cropInput = blurOutput.clone();
-            cropOutput = crop(cropInput, new Point(130, 225), new Point(564, 371));
+            if(!isBlue)
+                cropOutput = crop(cropInput, topLeftRed, bottomRightRed);
+            else
+                cropOutput = crop(cropInput, topLeftBlue, bottomRightBlue);
 
             // Step HSV_Threshold0:
             Mat hsvThresholdInput = cropOutput;

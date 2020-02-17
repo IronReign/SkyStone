@@ -234,10 +234,11 @@ public class Crane {
 
             case 1:
                 if (System.nanoTime() >= grabTimer) {
-                    servoGripper.setPosition(servoNormalize(1500));
+                    servoGripper.setPosition(servoNormalize(1700));
                     grabState++;
                 }
                 break;
+
         }
 
     }

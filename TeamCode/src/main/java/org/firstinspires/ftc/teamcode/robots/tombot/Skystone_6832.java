@@ -45,6 +45,7 @@ import org.firstinspires.ftc.teamcode.vision.GoldPos;
 import static org.firstinspires.ftc.teamcode.util.Conversions.nearZero;
 import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
+import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
 
 /**
@@ -146,6 +147,8 @@ public class Skystone_6832 extends LinearOpMode {
     private double targetAngle = 287.25;
 
     private int craneArticulation = 1;
+
+    private boolean stopAll = false;
 
     Telemetry dummyT = new Telemetry() {
         @Override
@@ -328,6 +331,9 @@ public class Skystone_6832 extends LinearOpMode {
                 }
                 if (toggleAllowed(gamepad1.y, y, 1)) {
                     robot.setHeadingBase(270.0);
+                }
+                if (toggleAllowed(gamepad1.a, a, 1)) {
+                    robot.setHeadingBase(90.0);
                 }
 
             }
@@ -580,6 +586,13 @@ public class Skystone_6832 extends LinearOpMode {
 
     int reverse = 1;
     private void joystickDrive() {
+        if(stopAll) {
+            robot.stopAll();
+        }
+
+        if(gamepad1.guide || gamepad2.guide)
+            stopAll = true;
+
 
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
@@ -639,7 +652,7 @@ public class Skystone_6832 extends LinearOpMode {
 
 
         if(toggleAllowed(gamepad1.y,y,1) && toggleAllowed(gamepad1.dpad_down,dpad_down,1)){
-            robot.crane.servoGripper.setPosition(800);
+            robot.crane.servoGripper.setPosition(servoNormalize(800));
 
         }
 

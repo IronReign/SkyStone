@@ -993,7 +993,7 @@ public class PoseSkystone {
                 break;
             case 3:
                 if(rotateIMU(270,6.0)) {
-                    driveIMUDistance(.3,270,false,.3);
+                    //driveIMUDistance(.3,270,false,.3);
                     calibrateStage = 0;
                     return true;
                 }
@@ -1587,6 +1587,7 @@ public class PoseSkystone {
      */
     public void stopAll(){
         crane.stopAll();
+        turret.stopAll();
         driveMixerMec(0, 0, 0);
     }
 

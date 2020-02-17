@@ -173,6 +173,11 @@ public class Turret{
         setTurntableAngle(nextCardinal(getHeading(),right,10));
     }
 
+    public void stopAll() {
+        setPower(0);
+        active = false;
+    }
+
     public void setTurntableAngle(double currentAngle, double adjustAngle){
         turretTargetHeading=wrap360(currentAngle, adjustAngle);
     }
