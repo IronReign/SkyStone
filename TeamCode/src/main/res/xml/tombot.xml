@@ -11,8 +11,8 @@
 			<Servo name="intakeServoBack" port="2" />
 			<Servo name="gripperSwivel" port="1" />
 			<Servo name="blinkin" port="4" />
-			<AnalogInput name="leftAnalog" port="0" />
-			<AnalogInput name="rightAnalog" port="1" />
+			<AnalogInput name="gripperLeft" port="0" />
+			<AnalogInput name="gripperRight" port="1" />
 
 			<LynxEmbeddedIMU name="turretIMU" port="0" bus="0" />
 		</LynxModule>

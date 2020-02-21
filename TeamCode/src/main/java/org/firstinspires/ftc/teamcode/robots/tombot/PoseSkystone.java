@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -87,6 +89,8 @@ public class PoseSkystone {
     DistanceSensor distForward;
     DistanceSensor distLeft;
     DistanceSensor distRight;
+    AnalogInput gripperLeft;
+    AnalogInput gripperRight;
     //DigitalChannel magSensor;
 
     //drive train power values
@@ -331,6 +335,8 @@ public class PoseSkystone {
         this.distRight = this.hwMap.get(DistanceSensor.class, "distRight");
         this.distLeft = this.hwMap.get(DistanceSensor.class, "distLeft");
         //this.magSensor = this.hwMap.get(DigitalChannel.class, "magSensor");
+        this.gripperLeft  = this.hwMap.get(AnalogInput.class, "gripperLeft");     //  Use generic form of device mapping
+        this.gripperRight = this.hwMap.get(AnalogInput.class, "gripperRight");    //  Use generic form of device mapping
 
 
         //motorFrontLeft = hwMap.get(DcMotor.class, "motorFrontLeft");

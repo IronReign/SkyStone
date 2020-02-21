@@ -1084,10 +1084,13 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("right motor ticks ", ()-> robot.getLeftMotorTicks())
                 .addData("left motor ticks ", ()-> robot.getRightMotorTicks());
         telemetry.addLine()
-                .addData("left sensor ", ()-> robot.getDistLeftDist())
-                .addData("right sensor ", ()-> robot.getDistRightDist())
-                .addData("front sensor ", ()-> robot.getDistForwardDist())
-        ;
+                .addData("gripperLeft ", ()-> robot.gripperLeft.getVoltage())
+                .addData("gripperRight ", ()-> robot.gripperRight.getVoltage())
+                .addData("left distance ", ()-> robot.getDistLeftDist())
+                .addData("right distance ", ()-> robot.getDistRightDist())
+                .addData("front distance ", ()-> robot.getDistForwardDist());
+
+
 
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
         //telemetry.addLine()
