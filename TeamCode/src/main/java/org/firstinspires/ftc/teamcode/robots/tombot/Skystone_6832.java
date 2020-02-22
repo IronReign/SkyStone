@@ -561,8 +561,8 @@ public class Skystone_6832 extends LinearOpMode {
         if(toggleAllowed(gamepad1.dpad_down,dpad_down,1)) {
             robot.crane.changeTowerHeight(-1);
         }
-        if(toggleAllowed(gamepad1.a,a,1)) {
-            robot.crane.extendToTowerHeight();
+        if(toggleAllowed(gamepad1.a, a, 1)) {
+            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
         }
         if (toggleAllowed(gamepad1.dpad_right,dpad_right,1)) {
             robot.crane.toggleGripper();

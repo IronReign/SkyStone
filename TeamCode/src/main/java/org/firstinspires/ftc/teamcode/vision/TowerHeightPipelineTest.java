@@ -82,9 +82,9 @@ import org.opencv.imgproc.Imgproc;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="open cv test grip pipeline", group="Linear Opmode")
+@TeleOp(name="tower height pipeline test", group="Linear Opmode")
 //@Disabled
-public class SkystoneOpenCVTest extends LinearOpMode {
+public class TowerHeightPipelineTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -92,7 +92,7 @@ public class SkystoneOpenCVTest extends LinearOpMode {
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> q;
     private FtcDashboard dashboard;
     VuforiaLocalizer.CloseableFrame frame;
-    private SkystoneGripPipeline pipeline;
+    private TowerHeightPipeline pipeline;
 
     @Override
     public void runOpMode() {
@@ -103,7 +103,7 @@ public class SkystoneOpenCVTest extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        pipeline = new SkystoneGripPipeline(hardwareMap);
+        pipeline = new TowerHeightPipeline(hardwareMap);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -117,12 +117,15 @@ public class SkystoneOpenCVTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             Mat output = pipeline.process();
-            if(!(output == null)) {
+            if (!(output == null)) {
                 Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(output, bm);
 
                 TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Position", pipeline.info.toString());
+                packet.put("aspect ratio", pipeline.aspectRatio);
+                packet.put("width", pipeline.towerWidth);
+                packet.put("height", pipeline.towerHeight);
+                packet.put("stack height", pipeline.blocks);
 
                 dashboard.sendImage(bm);
                 dashboard.sendTelemetryPacket(packet);
@@ -132,25 +135,5 @@ public class SkystoneOpenCVTest extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
         }
-    }
-    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
-        if (viewpoint == Viewpoint.BACK)
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        else if (viewpoint == Viewpoint.WEBCAM)
-            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
-        else
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-        vuforia.setFrameQueueCapacity(1);
-    }
-
-    public void initializeVision(HardwareMap hardwareMap, Viewpoint viewpoint) {
-        initVuforia(hardwareMap, viewpoint);
-        q = vuforia.getFrameQueue();
-        dashboard = FtcDashboard.getInstance();
-
     }
 }

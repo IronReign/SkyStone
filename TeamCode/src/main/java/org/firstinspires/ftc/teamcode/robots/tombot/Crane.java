@@ -255,6 +255,12 @@ public class Crane {
 
     public int getElbowMax() {return elbowMax;}
 
+    public void extendToTowerHeight(double distance, int stackHeight) {
+        hypotenuse = Math.sqrt(Math.pow(distance, 2) + Math.pow((stackHeight* blockHeightMeter),2));//in meters
+        setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
+        setExtendABobLengthMeters(hypotenuse-.3683);
+    }
+
     public void extendToTowerHeight(){
         hypotenuse = Math.sqrt(.76790169 + Math.pow(((currentTowerHeight+1)* blockHeightMeter),2));//in meters
         setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));

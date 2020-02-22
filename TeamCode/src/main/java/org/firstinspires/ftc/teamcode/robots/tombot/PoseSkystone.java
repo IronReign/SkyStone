@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
+import org.firstinspires.ftc.teamcode.vision.TowerHeightPipeline;
 
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
@@ -148,6 +149,7 @@ public class PoseSkystone {
 
     //vision related
     public SkystoneGripPipeline pipeline;
+    public TowerHeightPipeline towerHeightPipeline;
 
     public enum MoveMode {
         forward,
@@ -172,6 +174,7 @@ public class PoseSkystone {
         retriving2,
         bridgeTransit,
         extendToTowerHeightArticulation,
+        autoExtendToTowerHeightArticulation,
         retractFromTower,
         retractFromBlock,
         retractFromBlockAuton,
@@ -394,6 +397,7 @@ public class PoseSkystone {
 
         //initialize vision
         pipeline = new SkystoneGripPipeline(hwMap);
+        towerHeightPipeline = new TowerHeightPipeline(hwMap);
 
         //dashboard
         dashboard = FtcDashboard.getInstance();
@@ -730,6 +734,10 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case autoExtendToTowerHeightArticulation:
+                if(autoExtendToTowerHeightArticulation()) {
+                    articulation = Articulation.manual;
+                }
             case shootOut:
                 if (shootOut()) {
                     articulation = Articulation.manual;
@@ -1243,6 +1251,16 @@ public class PoseSkystone {
 
     public boolean extendToTowerHeightArticulation(){
         crane.extendToTowerHeight();
+        return true;
+    }
+
+    public boolean autoExtendToTowerHeightArticulation() {
+        int stackHeightSum = 0;
+        for(int i = 0; i < 5; i++) {
+            towerHeightPipeline.process();
+            stackHeightSum += towerHeightPipeline.blocks;
+        }
+        crane.extendToTowerHeight(getDistForwardDist(), (int) (stackHeightSum / 5.0));
         return true;
     }
 
