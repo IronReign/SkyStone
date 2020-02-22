@@ -170,6 +170,8 @@ public class PoseSkystone {
         reverseDriving,
         retrieving, //retrieve a stone
         retriving2,
+        yoinkStone,
+        autoGrab,
         bridgeTransit,
         extendToTowerHeightArticulation,
         retractFromTower,
@@ -721,6 +723,18 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case yoinkStone: //todo: fixup comments for deploy actions - moved stuff around
+                //auton initial hang at the beginning of a match
+                if (YoinkStone()) {
+                    articulation = Articulation.manual;
+                }
+                break;
+            case autoGrab: //todo: fixup comments for deploy actions - moved stuff around
+                //auton initial hang at the beginning of a match
+                if (autoPickStone()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case bridgeTransit:
                 if (bridgeTransit()) {
                 }
@@ -1229,6 +1243,83 @@ public class PoseSkystone {
                     craneArticulation = 0;
                     return true;
                 }
+        }
+        return false;
+    }
+
+    private int yoinkStage = 0;
+    private double yoinkTimer = 0.0;
+    private double voltagePlaceholder; //todo- make this an actual value
+    private int distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder; //todo- make this an actual value, based on the distance sensor reading
+
+    public boolean YoinkStone(){ //this goes down and grabs the block note how it assumes it is over the block already
+        switch(yoinkStage)
+        {
+            case 0:
+                if (crane.setElbowTargetPos(distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, 1)) {
+                    yoinkStage++;
+                }
+
+                break;
+            case 1:
+                if (crane.setElbowTargetPos(crane.getElbowCurrentPos() - distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, 1)) {
+                    yoinkStage++;
+                }
+                break;
+            case 3:
+                    yoinkStage = 0;
+                    return true;
+        }
+        return false;
+    }
+
+    private int autoPickUpStage = 0;
+    private double autoPickUpTimer = 0.0;
+    private double voltageBefore = 0.0; //todo- check that the farther you get out makes it larger, if not then I need to relace this with a larger number and subtract one a bit lower when checking for height difference
+    private boolean rightWasFirst = false;
+    private int lastRotationSet = 1500;
+    public boolean autoPickStone(){ //this goes down and grabs the block
+        switch(autoPickUpStage)
+        {
+            case 0:
+                if (crane.setElbowTargetPos(distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, .6)) { //put the elbow in the correct place
+                    autoPickUpStage++;
+                }
+                break;
+            case 1:
+                if (crane.extendToPosition(crane.getExtendABobCurrentPos()+10,1,0)) { //extends out the arm just a bit
+
+                }
+                if(gripperLeft.getVoltage() > voltageBefore+1.0 ){ //checks if the left sensor has detected anything
+                    rightWasFirst = false; //so we know later
+                    voltageBefore = 0.0; //this is just a reset, see todo above
+                    autoPickUpStage++;
+                }
+                if(gripperRight.getVoltage() > voltageBefore+ 1.0) { //checks if the right sensor has detected anything
+                    rightWasFirst = true; //so we know later
+                    voltageBefore = 0.0; //this is just a reset, see todo above
+                    autoPickUpStage++;
+                }
+                break;
+            case 3:
+                if(rightWasFirst){
+                    gripperSwivel.setPosition(lastRotationSet+10);//swivels it right
+                    if(gripperLeft.getVoltage() > voltageBefore+1.0 ){ //checks for a jump in the reading
+                        gripperSwivel.setPosition(lastRotationSet-10);//counteracts the overturn a bit
+                        autoPickUpStage++;
+                    }
+                }
+                if(!rightWasFirst){
+                    gripperSwivel.setPosition(lastRotationSet-10);//swivels it right
+                    if(gripperRight.getVoltage() > voltageBefore+1.0 ){ //checks for a jump in the reading
+                        gripperSwivel.setPosition(lastRotationSet+10);//counteracts the overturn a bit
+                        autoPickUpStage++;
+                    }
+                }
+            case 4:
+                articulate(Articulation.yoinkStone); //grabs the stone
+                autoPickUpStage = 0;
+                return true;
         }
         return false;
     }
