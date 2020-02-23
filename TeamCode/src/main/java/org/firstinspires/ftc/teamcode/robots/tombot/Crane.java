@@ -175,7 +175,7 @@ public class Crane {
 
         //belt extension encoder values
         extendDeposit = 1489;
-        extendMax = 2960;
+        extendMax = 2700;
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
         extendMin = 200;  //prevent crunching foundation grabber
@@ -460,8 +460,13 @@ public class Crane {
 
 
     public void setExtendABobTargetPos(int pos){
+        extendABobPos = Math.min(Math.max(pos, extendMin),extendMax);
+    }
+
+    public void setExtendABobTargetPosNoCap(int pos){
         extendABobPos = pos;
     }
+
     public int getExtendABobTargetPos(){
         return extendABobPos;
     }
@@ -474,6 +479,11 @@ public class Crane {
         if (pos>=elbowMin && pos<=elbowMax)
         elbowPos = pos;
     }
+
+    public void setElbowTargetPosNoCap(int pos){
+            elbowPos = pos;
+    }
+
     public boolean setElbowTargetPos(int pos, double speed){
         setElbowTargetPos(pos);
         setElbowPwr(speed);
@@ -623,6 +633,10 @@ public class Crane {
 
 
     }
+
+    public void adjustElbowAngleNoCap(double speed){
+        setElbowTargetPosNoCap(getElbowCurrentPos() + (int)(200 * speed));
+    }
     public void decreaseElbowAngle(){
         setElbowTargetPos(Math.max(getElbowCurrentPos() - 100, 0));
     }
@@ -636,7 +650,11 @@ public class Crane {
     }
 
     public void adjustBelt(double speed){
-        setExtendABobTargetPos(Math.max(getExtendABobCurrentPos() + (int)(250 * speed), extendMin));
+        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(250 * speed));
+    }
+
+    public void adjustBeltNoCap(double speed){
+        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(250 * speed));
     }
 
     public void runToAngle(double angle){

@@ -47,13 +47,13 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.notdeadzone;
 import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 
-
 /**
- * This file contains the code for Iron Reign's main OpMode, used for both TeleOp and Autonomous.
+ * This file contains the code for Iron Reign's main OpMode, used for both
+ * TeleOp and Autonomous.
  */
 
-@TeleOp(name = "Skystone_6832", group = "Challenge")  // @Autonomous(...) is the other common choice
-//  @Autonomous
+@TeleOp(name = "Skystone_6832", group = "Challenge") // @Autonomous(...) is the other common choice
+// @Autonomous
 public class Skystone_6832 extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -70,12 +70,12 @@ public class Skystone_6832 extends LinearOpMode {
 
     private int state = 0;
 
-    //loop time profile
+    // loop time profile
     long lastLoopClockTime;
     double loopAvg = 0;
     private static final double loopWeight = .1;
 
-    //drive train control variables
+    // drive train control variables
     private double pwrDamper = 1;
     private double pwrFwd = 0;
     private double pwrStf = 0;
@@ -88,38 +88,38 @@ public class Skystone_6832 extends LinearOpMode {
     private boolean enableTank = false;
     private boolean bypassJoysticks = false;
     private long damperTimer = 0;
-    private int direction = 1;  //-1 to reverse direction
+    private int direction = 1; // -1 to reverse direction
     private int currTarget = 0;
 
-    //sensors/sensing-related variables
+    // sensors/sensing-related variables
     private Orientation angles;
 
-    //these are meant as short term testing variables, don't expect their usage
-    //to be consistent across development sessions
-    //private double testableDouble = robot.kpDrive;
+    // these are meant as short term testing variables, don't expect their usage
+    // to be consistent across development sessions
+    // private double testableDouble = robot.kpDrive;
     private double testableHeading = 0;
     private boolean testableDirection = true;
 
-    //values associated with the buttons in the toggleAllowed method
+    // values associated with the buttons in the toggleAllowed method
     private boolean[] buttonSavedStates = new boolean[16];
-    private int a = 0; //lower glyph lift
-    private int b = 1; //toggle grip/release on glyph
-    private int x = 2; //no function
-    private int y = 3; //raise glyph lift
-    private int dpad_down = 4; //enable/disable ftcdash telemetry
-    private int dpad_up = 5; //vision init/de-init
-    private int dpad_left = 6; //vision provider switch
-    private int dpad_right = 7; //switch viewpoint
-    private int left_bumper = 8; //increment state down (always)
-    private int right_bumper = 9; //increment state up (always)
-    private int startBtn = 10; //toggle active (always)
-    private int left_trigger = 11; //vision detection
+    private int a = 0; // lower glyph lift
+    private int b = 1; // toggle grip/release on glyph
+    private int x = 2; // no function
+    private int y = 3; // raise glyph lift
+    private int dpad_down = 4; // enable/disable ftcdash telemetry
+    private int dpad_up = 5; // vision init/de-init
+    private int dpad_left = 6; // vision provider switch
+    private int dpad_right = 7; // switch viewpoint
+    private int left_bumper = 8; // increment state down (always)
+    private int right_bumper = 9; // increment state up (always)
+    private int startBtn = 10; // toggle active (always)
+    private int left_trigger = 11; // vision detection
     private int right_trigger = 12;
     private int back_button = 13;
     private int left_stick_button = 14;
-    private int right_stick_button = 15; //sound player
+    private int right_stick_button = 15; // sound player
 
-    //values associated with the buttons in the toggleAllowedGP2 method
+    // values associated with the buttons in the toggleAllowedGP2 method
     private boolean[] buttonSavedStates2 = new boolean[16];
 
     boolean debugTelemetry = false;
@@ -131,16 +131,16 @@ public class Skystone_6832 extends LinearOpMode {
     boolean isHooked = false;
     boolean enableHookSensors = false;
 
-    //game mode configuration
+    // game mode configuration
     private int gameMode = 0;
     private static final int NUM_MODES = 4;
-    private static final String[] GAME_MODES = {"REVERSE", "ENDGAME", "PRE-GAME", "REGULAR"};
+    private static final String[] GAME_MODES = { "REVERSE", "ENDGAME", "PRE-GAME", "REGULAR" };
 
-    //sound related configuration
+    // sound related configuration
     private int soundState = 0;
     private int soundID = -1;
 
-    //auto stuff
+    // auto stuff
     private GoldPos initGoldPosTest;
     private double pCoeff = 0.14;
     private double dCoeff = 1.31;
@@ -260,15 +260,21 @@ public class Skystone_6832 extends LinearOpMode {
         public Log log() {
             return null;
         }
-        @Override public void speak(String text){}
-        @Override public void speak(String text, String languageCode, String countryCode){}
+
+        @Override
+        public void speak(String text) {
+        }
+
+        @Override
+        public void speak(String text, String languageCode, String countryCode) {
+        }
 
     };
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        telemetry.addData("Status", "Initializing "+currentBot+"...");
+        telemetry.addData("Status", "Initializing " + currentBot + "...");
         telemetry.addData("Status", "Hold right_trigger to enable debug mode");
         telemetry.update();
 
@@ -277,11 +283,12 @@ public class Skystone_6832 extends LinearOpMode {
 
         auto = new Autonomous(robot, dummyT, gamepad1);
 
-
         debugTelemetry = gamepad1.right_trigger > .3;
         debugTelemetry = true;
-        if(debugTelemetry) configureDashboardDebug();
-        else configureDashboardMatch();
+        if (debugTelemetry)
+            configureDashboardDebug();
+        else
+            configureDashboardMatch();
         telemetry.update();
 
         // waitForStart();
@@ -291,8 +298,7 @@ public class Skystone_6832 extends LinearOpMode {
         robot.resetMotors(true);
         auto.visionProviderFinalized = false;
 
-
-        while (!isStarted()) {    // Wait for the game to start (driver presses PLAY)
+        while (!isStarted()) { // Wait for the game to start (driver presses PLAY)
             synchronized (this) {
                 try {
                     this.wait();
@@ -306,26 +312,31 @@ public class Skystone_6832 extends LinearOpMode {
 
             if (active) {
 
-                //we can do very basic driving to get to calibration position
-                //turret and drive controls on gamepad1 only since we don't always have 2 pads for auton testing
+                // we can do very basic driving to get to calibration position
+                // turret and drive controls on gamepad1 only since we don't always have 2 pads
+                // for auton testing
 
-                //this test suppresses pregame driving while a calibration articulation is active
-                if (robot.articulation == PoseSkystone.Articulation.manual) joystickDrivePregameMode();
+                // this test suppresses pregame driving while a calibration articulation is
+                // active
+                if (robot.articulation == PoseSkystone.Articulation.manual)
+                    joystickDrivePregameMode();
 
-                //red alliance
+                // red alliance
                 if (toggleAllowed(gamepad1.b, b, 1)) {
                     robot.setIsBlue(false);
 
-                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
+                                                        // heading are reset
                         robot.articulate(PoseSkystone.Articulation.calibrate);
                     }
                 }
 
-                //blue alliance
+                // blue alliance
                 if (toggleAllowed(gamepad1.x, x, 1)) {
                     robot.setIsBlue(true);
 
-                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
+                                                        // heading are reset
                         robot.articulate(PoseSkystone.Articulation.calibrateBlue);
                     }
                 }
@@ -338,74 +349,87 @@ public class Skystone_6832 extends LinearOpMode {
 
             }
 
-            else { //if inactive we are in configuration mode
+            else { // if inactive we are in configuration mode
 
                 float initTimer = 0f;
                 int setupStage = 0;
-                //red alliance
+                // red alliance
                 if (toggleAllowed(gamepad1.b, b, 1)) {
                     robot.setIsBlue(false);
 
-                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
+                                                        // heading are reset
                         robot.articulate(PoseSkystone.Articulation.calibrate);
                     }
                 }
 
-                if (toggleAllowed(gamepad1.y,y,1)) {
-                robot.articulate(PoseSkystone.Articulation.calibrateBasic);
-            }
-                //blue alliance
+                if (toggleAllowed(gamepad1.y, y, 1)) {
+                    robot.articulate(PoseSkystone.Articulation.calibrateBasic);
+                }
+                // blue alliance
                 if (toggleAllowed(gamepad1.x, x, 1)) {
                     robot.setIsBlue(true);
 
-                    if (gamepad1.right_trigger < 0.8) { //unless right trigger is being held very hard, encoders and heading are reset
+                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
+                                                        // heading are reset
                         robot.articulate(PoseSkystone.Articulation.calibrateBlue);
                     }
                 }
 
-                //if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) < .08)
-                //robot.crane.hookOn();
-                //if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) < .08)
-                //robot.crane.hookOff();
-
+                // if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) <
+                // .08)
+                // robot.crane.hookOn();
+                // if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) <
+                // .08)
+                // robot.crane.hookOff();
 
                 if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
-                    auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; //switch vision provider
+                    auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; // switch
+                                                                                                             // vision
+                                                                                                             // provider
                 }
                 if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up, 1)) {
-                    auto.initVisionProvider(); //this is blocking
+                    auto.initVisionProvider(); // this is blocking
                 } else if (auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_up, dpad_up, 1)) {
-                    auto.deinitVisionProvider(); //also blocking, but should be very quick
+                    auto.deinitVisionProvider(); // also blocking, but should be very quick
                 }
                 if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
-                    auto.enableTelemetry = !auto.enableTelemetry; //enable/disable FtcDashboard telemetry
-//                CenterOfGravityCalculator.drawRobotDiagram = !CenterOfGravityCalculator.drawRobotDiagram;
+                    auto.enableTelemetry = !auto.enableTelemetry; // enable/disable FtcDashboard telemetry
+                    // CenterOfGravityCalculator.drawRobotDiagram =
+                    // !CenterOfGravityCalculator.drawRobotDiagram;
                 }
                 if (auto.visionProviderFinalized && gamepad1.left_trigger > 0.3) {
                     GoldPos gp = auto.vp.detect();
                     if (gp != GoldPos.HOLD_STATE)
                         initGoldPosTest = gp;
-                    telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest, gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
+                    telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest,
+                            gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
                 }
 
                 if (soundState == 0 && toggleAllowed(gamepad1.right_stick_button, right_stick_button, 1)) {
                     initialization_initSound();
                 }
 
-
-//            telemetry.addData("Vision", "Backend: %s (%s)", auto.visionProviders[auto.visionProviderState].getSimpleName(), auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500 % 2 == 0 ? "**NOT FINALIZED**" : "  NOT FINALIZED  ");
-//            telemetry.addData("Vision", "FtcDashboard Telemetry: %s", auto.enableTelemetry ? "Enabled" : "Disabled");
-//            telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
-//
-//            telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" : soundState == 2 ? "file not found" : "other");
-//
-//            telemetry.addData("Status", "Initialized");
-//            telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
-//            telemetry.addData("Status", "Side: " + getAlliance());
-//            telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-//            telemetry.addData("Status","hook encoder val: " + robot.crane.hook.getCurrentPosition());
-//            telemetry.addData("Turret", "Turret Position raw: " + robot.turret.getCurrentRotationEncoderRaw());
-
+                // telemetry.addData("Vision", "Backend: %s (%s)",
+                // auto.visionProviders[auto.visionProviderState].getSimpleName(),
+                // auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500
+                // % 2 == 0 ? "**NOT FINALIZED**" : " NOT FINALIZED ");
+                // telemetry.addData("Vision", "FtcDashboard Telemetry: %s",
+                // auto.enableTelemetry ? "Enabled" : "Disabled");
+                // telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
+                //
+                // telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" :
+                // soundState == 2 ? "file not found" : "other");
+                //
+                // telemetry.addData("Status", "Initialized");
+                // telemetry.addData("Status", "Auto Delay: " + Integer.toString((int)
+                // auto.autoDelay) + "seconds");
+                // telemetry.addData("Status", "Side: " + getAlliance());
+                // telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
+                // telemetry.addData("Status","hook encoder val: " +
+                // robot.crane.hook.getCurrentPosition());
+                // telemetry.addData("Turret", "Turret Position raw: " +
+                // robot.turret.getCurrentRotationEncoderRaw());
 
             }
             telemetry.update();
@@ -418,11 +442,10 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (auto.vp == null) {
-            auto.initDummyVisionProvider(); //this is blocking
+            auto.initDummyVisionProvider(); // this is blocking
         }
 
         auto.vp.reset();
-
 
         robot.crane.restart(.4, .5);
 
@@ -433,34 +456,39 @@ public class Skystone_6832 extends LinearOpMode {
             stateSwitch();
             if (active) {
                 switch (state) {
-                    case 0: //auton full
-                        if (auto.redAutoFull.execute()) active = false;
-
+                    case 0: // auton full
+                        if (auto.redAutoFull.execute()) {
+                            active = false;
+                            state = 1;
+                        }
                         break;
-//                    case 1: //autonomous that goes to opponent's crater
-//                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
-//                        break;
-                    case 1: //teleop
+                    case 1: // teleop
                         joystickDrive();
-                        //if (auto.walkOfShame.execute()) active = false;
                         break;
-                    case 3: //autonomous that starts in our crater
-                        if (auto.walkOfShameRight.execute()) active = false;
+                    case 3: // autonomous that starts in our crater
+                        if (auto.walkOfShameRight.execute()) {
+                            active = false;
+                            state = 1;
+                        }
                         break;
                     case 4:
-                        if (auto.walkOfShameLeft.execute()) active = false;
+                        if (auto.walkOfShameLeft.execute()) {
+                            active = false;
+                            state = 1;
+                        }
                         break;
                     case 5:
-                        if (auto.autoMethodTesterTool.execute()) active = false;
+                        if (auto.autoMethodTesterTool.execute())
+                            active = false;
                         break;
                     case 6:
                         demo();
                         break;
                     case 7:
-
+                        joystickDriveNoCap();
                         break;
                     case 8:
-
+                        demo();
                         break;
                     case 9:
 
@@ -482,7 +510,7 @@ public class Skystone_6832 extends LinearOpMode {
             if (loopAvg == 0)
                 loopAvg = loopTime;
             else
-                loopAvg = loopWeight*loopTime + (1-loopWeight)*loopAvg;
+                loopAvg = loopWeight * loopTime + (1 - loopWeight) * loopAvg;
             lastLoopClockTime = loopClockTime;
 
             telemetry.update();
@@ -490,29 +518,32 @@ public class Skystone_6832 extends LinearOpMode {
         }
     }
 
-    public boolean driveStraight(){
-        return robot.driveForward(true,1,.5);
+    public boolean driveStraight() {
+        return robot.driveForward(true, 1, .5);
     }
 
     int tpmtuningstage = 0;
-    public void tpmtuning(){
 
-        switch (tpmtuningstage){
-            case 0: //todo - this probably needs work to setup the basic articulation for odometer distance tuning
-//                if(robot.goToPosition(0,robot.crane.pos_reverseSafeDrive,.75,.3)){
-//                }
+    public void tpmtuning() {
 
-                if(toggleAllowed(gamepad1.y,y,1)){
+        switch (tpmtuningstage) {
+            case 0: // todo - this probably needs work to setup the basic articulation for odometer
+                    // distance tuning
+                // if(robot.goToPosition(0,robot.crane.pos_reverseSafeDrive,.75,.3)){
+                // }
+
+                if (toggleAllowed(gamepad1.y, y, 1)) {
                     robot.resetMotors(true);
                 }
 
-                if(toggleAllowed(gamepad1.a,a,1 )){
+                if (toggleAllowed(gamepad1.a, a, 1)) {
                     tpmtuningstage++;
                 }
                 break;
             case 1:
-                if(robot.driveForward(true,2,.35)){ //calibrate forward/backward
-                //if(robot.driveStrafe(true,2,.35)){ //calibrate strafe if capable - uncomment only one of these at a time
+                if (robot.driveForward(true, 2, .35)) { // calibrate forward/backward
+                    // if(robot.driveStrafe(true,2,.35)){ //calibrate strafe if capable - uncomment
+                    // only one of these at a time
                     tpmtuningstage = 0;
                     robot.resetMotors(true);
                 }
@@ -520,21 +551,18 @@ public class Skystone_6832 extends LinearOpMode {
         }
     }
 
-
-
     private void initialization_initSound() {
         telemetry.addData("Please wait", "Initializing Sound");
-        //telemetry.update();
+        // telemetry.update();
         robot.ledSystem.setColor(LEDSystem.Color.CALM);
-        soundID = hardwareMap.appContext.getResources().getIdentifier("gracious", "raw", hardwareMap.appContext.getPackageName());
+        soundID = hardwareMap.appContext.getResources().getIdentifier("gracious", "raw",
+                hardwareMap.appContext.getPackageName());
         boolean success = SoundPlayer.getInstance().preload(hardwareMap.appContext, soundID);
         if (success)
             soundState = 1;
         else
             soundState = 2;
     }
-
-
 
     private void demo() {
         if (gamepad1.x)
@@ -553,45 +581,45 @@ public class Skystone_6832 extends LinearOpMode {
             robot.turret.adjust(gamepad1.right_stick_x);
         }
 
-        if(toggleAllowed(gamepad1.dpad_up,dpad_up,1)) {
+        if (toggleAllowed(gamepad1.dpad_up, dpad_up, 1)) {
             robot.crane.changeTowerHeight(1);
         }
 
-        if(toggleAllowed(gamepad1.dpad_down,dpad_down,1)) {
+        if (toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
             robot.crane.changeTowerHeight(-1);
         }
-        if(toggleAllowed(gamepad1.a, a, 1)) {
+        if (toggleAllowed(gamepad1.a, a, 1)) {
             robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
         }
-        if (toggleAllowed(gamepad1.dpad_right,dpad_right,1)) {
+        if (toggleAllowed(gamepad1.dpad_right, dpad_right, 1)) {
             robot.crane.toggleGripper();
         }
-        if(toggleAllowed(gamepad1.b,b,1))
+        if (toggleAllowed(gamepad1.b, b, 1))
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
 
-        if(gamepad1.left_trigger > 0) {
+        if (gamepad1.left_trigger > 0) {
             robot.crane.swivelGripper(false);
         }
-        if(gamepad1.right_trigger > 0) {
+        if (gamepad1.right_trigger > 0) {
             robot.crane.swivelGripper(true);
         }
-        if(gamepad1.left_bumper) {
-            robot.rotateIMU(nextCardinal(robot.getHeading(),false, 10),1);
+        if (gamepad1.left_bumper) {
+            robot.rotateIMU(nextCardinal(robot.getHeading(), false, 10), 1);
         }
-        if(gamepad1.right_bumper ) {
-            robot.rotateIMU(nextCardinal(robot.getHeading(),true, 10),1);
+        if (gamepad1.right_bumper) {
+            robot.rotateIMU(nextCardinal(robot.getHeading(), true, 10), 1);
         }
     }
 
     int reverse = 1;
+
     private void joystickDrive() {
-        if(stopAll) {
+        if (stopAll) {
             robot.stopAll();
         }
 
-        if(gamepad1.guide || gamepad2.guide)
+        if (gamepad1.guide || gamepad2.guide)
             stopAll = true;
-
 
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
@@ -599,125 +627,123 @@ public class Skystone_6832 extends LinearOpMode {
             joystickDriveStarted = true;
         }
 
-        if(robot.getArticulation() == PoseSkystone.Articulation.intake){
+        if (robot.getArticulation() == PoseSkystone.Articulation.intake) {
             reverse = -1;
-        }else if(robot.getArticulation() != PoseSkystone.Articulation.intake && robot.getArticulation() != PoseSkystone.Articulation.manual){
+        } else if (robot.getArticulation() != PoseSkystone.Articulation.intake
+                && robot.getArticulation() != PoseSkystone.Articulation.manual) {
             reverse = 1;
         }
 
-
-
-        reverse=-1;
+        reverse = -1;
         pwrDamper = .70;
 
         pwrFwd = 0;
         pwrRot = 0;
 
-        if (notdeadzone(gamepad1.left_stick_y)) pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
-        if (notdeadzone(gamepad1.right_stick_x)) pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+        if (notdeadzone(gamepad1.left_stick_y))
+            pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
+        if (notdeadzone(gamepad1.right_stick_x))
+            pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
-        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating){}
-        else {
-            robot.isNavigating=false; //take control back from any auton navigation if any joystick input is running
+        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating) {
+        } else {
+            robot.isNavigating = false; // take control back from any auton navigation if any joystick input is running
             robot.autonTurnInitialized = false;
             robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
         }
 
+        // old mecanum controls
+        // pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
+        // pwrStfL = direction * pwrDamper * gamepad1.left_stick_x;
+        //
+        // pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
+        // pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
 
-        //old mecanum controls
-//        pwrFwdL = direction * pwrDamper * gamepad1.left_stick_y;
-//        pwrStfL = direction * pwrDamper * gamepad1.left_stick_x;
-//
-//        pwrFwdR = direction * pwrDamper * gamepad1.right_stick_y;
-//        pwrStfR = direction * pwrDamper * gamepad1.right_stick_x;
+        // gamepad1 controls
 
+        // trigger retractFromTower articulation
+        // if(toggleAllowed(gamepad1.a,a,1)){
+        // robot.articulate(PoseSkystone.Articulation.retractFromTower);
+        // }
 
-        //gamepad1 controls
-
-//trigger retractFromTower articulation
-//        if(toggleAllowed(gamepad1.a,a,1)){
-//            robot.articulate(PoseSkystone.Articulation.retractFromTower);
-//        }
-
-        if(toggleAllowed(gamepad1.a, a, 1))
+        if (toggleAllowed(gamepad1.a, a, 1))
             robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
 
-        if(toggleAllowed(gamepad1.b,b,1)){
+        if (toggleAllowed(gamepad1.b, b, 1)) {
             robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(1500,1.0,20);
+            robot.crane.extendToPosition(1500, 1.0, 20);
         }
 
-        //Foundation Gripper
-        if(toggleAllowed(gamepad1.x,x,1)){
+        // Foundation Gripper
+        if (toggleAllowed(gamepad1.x, x, 1)) {
             robot.crane.hookToggle();
         }
 
+        if (toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
+            robot.articulate(PoseSkystone.Articulation.yoinkStone);
+        }
 
-        if(toggleAllowed(gamepad1.y,y,1) && toggleAllowed(gamepad1.dpad_down,dpad_down,1)){
+        if (toggleAllowed(gamepad1.y, y, 1) && toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
             robot.crane.servoGripper.setPosition(servoNormalize(800));
 
         }
 
-        //Pad1 Bumbers - Rotate Cardinal
-        if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
+        // Pad1 Bumbers - Rotate Cardinal
+        if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
             robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
 
         }
 
-        if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
+        if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
             robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
         }
 
+        // gamepad2 controls
 
-
-        //gamepad2 controls
-
-
-
-        if(toggleAllowed(gamepad2.a,a,2)) {
+        if (toggleAllowed(gamepad2.a, a, 2)) {
             robot.crane.toggleGripper();
         }
 
-        if(toggleAllowed(gamepad2.b,b,2)) {
+        if (toggleAllowed(gamepad2.b, b, 2)) {
             robot.turret.rotateCardinalTurret(true);
         }
 
-        if(toggleAllowed(gamepad2.y,y,2)) {
+        if (toggleAllowed(gamepad2.y, y, 2)) {
             robot.crane.toggleSwivel();
         }
 
-        if(toggleAllowed(gamepad2.x,x,2)) {
+        if (toggleAllowed(gamepad2.x, x, 2)) {
             robot.turret.rotateCardinalTurret(false);
         }
 
-        if(gamepad2.left_bumper) {
+        if (gamepad2.left_bumper) {
             robot.crane.swivelGripper(false);
         }
 
-        if(gamepad2.right_bumper) {
+        if (gamepad2.right_bumper) {
             robot.crane.swivelGripper(true);
         }
 
-        if (toggleAllowed(gamepad2.dpad_right,dpad_right,2)) {
+        if (toggleAllowed(gamepad2.dpad_right, dpad_right, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
 
-        if(toggleAllowed(gamepad2.dpad_up,dpad_up,2)){
+        if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
             robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(2500,1.0,20);
+            robot.crane.extendToPosition(2500, 1.0, 20);
         }
 
-        if(toggleAllowed(gamepad2.dpad_down,dpad_down,2)){
+        if (toggleAllowed(gamepad2.dpad_down, dpad_down, 2)) {
             robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(1500,1.0,20);
+            robot.crane.extendToPosition(1500, 1.0, 20);
         }
 
-        if(toggleAllowed(gamepad2.dpad_left,dpad_left,2)){
+        if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
 
         if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y); //
+            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
         }
 
         if (notdeadzone(gamepad2.right_stick_y)) {
@@ -726,47 +752,151 @@ public class Skystone_6832 extends LinearOpMode {
         if (notdeadzone(gamepad2.right_stick_x)) {
             robot.turret.adjust(gamepad2.right_stick_x);
         }
-        //turret controls
-        if(notdeadzone(gamepad2.right_trigger))
+        // turret controls
+        if (notdeadzone(gamepad2.right_trigger))
             robot.turret.rotateRight(gamepad2.right_trigger * 5);
+        // robot.articulate(PoseSkystone.Articulation.autoGrab);
 
-        if(notdeadzone(gamepad2.left_trigger))
+        if (notdeadzone(gamepad2.left_trigger))
             robot.turret.rotateLeft(gamepad2.left_trigger * 5);
-
-
-
-
-
-
-
+        // robot.articulate(PoseSkystone.Articulation.yoinkStone);
 
         robot.crane.update();
         robot.turret.update(opModeIsActive());
     }
 
+    private void joystickDriveNoCap() { // todo - untested
+        if (stopAll) {
+            robot.stopAll();
+        }
+
+        if (gamepad1.guide || gamepad2.guide)
+            stopAll = true;
+
+        if (!joystickDriveStarted) {
+            robot.resetMotors(true);
+            robot.setAutonSingleStep(true);
+            joystickDriveStarted = true;
+        }
+
+        if (robot.getArticulation() == PoseSkystone.Articulation.intake) {
+            reverse = -1;
+        } else if (robot.getArticulation() != PoseSkystone.Articulation.intake
+                && robot.getArticulation() != PoseSkystone.Articulation.manual) {
+            reverse = 1;
+        }
+
+        reverse = -1;
+        pwrDamper = .70;
+
+        pwrFwd = 0;
+        pwrRot = 0;
+
+        if (notdeadzone(gamepad1.left_stick_y))
+            pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
+        if (notdeadzone(gamepad1.right_stick_x))
+            pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+
+        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating) {
+        } else {
+            robot.isNavigating = false; // take control back from any auton navigation if any joystick input is running
+            robot.autonTurnInitialized = false;
+            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
+        }
+
+        // Foundation Gripper
+        if (toggleAllowed(gamepad1.x, x, 1)) {
+            robot.crane.hookToggle();
+        }
+
+        if (toggleAllowed(gamepad1.y, y, 1) && toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
+            robot.crane.servoGripper.setPosition(servoNormalize(800));
+
+        }
+
+        // Pad1 Bumbers - Rotate Cardinal
+        if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
+
+        }
+
+        if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
+        }
+
+        // gamepad2 controls
+
+        if (toggleAllowed(gamepad2.a, a, 2)) {
+            robot.crane.toggleGripper();
+        }
+
+        if (toggleAllowed(gamepad2.b, b, 2)) {
+            robot.turret.rotateCardinalTurret(true);
+        }
+
+        if (toggleAllowed(gamepad2.y, y, 2)) {
+            robot.crane.toggleSwivel();
+        }
+
+        if (toggleAllowed(gamepad2.x, x, 2)) {
+            robot.turret.rotateCardinalTurret(false);
+        }
+
+        if (gamepad2.left_bumper) {
+            robot.crane.swivelGripper(false);
+        }
+
+        if (gamepad2.right_bumper) {
+            robot.crane.swivelGripper(true);
+        }
+
+        if (notdeadzone(gamepad2.left_stick_y)) {
+            robot.crane.adjustElbowAngleNoCap(-gamepad2.left_stick_y);
+        }
+
+        if (notdeadzone(gamepad2.right_stick_y)) {
+            robot.crane.adjustBeltNoCap(-gamepad2.right_stick_y);
+        }
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad2.right_stick_x);
+        }
+
+        // turret controls
+        if (notdeadzone(gamepad2.right_trigger))
+            robot.turret.rotateRight(gamepad2.right_trigger * 5);
+        // robot.articulate(PoseSkystone.Articulation.autoGrab);
+
+        if (notdeadzone(gamepad2.left_trigger))
+            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+        // robot.articulate(PoseSkystone.Articulation.yoinkStone);
+
+        robot.crane.update();
+        robot.turret.update(opModeIsActive());
+    }
 
     private void joystickDrivePregameMode() {
-        //robot.setAutonSingleStep(true); //single step through articulations having to do with deploying
+        // robot.setAutonSingleStep(true); //single step through articulations having to
+        // do with deploying
 
         robot.ledSystem.setColor(LEDSystem.Color.CALM);
         reverse = -1;
 
         pwrDamper = .70;
 
-        //drive joysticks
+        // drive joysticks
         pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
         pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
 
-
         robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
 
-        //turret controls  - this is on gamepad2 in teleop - but on gamepad 1 for prematch setup
+        // turret controls - this is on gamepad2 in teleop - but on gamepad 1 for
+        // prematch setup
         if (notdeadzone(gamepad1.right_trigger))
             robot.turret.rotateRight(gamepad1.right_trigger * 5);
         if (notdeadzone(gamepad1.left_trigger))
             robot.turret.rotateLeft(gamepad1.left_trigger * 5);
 
-        //Pad1 Bumbers - Rotate Cardinal
+        // Pad1 Bumbers - Rotate Cardinal
         if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
             robot.turret.rotateCardinalTurret(true);
         }
@@ -774,18 +904,17 @@ public class Skystone_6832 extends LinearOpMode {
             robot.turret.rotateCardinalTurret(false);
 
         }
-        //fine adjustment of turret - this is on gamepad2 right stick in teleop - but on gamepad 1 for prematch setup
+        // fine adjustment of turret - this is on gamepad2 right stick in teleop - but
+        // on gamepad 1 for prematch setup
         if (notdeadzone(gamepad1.left_stick_x)) {
             robot.turret.adjust(gamepad1.left_stick_x);
         }
     }
 
-
     private void logTurns(double target) {
         telemetry.addData("Error: ", target - robot.getHeading());
-        //telemetry.update();
+        // telemetry.update();
     }
-
 
     private void joystickDriveEndgameMode() {
 
@@ -793,15 +922,18 @@ public class Skystone_6832 extends LinearOpMode {
 
         boolean doLatchStage = false;
         robot.driveMixerDiffSteer(pwrFwd, pwrRot);
-        if (toggleAllowed(gamepad1.b, b,1)) { //b advances us through latching stages - todo: we should really be calling a pose.nextLatchStage function
+        if (toggleAllowed(gamepad1.b, b, 1)) { // b advances us through latching stages - todo: we should really be
+                                               // calling a pose.nextLatchStage function
             stateLatched++;
-            if (stateLatched > 2) stateLatched = 0;
+            if (stateLatched > 2)
+                stateLatched = 0;
             doLatchStage = true;
         }
 
-        if (toggleAllowed(gamepad1.x, x,1)) { //x allows us to back out of latching stages
+        if (toggleAllowed(gamepad1.x, x, 1)) { // x allows us to back out of latching stages
             stateLatched--;
-            if (stateLatched < 0) stateLatched = 0;
+            if (stateLatched < 0)
+                stateLatched = 0;
             doLatchStage = true;
         }
 
@@ -819,15 +951,15 @@ public class Skystone_6832 extends LinearOpMode {
             }
         }
 
-        if (toggleAllowed(gamepad1.a, a,1)) {
+        if (toggleAllowed(gamepad1.a, a, 1)) {
             isHooked = !isHooked;
         }
 
-//        if (isHooked) {
-//            robot.crane.hookOn();
-//        } else {
-//            robot.crane.hookOff();
-//        }
+        // if (isHooked) {
+        // robot.crane.hookOn();
+        // } else {
+        // robot.crane.hookOff();
+        // }
     }
 
     private void turnTest() {
@@ -851,26 +983,26 @@ public class Skystone_6832 extends LinearOpMode {
         robot.driveMixerDiffSteer(pwrFwd, pwrRot);
 
         if (gamepad1.y) {
-//            robot.goToSafeDrive();
-//            isIntakeClosed = true;
+            // robot.goToSafeDrive();
+            // isIntakeClosed = true;
             robot.crane.grabStone();
         }
-        if (toggleAllowed(gamepad1.a, a,1)) {
-            //isIntakeClosed = !isIntakeClosed;
+        if (toggleAllowed(gamepad1.a, a, 1)) {
+            // isIntakeClosed = !isIntakeClosed;
             robot.crane.ejectStone();
         }
 
-
-        if (toggleAllowed(gamepad1.b, b,1)) {
-//            stateIntake++;
-//            if (stateIntake > 3) stateIntake = 0;
-//            doIntake = true;
-            //robot.crane.stopGripper();
+        if (toggleAllowed(gamepad1.b, b, 1)) {
+            // stateIntake++;
+            // if (stateIntake > 3) stateIntake = 0;
+            // doIntake = true;
+            // robot.crane.stopGripper();
         }
 
-        if (toggleAllowed(gamepad1.x, x,1)) {
+        if (toggleAllowed(gamepad1.x, x, 1)) {
             stateIntake--;
-            if (stateIntake < 0) stateIntake = 3;
+            if (stateIntake < 0)
+                stateIntake = 3;
             doIntake = true;
         }
 
@@ -893,12 +1025,10 @@ public class Skystone_6832 extends LinearOpMode {
             }
         }
 
-
-        /*if (isIntakeClosed) {
-            robot.crane.closeGate();
-        } else {
-            robot.crane.grabStone();
-        }*/
+        /*
+         * if (isIntakeClosed) { robot.crane.closeGate(); } else {
+         * robot.crane.grabStone(); }
+         */
     }
 
     private void joystickDriveRegularModeReverse() {
@@ -909,25 +1039,25 @@ public class Skystone_6832 extends LinearOpMode {
 
         boolean doIntake = false;
 
-
         if (gamepad1.y) {
             robot.articulate(PoseSkystone.Articulation.reverseDriving);
             isIntakeClosed = true;
         }
-        if (toggleAllowed(gamepad1.a, a,1)) {
+        if (toggleAllowed(gamepad1.a, a, 1)) {
             isIntakeClosed = !isIntakeClosed;
         }
 
-
-        if (toggleAllowed(gamepad1.b, b,1)) {
+        if (toggleAllowed(gamepad1.b, b, 1)) {
             stateIntake++;
-            if (stateIntake > 3) stateIntake = 0;
+            if (stateIntake > 3)
+                stateIntake = 0;
             doIntake = true;
         }
 
-        if (toggleAllowed(gamepad1.x, x,1)) {
+        if (toggleAllowed(gamepad1.x, x, 1)) {
             stateIntake--;
-            if (stateIntake < 0) stateIntake = 3;
+            if (stateIntake < 0)
+                stateIntake = 3;
             doIntake = true;
         }
 
@@ -935,40 +1065,39 @@ public class Skystone_6832 extends LinearOpMode {
             switch (stateIntake) {
                 case 0:
                     robot.articulate(PoseSkystone.Articulation.reverseIntake);
-                    pwrRot-=.25;
-                    //robot.crane.setBeltToElbowModeEnabled();
+                    pwrRot -= .25;
+                    // robot.crane.setBeltToElbowModeEnabled();
                     isIntakeClosed = true;
                     break;
                 case 1:
                     robot.articulate(PoseSkystone.Articulation.prereversedeposit);
-                    //robot.crane.setBeltToElbowModeDisabled();
+                    // robot.crane.setBeltToElbowModeDisabled();
                     isIntakeClosed = true;
                     break;
                 case 2:
                     robot.articulate(PoseSkystone.Articulation.reverseDeposit);
-                    //robot.crane.setBeltToElbowModeDisabled();
+                    // robot.crane.setBeltToElbowModeDisabled();
                     break;
                 case 3:
                     robot.articulate(PoseSkystone.Articulation.reverseDriving);
-                    //robot.crane.setBeltToElbowModeDisabled();
+                    // robot.crane.setBeltToElbowModeDisabled();
                     isIntakeClosed = true;
                     break;
             }
         }
         robot.driveMixerDiffSteer(pwrFwd, pwrRot);
 
-        /*if (isIntakeClosed) {
-            robot.crane.closeGate();
-        } else {
-            robot.crane.grabStone();
-        }*/
+        /*
+         * if (isIntakeClosed) { robot.crane.closeGate(); } else {
+         * robot.crane.grabStone(); }
+         */
     }
 
-
-    //the method that controls the main state of the robot; must be called in the main loop outside of the main switch
+    // the method that controls the main state of the robot; must be called in the
+    // main loop outside of the main switch
     private void stateSwitch() {
         if (!active) {
-            if (toggleAllowed(gamepad1.left_bumper, left_bumper,1)) {
+            if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
 
                 state--;
                 if (state < 0) {
@@ -978,7 +1107,7 @@ public class Skystone_6832 extends LinearOpMode {
                 active = false;
             }
 
-            if (toggleAllowed(gamepad1.right_bumper, right_bumper,1)) {
+            if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
 
                 state++;
                 if (state > 10) {
@@ -990,149 +1119,127 @@ public class Skystone_6832 extends LinearOpMode {
 
         }
 
-        if (toggleAllowed(gamepad1.start, startBtn,1)) {
+        if (toggleAllowed(gamepad1.start, startBtn, 1)) {
             robot.resetMotors(true);
             active = !active;
         }
     }
 
-
-    //checks to see if a specific button should allow a toggle at any given time; needs a rework
+    // checks to see if a specific button should allow a toggle at any given time;
+    // needs a rework
     private boolean toggleAllowed(boolean button, int buttonIndex, int gpId) {
         if (button) {
-            if(gpId == 1) {
-                if (!buttonSavedStates[buttonIndex]) { //we just pushed the button, and when we last looked at it, it was not pressed
+            if (gpId == 1) {
+                if (!buttonSavedStates[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
+                                                       // was not pressed
                     buttonSavedStates[buttonIndex] = true;
                     return true;
-                } else { //the button is pressed, but it was last time too - so ignore
+                } else { // the button is pressed, but it was last time too - so ignore
 
                     return false;
                 }
-            }
-            else{
-                if (!buttonSavedStates2[buttonIndex]) { //we just pushed the button, and when we last looked at it, it was not pressed
+            } else {
+                if (!buttonSavedStates2[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
+                                                        // was not pressed
                     buttonSavedStates2[buttonIndex] = true;
                     return true;
-                } else { //the button is pressed, but it was last time too - so ignore
+                } else { // the button is pressed, but it was last time too - so ignore
 
                     return false;
                 }
             }
         }
-        if(gpId == 1)
-        buttonSavedStates[buttonIndex] = false; //not pressed, so remember that it is not
+        if (gpId == 1)
+            buttonSavedStates[buttonIndex] = false; // not pressed, so remember that it is not
         else
-        buttonSavedStates2[buttonIndex] = false;
-        return false; //not pressed
+            buttonSavedStates2[buttonIndex] = false;
+        return false; // not pressed
 
     }
 
-
-//    private String getAlliance() {
-//        if (isBlue)
-//            return "Blue";
-//        return "Red";
-//    }
-
+    // private String getAlliance() {
+    // if (isBlue)
+    // return "Blue";
+    // return "Red";
+    // }
 
     private void configureDashboardDebug() {
         // Configure the dashboard.
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
-        //telemetry.addAction(() ->
-                // Acquiring the angles is relatively expensive; we don't want
-                // to do that in each of the three items that need that info, as that's
-                // three times the necessary expense.
-                //angles = robot.imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX)
+        // telemetry.addAction(() ->
+        // Acquiring the angles is relatively expensive; we don't want
+        // to do that in each of the three items that need that info, as that's
+        // three times the necessary expense.
+        // angles =
+        // robot.imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX)
 
-       // );
+        // );
 
-        telemetry.addLine()
-                .addData("active", () -> active)
-                .addData("state", () -> state)
-                .addData("autoStage", () -> auto.autoStage)
-                .addData("Game Mode", () -> GAME_MODES[gameMode])
+        telemetry.addLine().addData("active", () -> active).addData("state", () -> state)
+                .addData("autoStage", () -> auto.autoStage).addData("Game Mode", () -> GAME_MODES[gameMode])
                 .addData("Articulation", () -> robot.getArticulation());
-                //.addData("skystonePos: ", () -> robot.xPos);
+        // .addData("skystonePos: ", () -> robot.xPos);
 
         telemetry.addLine()
-                //.addData("elbowA", () -> robot.crane.isActive())
+                // .addData("elbowA", () -> robot.crane.isActive())
                 .addData("elbowC", () -> robot.crane.getElbowCurrentPos())
                 .addData("elbowT", () -> robot.crane.getElbowTargetPos());
-        telemetry.addLine()
-                .addData("liftPos", () -> robot.crane.getExtendABobCurrentPos());
-        telemetry.addLine()
-                .addData("roll", () -> robot.getRoll())
-                .addData("pitch", () -> robot.getPitch())
-                .addData("heading", () -> robot.getHeading())
-                .addData("yawraw", () -> robot.getHeading());
-        telemetry.addLine()
-                .addData("Loop time", "%.0fms", () -> loopAvg/1000000)
-                .addData("Loop time", "%.0fHz", () -> 1000000000/loopAvg);        //telemetry.addLine()w
-        telemetry.addLine()
-                .addData("Turret Pos", ()-> robot.turret.getCurrentRotationEncoderRaw())
-                .addData("Turret Target",()-> robot.turret.getTargetRotationTicks());
-        telemetry.addLine()
-                .addData("Turret Heading", ()-> robot.turret.getHeading())
-                .addData("Turret Target`s", ()->robot.turret.getTurretTargetHeading());
-        telemetry.addLine()
-                .addData("Turret Current tower height: ", ()-> robot.crane.getCurrentTowerHeight());
-        telemetry.addLine()
-                .addData("Turret Current angle ", ()-> robot.turret.getHeading())
-                .addData("Joystick Y ", ()-> gamepad1.right_stick_y);
-        telemetry.addLine()
-                .addData("avg motor ticks ", ()-> robot.getAverageTicks())
-                .addData("right motor ticks ", ()-> robot.getLeftMotorTicks())
-                .addData("left motor ticks ", ()-> robot.getRightMotorTicks());
-        telemetry.addLine()
-                .addData("gripperLeft ", ()-> robot.gripperLeft.getVoltage())
-                .addData("gripperRight ", ()-> robot.gripperRight.getVoltage())
-                .addData("left distance ", ()-> robot.getDistLeftDist())
-                .addData("right distance ", ()-> robot.getDistRightDist())
-                .addData("front distance ", ()-> robot.getDistForwardDist());
-
-
+        telemetry.addLine().addData("liftPos", () -> robot.crane.getExtendABobCurrentPos());
+        telemetry.addLine().addData("roll", () -> robot.getRoll()).addData("pitch", () -> robot.getPitch())
+                .addData("heading", () -> robot.getHeading()).addData("yawraw", () -> robot.getHeading());
+        telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000).addData("Loop time", "%.0fHz",
+                () -> 1000000000 / loopAvg); // telemetry.addLine()w
+        telemetry.addLine().addData("Turret Pos", () -> robot.turret.getCurrentRotationEncoderRaw())
+                .addData("Turret Target", () -> robot.turret.getTargetRotationTicks());
+        telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading()).addData("Turret Target`s",
+                () -> robot.turret.getTurretTargetHeading());
+        telemetry.addLine().addData("Turret Current tower height: ", () -> robot.crane.getCurrentTowerHeight());
+        telemetry.addLine().addData("Turret Current angle ", () -> robot.turret.getHeading()).addData("Joystick Y ",
+                () -> gamepad1.right_stick_y);
+        telemetry.addLine().addData("avg motor ticks ", () -> robot.getAverageTicks())
+                .addData("right motor ticks ", () -> robot.getLeftMotorTicks())
+                .addData("left motor ticks ", () -> robot.getRightMotorTicks());
+        telemetry.addLine().addData("gripperLeft ", () -> robot.gripperLeft.getVoltage())
+                .addData("gripperRight ", () -> robot.gripperRight.getVoltage())
+                .addData("left distance ", () -> robot.getDistLeftDist())
+                .addData("right distance ", () -> robot.getDistRightDist())
+                .addData("front distance ", () -> robot.getDistForwardDist());
 
         // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
-        //telemetry.addLine()
-                //.addData("drivedistance", () -> robot.getAverageAbsTicks());
-        //telemetry.addLine()
-                //.addData("status", () -> robot.imu.getSystemStatus().toShortString())
-                //.addData("mineralState", () -> auto.mineralState)
-//                .addData("distForward", () -> robot.distForward.getDistance(DistanceUnit.METER))
-//                .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
-//                .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
-                //.addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
-
-
-
+        // telemetry.addLine()
+        // .addData("drivedistance", () -> robot.getAverageAbsTicks());
+        // telemetry.addLine()
+        // .addData("status", () -> robot.imu.getSystemStatus().toShortString())
+        // .addData("mineralState", () -> auto.mineralState)
+        // .addData("distForward", () ->
+        // robot.distForward.getDistance(DistanceUnit.METER))
+        // .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
+        // .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
+        // .addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
 
     }
 
     private void configureDashboardMatch() {
         // Configure the dashboard.
 
-        telemetry.addLine()
-                .addData("active", () -> active)
-                .addData("state", () -> state)
+        telemetry.addLine().addData("active", () -> active).addData("state", () -> state)
                 .addData("Game Mode", () -> GAME_MODES[gameMode])
                 .addData("Articulation", () -> robot.getArticulation());
 
-        telemetry.addLine()
-                .addData("Loop time", "%.0fms", () -> loopAvg / 1000000)
-                .addData("Loop time", "%.0fHz", () -> 1000000000 / loopAvg);
+        telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000).addData("Loop time", "%.0fHz",
+                () -> 1000000000 / loopAvg);
 
     }
-
 
     private int servoTest = 1005;
 
     private void servoTest() {
-        //robot.ledSystem.movement.setPosition(Conversions.servoNormalize(servoTest));
-        if (toggleAllowed(gamepad1.a, a,1))
+        // robot.ledSystem.movement.setPosition(Conversions.servoNormalize(servoTest));
+        if (toggleAllowed(gamepad1.a, a, 1))
             servoTest -= 10;
-        else if (toggleAllowed(gamepad1.y, y,1))
+        else if (toggleAllowed(gamepad1.y, y, 1))
             servoTest += 10;
         telemetry.addData("Pulse width", servoTest);
     }

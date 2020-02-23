@@ -53,6 +53,20 @@ public class Conversions {
         return wrap360(angleCurrent + angleChange);
     }
 
+    public static boolean isNear(double baseValue, double slop){
+        if(baseValue <= baseValue+slop || baseValue >= baseValue- slop){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isNear(int baseValue, int slop){
+        if(baseValue <= baseValue+slop || baseValue >= baseValue- slop){
+            return true;
+        }
+        return false;
+    }
+
     public static double wrapAngle(double angle){
         return (angle) % 360;
     }
