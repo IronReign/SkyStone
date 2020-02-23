@@ -666,8 +666,9 @@ public class Skystone_6832 extends LinearOpMode {
         // robot.articulate(PoseSkystone.Articulation.retractFromTower);
         // }
 
-        if (toggleAllowed(gamepad1.a, a, 1))
+        if (toggleAllowed(gamepad1.a, a, 1)) {
             robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+        }
 
         if (toggleAllowed(gamepad1.b, b, 1)) {
             robot.crane.setElbowTargetPos(250);
@@ -676,7 +677,9 @@ public class Skystone_6832 extends LinearOpMode {
 
         // Foundation Gripper
         if (toggleAllowed(gamepad1.x, x, 1)) {
-            robot.crane.hookToggle();
+//            robot.crane.hookToggle();
+            robot.crane.currentTowerHeight = 3;
+            robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation);
         }
 
         if (toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {

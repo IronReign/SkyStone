@@ -257,8 +257,8 @@ public class Crane {
 
     public void extendToTowerHeight(double distance, int stackHeight) {
         hypotenuse = Math.sqrt(Math.pow(distance, 2) + Math.pow((stackHeight* blockHeightMeter),2));//in meters
-        setElbowTargetAngle(Math.toDegrees(Math.acos(0.8763/ hypotenuse)));
-        setExtendABobLengthMeters(hypotenuse-.3683);
+        setElbowTargetAngle(Math.toDegrees(Math.atan((stackHeight * blockHeightMeter) / distance)));
+        setExtendABobLengthMeters(hypotenuse);
     }
 
     public void extendToTowerHeight(){

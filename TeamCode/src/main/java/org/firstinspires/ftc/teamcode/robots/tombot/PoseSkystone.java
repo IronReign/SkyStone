@@ -19,6 +19,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.Conversions;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
@@ -1364,15 +1366,17 @@ public class PoseSkystone {
     }
 
     public boolean autoExtendToTowerHeightArticulation() {
-        int stackHeightSum = 0;
-        for (int i = 0; i < 5; i++) {
+        double totalTowerHeight = 0;
+        for(int i = 0; i < 5; i++) {
             Mat mat = towerHeightPipeline.process();
-            stackHeightSum += towerHeightPipeline.blocks;
-            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
-            Utils.matToBitmap(mat, bm);
-            dashboard.sendImage(bm);
+            if(mat != null) {
+                Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+                Utils.matToBitmap(mat, bm);
+                dashboard.sendImage(bm);
+            }
+            totalTowerHeight += towerHeightPipeline.blocks;
         }
-        crane.extendToTowerHeight(getDistForwardDist(), (int) (stackHeightSum / 5.0));
+        crane.extendToTowerHeight(getDistForwardDist(), (int) (totalTowerHeight / 5));
         return true;
     }
 
