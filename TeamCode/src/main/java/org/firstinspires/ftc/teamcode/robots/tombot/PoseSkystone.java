@@ -4,19 +4,16 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.teamcode.RC;
+import org.firstinspires.ftc.teamcode.util.Conversions;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.TowerHeightPipeline;
@@ -232,7 +229,7 @@ public class PoseSkystone {
     }
 
     boolean autonSingleStep = false; //single step through auton deploying stages to facilitate testing and demos
-
+    
     public void setIsBlue(boolean blue){
         isBlue = blue;
     }
@@ -1257,20 +1254,19 @@ public class PoseSkystone {
 
     private int yoinkStage = 0;
     private double yoinkTimer = 0.0;
-    private double voltagePlaceholder; //todo- make this an actual value
-    private int distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder; //todo- make this an actual value, based on the distance sensor reading
+    private int ticksTheElbowShouldGoBasedOnVoltageReading = 146; //todo- make this an actual value, based on the distance sensor reading
 
     public boolean YoinkStone(){ //this goes down and grabs the block note how it assumes it is over the block already
         switch(yoinkStage)
         {
             case 0:
-                if (crane.setElbowTargetPos(distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, 1)) {
+                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, 1)) {
                     yoinkStage++;
                 }
 
                 break;
             case 1:
-                if (crane.setElbowTargetPos(crane.getElbowCurrentPos() - distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, 1)) {
+                if (crane.setElbowTargetPos(0, 1)) {
                     yoinkStage++;
                 }
                 break;
@@ -1282,7 +1278,6 @@ public class PoseSkystone {
     }
 
     private int autoPickUpStage = 0;
-    private double autoPickUpTimer = 0.0;
     private double voltageBefore = 0.0; //todo- check that the farther you get out makes it larger, if not then I need to relace this with a larger number and subtract one a bit lower when checking for height difference
     private boolean rightWasFirst = false;
     private int lastRotationSet = 1500;
@@ -1290,22 +1285,24 @@ public class PoseSkystone {
         switch(autoPickUpStage)
         {
             case 0:
-                if (crane.setElbowTargetPos(distanceTheArmShouldGoBasedOnVoltageReadingPlaceholder, .6)) { //put the elbow in the correct place
+                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, .6)) { //put the elbow in the correct place
                     autoPickUpStage++;
                 }
                 break;
             case 1:
-                if (crane.extendToPosition(crane.getExtendABobCurrentPos()+10,1,0)) { //extends out the arm just a bit
+                if(crane.getExtendABobCurrentPos() == crane.extendMax)
+                    return false;
+                if (crane.extendToPosition(crane.getExtendABobCurrentPos()+10,1,0) ) { //extends out the arm just a bit
 
                 }
                 if(gripperLeft.getVoltage() > voltageBefore+1.0 ){ //checks if the left sensor has detected anything
                     rightWasFirst = false; //so we know later
-                    voltageBefore = 0.0; //this is just a reset, see todo above
+                    voltageBefore = 0.0;
                     autoPickUpStage++;
                 }
                 if(gripperRight.getVoltage() > voltageBefore+ 1.0) { //checks if the right sensor has detected anything
                     rightWasFirst = true; //so we know later
-                    voltageBefore = 0.0; //this is just a reset, see todo above
+                    voltageBefore = 0.0;
                     autoPickUpStage++;
                 }
                 break;

@@ -434,34 +434,28 @@ public class Skystone_6832 extends LinearOpMode {
             if (active) {
                 switch (state) {
                     case 0: //auton full
-                        if (auto.redAutoFull.execute()) active = false;
-
+                        if (auto.redAutoFull.execute()){ active = false; state = 1;}
                         break;
-//                    case 1: //autonomous that goes to opponent's crater
-//                        if (auto.autoSkyStoneRetrieve.execute()) {if(auto.redAutoFull.execute()) active = false;} //active = false;
-//                        break;
                     case 1: //teleop
                         joystickDrive();
-                        //if (auto.walkOfShame.execute()) active = false;
                         break;
                     case 3: //autonomous that starts in our crater
-                        if (auto.walkOfShameRight.execute()) active = false;
+                        if (auto.walkOfShameRight.execute()){ active = false; state = 1;}
                         break;
                     case 4:
-                        if (auto.walkOfShameLeft.execute()) active = false;
+                        if (auto.walkOfShameLeft.execute()){ active = false; state = 1;}
                         break;
                     case 5:
                         if (auto.autoMethodTesterTool.execute()) active = false;
                         break;
                     case 6:
-                        demo();
                         if(auto.visionTest.execute()) active = false;
                         break;
                     case 7:
-
+                        joystickDriveNoCap();
                         break;
                     case 8:
-
+                        demo();
                         break;
                     case 9:
 
@@ -650,6 +644,9 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.hookToggle();
         }
 
+        if(toggleAllowed(gamepad1.dpad_left,dpad_left,1)){
+            robot.articulate(PoseSkystone.Articulation.yoinkStone);
+        }
 
         if(toggleAllowed(gamepad1.y,y,1) && toggleAllowed(gamepad1.dpad_down,dpad_down,1)){
             robot.crane.servoGripper.setPosition(servoNormalize(800));
@@ -715,7 +712,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y); //
+            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
         }
 
         if (notdeadzone(gamepad2.right_stick_y)) {
@@ -727,9 +724,11 @@ public class Skystone_6832 extends LinearOpMode {
         //turret controls
         if(notdeadzone(gamepad2.right_trigger))
             robot.turret.rotateRight(gamepad2.right_trigger * 5);
+//            robot.articulate(PoseSkystone.Articulation.autoGrab);
 
         if(notdeadzone(gamepad2.left_trigger))
             robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+//            robot.articulate(PoseSkystone.Articulation.yoinkStone);
 
 
 
@@ -737,6 +736,121 @@ public class Skystone_6832 extends LinearOpMode {
 
 
 
+
+
+        robot.crane.update();
+        robot.turret.update(opModeIsActive());
+    }
+
+    private void joystickDriveNoCap() { //todo - untested
+        if(stopAll) {
+            robot.stopAll();
+        }
+
+        if(gamepad1.guide || gamepad2.guide)
+            stopAll = true;
+
+
+        if (!joystickDriveStarted) {
+            robot.resetMotors(true);
+            robot.setAutonSingleStep(true);
+            joystickDriveStarted = true;
+        }
+
+        if(robot.getArticulation() == PoseSkystone.Articulation.intake){
+            reverse = -1;
+        }else if(robot.getArticulation() != PoseSkystone.Articulation.intake && robot.getArticulation() != PoseSkystone.Articulation.manual){
+            reverse = 1;
+        }
+
+
+
+        reverse=-1;
+        pwrDamper = .70;
+
+        pwrFwd = 0;
+        pwrRot = 0;
+
+        if (notdeadzone(gamepad1.left_stick_y)) pwrFwd = reverse*direction * pwrDamper * gamepad1.left_stick_y;
+        if (notdeadzone(gamepad1.right_stick_x)) pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
+
+        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating){}
+        else {
+            robot.isNavigating=false; //take control back from any auton navigation if any joystick input is running
+            robot.autonTurnInitialized = false;
+            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
+        }
+
+        //Foundation Gripper
+        if(toggleAllowed(gamepad1.x,x,1)){
+            robot.crane.hookToggle();
+        }
+
+
+        if(toggleAllowed(gamepad1.y,y,1) && toggleAllowed(gamepad1.dpad_down,dpad_down,1)){
+            robot.crane.servoGripper.setPosition(servoNormalize(800));
+
+        }
+
+        //Pad1 Bumbers - Rotate Cardinal
+        if(toggleAllowed(gamepad1.right_bumper,right_bumper,1)){
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
+
+        }
+
+        if(toggleAllowed(gamepad1.left_bumper,left_bumper,1)){
+            robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
+        }
+
+
+
+        //gamepad2 controls
+
+
+
+        if(toggleAllowed(gamepad2.a,a,2)) {
+            robot.crane.toggleGripper();
+        }
+
+        if(toggleAllowed(gamepad2.b,b,2)) {
+            robot.turret.rotateCardinalTurret(true);
+        }
+
+        if(toggleAllowed(gamepad2.y,y,2)) {
+            robot.crane.toggleSwivel();
+        }
+
+        if(toggleAllowed(gamepad2.x,x,2)) {
+            robot.turret.rotateCardinalTurret(false);
+        }
+
+        if(gamepad2.left_bumper) {
+            robot.crane.swivelGripper(false);
+        }
+
+        if(gamepad2.right_bumper) {
+            robot.crane.swivelGripper(true);
+        }
+
+        if (notdeadzone(gamepad2.left_stick_y)) {
+            robot.crane.adjustElbowAngleNoCap(-gamepad2.left_stick_y);
+        }
+
+        if (notdeadzone(gamepad2.right_stick_y)) {
+            robot.crane.adjustBeltNoCap(-gamepad2.right_stick_y);
+        }
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad2.right_stick_x);
+        }
+
+        //turret controls
+        if(notdeadzone(gamepad2.right_trigger))
+            robot.turret.rotateRight(gamepad2.right_trigger * 5);
+//            robot.articulate(PoseSkystone.Articulation.autoGrab);
+
+        if(notdeadzone(gamepad2.left_trigger))
+            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
+//            robot.articulate(PoseSkystone.Articulation.yoinkStone);
 
         robot.crane.update();
         robot.turret.update(opModeIsActive());
