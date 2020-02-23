@@ -63,8 +63,8 @@ public class SkystoneGripPipeline {
     private static final int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
     private boolean isBlue;
 
-    public SkystoneGripPipeline(HardwareMap hardwareMap) {
-        initVuforia(hardwareMap, Viewpoint.WEBCAM);
+    public SkystoneGripPipeline(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
+        this.vuforia = vuforia;
         q = vuforia.getFrameQueue();
         dashboard = FtcDashboard.getInstance();
         info = new SkystoneTargetInfo();
@@ -73,20 +73,6 @@ public class SkystoneGripPipeline {
 
     public void setIsBlue(boolean isBlue) {
         this.isBlue = isBlue;
-    }
-
-    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
-        if (viewpoint == Viewpoint.BACK)
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        else if (viewpoint == Viewpoint.WEBCAM)
-            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
-        else
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-        vuforia.setFrameQueueCapacity(1);
     }
 
     /**

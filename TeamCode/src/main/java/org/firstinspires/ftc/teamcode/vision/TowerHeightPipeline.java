@@ -52,27 +52,15 @@ public class TowerHeightPipeline {
     public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
     public int towerWidth, towerHeight, blocks;
     public double aspectRatio;
+    public FtcDashboard dashboard;
 
     //contants
     public static final double[] ASPECT_RATIOS  = {0.3325, 0.8775, 1.2575, 1.6375, 2.0425, 2.4, 2.7325};
 
-    public TowerHeightPipeline(HardwareMap hardwareMap) {
-        initVuforia(hardwareMap, Viewpoint.WEBCAM);
+    public TowerHeightPipeline(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
+        this.vuforia = vuforia;
         q = vuforia.getFrameQueue();
-    }
-
-    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
-        if (viewpoint == Viewpoint.BACK)
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        else if (viewpoint == Viewpoint.WEBCAM)
-            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
-        else
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-        vuforia.setFrameQueueCapacity(1);
+        dashboard = FtcDashboard.getInstance();
     }
 
     /**

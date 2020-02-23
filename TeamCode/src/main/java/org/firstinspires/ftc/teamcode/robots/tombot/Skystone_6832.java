@@ -455,7 +455,6 @@ public class Skystone_6832 extends LinearOpMode {
                         break;
                     case 6:
                         demo();
-                        if(auto.visionTest.execute()) active = false;
                         break;
                     case 7:
 
@@ -636,9 +635,12 @@ public class Skystone_6832 extends LinearOpMode {
         //gamepad1 controls
 
 //trigger retractFromTower articulation
-        if(toggleAllowed(gamepad1.a,a,1)){
-            robot.articulate(PoseSkystone.Articulation.retractFromTower);
-        }
+//        if(toggleAllowed(gamepad1.a,a,1)){
+//            robot.articulate(PoseSkystone.Articulation.retractFromTower);
+//        }
+
+        if(toggleAllowed(gamepad1.a, a, 1))
+            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
 
         if(toggleAllowed(gamepad1.b,b,1)){
             robot.crane.setElbowTargetPos(250);

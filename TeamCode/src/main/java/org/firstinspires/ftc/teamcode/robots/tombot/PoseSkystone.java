@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import android.graphics.Bitmap;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -9,7 +11,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -20,6 +25,9 @@ import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.TowerHeightPipeline;
+import org.firstinspires.ftc.teamcode.vision.Viewpoint;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
@@ -398,11 +406,23 @@ public class PoseSkystone {
         imu.initialize(parametersIMU);
 
         //initialize vision
-        pipeline = new SkystoneGripPipeline(hwMap);
-        towerHeightPipeline = new TowerHeightPipeline(hwMap);
+
+        VuforiaLocalizer vuforia;
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+            parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(1);
+        pipeline = new SkystoneGripPipeline(hwMap, vuforia);
+        towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
 
         //dashboard
         dashboard = FtcDashboard.getInstance();
+    }
+
+    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
+
     }
 
     public void resetIMU() {
@@ -1348,8 +1368,11 @@ public class PoseSkystone {
     public boolean autoExtendToTowerHeightArticulation() {
         int stackHeightSum = 0;
         for(int i = 0; i < 5; i++) {
-            towerHeightPipeline.process();
+            Mat mat = towerHeightPipeline.process();
             stackHeightSum += towerHeightPipeline.blocks;
+            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(mat, bm);
+            dashboard.sendImage(bm);
         }
         crane.extendToTowerHeight(getDistForwardDist(), (int) (stackHeightSum / 5.0));
         return true;

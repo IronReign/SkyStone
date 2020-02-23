@@ -103,7 +103,14 @@ public class TowerHeightPipelineTest extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        pipeline = new TowerHeightPipeline(hardwareMap);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(1);
+
+        pipeline = new TowerHeightPipeline(hardwareMap, vuforia);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
