@@ -68,6 +68,8 @@ import java.util.concurrent.BlockingQueue;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
+import static org.firstinspires.ftc.teamcode.robots.tombot.Crane.*;
+
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -133,8 +135,14 @@ public class TowerHeightPipelineTest extends LinearOpMode {
                 packet.put("width", pipeline.towerWidth);
                 packet.put("height", pipeline.towerHeight);
                 packet.put("stack height", pipeline.blocks);
+                double x = 0.3 + DISTANCE_SENSOR_TO_ELBOW - X_LEEWAY;
+                double y = (pipeline.blocks + 1) * blockHeightMeter + GRIPPER_HEIGHT + Y_LEEWAY - ELBOW_HEIGHT;
+                packet.put("x", x);
+                packet.put("y", y);
+                packet.put("hypot", Math.hypot(x, y));
+                packet.put("angle", Math.atan(y / x));
 
-                dashboard.sendImage(bm);
+                        dashboard.sendImage(bm);
                 dashboard.sendTelemetryPacket(packet);
             }
 

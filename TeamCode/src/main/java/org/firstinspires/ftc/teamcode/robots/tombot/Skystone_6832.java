@@ -40,7 +40,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.vision.Config;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
+import org.opencv.core.Mat;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.nearZero;
 import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
@@ -589,7 +591,9 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.changeTowerHeight(-1);
         }
         if (toggleAllowed(gamepad1.a, a, 1)) {
-            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+//            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+            Mat mat = robot.towerHeightPipeline.process();
+
         }
         if (toggleAllowed(gamepad1.dpad_right, dpad_right, 1)) {
             robot.crane.toggleGripper();
@@ -633,6 +637,8 @@ public class Skystone_6832 extends LinearOpMode {
                 && robot.getArticulation() != PoseSkystone.Articulation.manual) {
             reverse = 1;
         }
+
+        robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
 
         reverse = -1;
         pwrDamper = .70;

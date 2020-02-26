@@ -99,7 +99,7 @@ public class Crane {
     public int stow = 650;
 
     public int currentTowerHeight;
-    public final double blockHeightMeter = 0.127;
+    public static final double blockHeightMeter = 0.127;
     public int anglePerBlock;
 
     public int craneArticulation = 0;
@@ -110,6 +110,12 @@ public class Crane {
 
     public double ticksPerDegree = 19.4705882353;
     public final double ticksPerMeter = 806/.2921;
+    public static final double DISTANCE_SENSOR_TO_ELBOW = 0.33;
+    public static final double GRIPPER_HEIGHT = 0.23;
+    public static final double Y_LEEWAY = 0.05;
+    public static final double X_LEEWAY = 0.02;
+    public static final double ELBOW_HEIGHT = 0.24;
+    public static final double CRANE_LENGTH = .3683;
 
     public boolean active = true;
 
@@ -256,9 +262,10 @@ public class Crane {
     public int getElbowMax() {return elbowMax;}
 
     public void extendToTowerHeight(double distance, int stackHeight) {
-        hypotenuse = Math.sqrt(Math.pow(distance, 2) + Math.pow((stackHeight* blockHeightMeter),2));//in meters
-        setElbowTargetAngle(Math.toDegrees(Math.atan((stackHeight * blockHeightMeter) / distance)));
-        setExtendABobLengthMeters(hypotenuse);
+        double x = distance + DISTANCE_SENSOR_TO_ELBOW - X_LEEWAY;
+        double y = (stackHeight + 1) * blockHeightMeter + GRIPPER_HEIGHT + Y_LEEWAY - ELBOW_HEIGHT;
+        setElbowTargetAngle(Math.toDegrees(Math.atan(y / x))); //in degrees
+        setExtendABobLengthMeters(Math.sqrt(x * x + y * y) - CRANE_LENGTH); //in meters
     }
 
     public void extendToTowerHeight(){

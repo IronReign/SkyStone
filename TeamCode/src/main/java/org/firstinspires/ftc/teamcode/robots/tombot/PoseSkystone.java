@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -752,6 +753,7 @@ public class PoseSkystone {
                 if (autoExtendToTowerHeightArticulation()) {
                     articulation = Articulation.manual;
                 }
+                break;
             case shootOut:
                 if (shootOut()) {
                     articulation = Articulation.manual;
@@ -1366,17 +1368,18 @@ public class PoseSkystone {
     }
 
     public boolean autoExtendToTowerHeightArticulation() {
-        double totalTowerHeight = 0;
-        for(int i = 0; i < 5; i++) {
             Mat mat = towerHeightPipeline.process();
             if(mat != null) {
                 Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
                 Utils.matToBitmap(mat, bm);
                 dashboard.sendImage(bm);
-            }
-            totalTowerHeight += towerHeightPipeline.blocks;
+
+                TelemetryPacket packet = new TelemetryPacket();
+                packet.put("stack height", towerHeightPipeline.blocks);
+                packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
+                dashboard.sendTelemetryPacket(packet);
         }
-        crane.extendToTowerHeight(getDistForwardDist(), (int) (totalTowerHeight / 5));
+        crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
         return true;
     }
 
