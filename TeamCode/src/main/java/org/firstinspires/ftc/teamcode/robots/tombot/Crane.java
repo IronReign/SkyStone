@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,7 +11,7 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 /**
  * Created by 2938061 on 11/10/2017.
  */
-
+@Config
 public class Crane {
 
     //number of ticks per revolution REV HD motor: 2240
@@ -25,6 +26,12 @@ public class Crane {
     Servo servoGripper = null;
     Servo intakeServoBack = null;
     Servo gripperSwivel = null;
+
+    AnalogInput gripperLeft;
+    AnalogInput gripperRight;
+
+    public static double gripLeftDist;
+    public static double gripRightDist; //these hold the most recently updated values for the gripper distance sensors
 
     double hookPwr = 1;
 
@@ -123,7 +130,7 @@ public class Crane {
         return gripperState;
     }
 
-    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo servoGripper, Servo intakeServoBack, Servo gripperSwivel){
+    public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo servoGripper, Servo intakeServoBack, Servo gripperSwivel, AnalogInput gripperLeft, AnalogInput gripperRight){
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
@@ -143,6 +150,10 @@ public class Crane {
         this.intakeServoBack = intakeServoBack;
         this.gripperSwivel = gripperSwivel;
         intakeServoBack.setDirection(Servo.Direction.REVERSE);
+        this.gripperLeft = gripperLeft;
+        this.gripperRight = gripperRight;
+
+
 
         intakePwr = .3; //.35;
         //normal Teleop encoder values
@@ -200,6 +211,9 @@ public class Crane {
             extendABob.setTargetPosition(extendABobPos);
             extendABob.setPower(extendABobPwr);
         }
+        gripLeftDist = gripperLeft.getVoltage();
+        gripRightDist = gripperRight.getVoltage();
+
         updateGripper();
         updateBeltToElbow();
     }
@@ -302,6 +316,23 @@ public class Crane {
             gripperSwivel.setPosition(gripperSwivel.getPosition()-.02);
         else
             gripperSwivel.setPosition(gripperSwivel.getPosition()+.02);
+    }
+
+    public boolean alignGripperDownFacing(){
+        //continuously try to align the gripper with a stone
+        //this version assumes downward directed sharp distance sensors that only see the stone when they cross over its edge
+        //should not operate while both sensors are seeing a larger distance to the floor than is reasonable
+        //when both sensors see the stone (distance indicates stone height above floor) then call it aligned, return true;
+        //if only one sensor sees the stone, rotate so that sensor backs away
+        //if both sensors only see the floor, extend crane out a bit
+        //repeat
+        double stoneDist = 0.2; //what is the typical distance to a stone?
+
+        if (gripLeftDist < stoneDist && gripRightDist < stoneDist) return true;
+
+
+        return false;
+
     }
 
     public void toggleSwivel(){

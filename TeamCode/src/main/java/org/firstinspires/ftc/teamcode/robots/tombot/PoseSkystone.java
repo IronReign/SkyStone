@@ -371,7 +371,7 @@ public class PoseSkystone {
          * driveRight.setDirection(DcMotorSimple.Direction.FORWARD); }
          */
         // setup subsystems
-        crane = new Crane(elbow, extender, hook, intakeServoFront, intakeServoBack, gripperSwivel);
+        crane = new Crane(elbow, extender, hook, intakeServoFront, intakeServoBack, gripperSwivel,gripperLeft,gripperRight);
         turretIMU = hwMap.get(BNO055IMU.class, "turretIMU");
         turret = new Turret(turretMotor, turretIMU);
         ledSystem = new LEDSystem(blinkin);
