@@ -32,6 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -40,7 +41,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.vision.Config;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
 import org.opencv.core.Mat;
 
@@ -54,8 +54,10 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
  * TeleOp and Autonomous.
  */
 
+
 @TeleOp(name = "Skystone_6832", group = "Challenge") // @Autonomous(...) is the other common choice
 // @Autonomous
+@Config
 public class Skystone_6832 extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -70,7 +72,7 @@ public class Skystone_6832 extends LinearOpMode {
     private boolean active = true;
     private boolean joystickDriveStarted = false;
 
-    private int state = 0;
+    static public int state = 0;
 
     // loop time profile
     long lastLoopClockTime;
@@ -467,6 +469,10 @@ public class Skystone_6832 extends LinearOpMode {
                     case 1: // teleop
                         joystickDrive();
                         break;
+                    case 2:
+                        robot.crane.alignGripperDownFacing();
+                        break;
+
                     case 3: // autonomous that starts in our crater
                         if (auto.walkOfShameRight.execute()) {
                             active = false;
@@ -638,7 +644,7 @@ public class Skystone_6832 extends LinearOpMode {
             reverse = 1;
         }
 
-        robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
+        //robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
 
         reverse = -1;
         pwrDamper = .70;

@@ -326,9 +326,22 @@ public class Crane {
         //if only one sensor sees the stone, rotate so that sensor backs away
         //if both sensors only see the floor, extend crane out a bit
         //repeat
-        double stoneDist = 0.2; //what is the typical distance to a stone?
+        double stoneDist = 1.4; //what is the typical trigger distance to a stone?
+        double floorDist = .5; //what is the typical trigger distance to the floor when at approach height?
 
-        if (gripLeftDist < stoneDist && gripRightDist < stoneDist) return true;
+        if (gripLeftDist < floorDist && gripRightDist < floorDist) return false; // we are too high
+
+        if (gripLeftDist < stoneDist && gripRightDist < stoneDist) return true; //we think we are done - could easily be over extended if we didn't approach correctly
+
+        if (gripLeftDist < stoneDist) {// && gripLeftDist < stoneDist && gripRightDist > floorDist) {
+            //we might be seeing a stone with the left sensor, so swivel left
+            swivelGripper(false);
+        }
+            if (gripRightDist < stoneDist){// && gripLeftDist < stoneDist && gripRightDist > floorDist) {
+                //we might be seeing a stone with the left sensor, so swivel left
+                swivelGripper(true);
+
+            }
 
 
         return false;
