@@ -34,6 +34,7 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.nextCardinal;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngle;
 import static org.firstinspires.ftc.teamcode.util.Conversions.wrapAngleMinus;
+import static org.firstinspires.ftc.teamcode.vision.Config.*;
 
 /**
  * The Pose class stores the current real world position/orientation:
@@ -55,6 +56,8 @@ public class PoseSkystone {
     // setup
     HardwareMap hwMap;
     PIDController drivePID = new PIDController(0, 0, 0);
+    PIDController alignPID = new PIDController(ALIGN_P, ALIGN_I, ALIGN_D);
+    private int autoAlignStage = 0;
     FtcDashboard dashboard;
 
     public static double kpDrive = 0.02; // proportional constant multiplier
@@ -172,7 +175,7 @@ public class PoseSkystone {
                  // weight toward drive wheels for better turn and drive traction
         reverseDriving, retrieving, // retrieve a stone
         retriving2, yoinkStone, autoGrab, bridgeTransit, extendToTowerHeightArticulation,
-        autoExtendToTowerHeightArticulation, retractFromTower, retractFromBlock, retractFromBlockAuton,
+        autoExtendToTowerHeightArticulation, autoAlignArticulation, retractFromTower, retractFromBlock, retractFromBlockAuton,
         cardinalBaseRight, cardinalBaseLeft, shootOut, shootOutII, recockGripper, deploying, // auton unfolding after
                                                                                              // initial hang - should
                                                                                              // only be called from the
@@ -754,6 +757,11 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case autoAlignArticulation:
+                if(autoAlignArticulation()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case shootOut:
                 if (shootOut()) {
                     articulation = Articulation.manual;
@@ -1290,7 +1298,7 @@ public class PoseSkystone {
                     yoinkStage++;
                 }
                 break;
-            case 3:
+            case 2:
                 yoinkStage = 0;
                 return true;
         }
@@ -1368,18 +1376,52 @@ public class PoseSkystone {
     }
 
     public boolean autoExtendToTowerHeightArticulation() {
-            Mat mat = towerHeightPipeline.process();
-            if(mat != null) {
-                Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
-                Utils.matToBitmap(mat, bm);
-                dashboard.sendImage(bm);
+        Mat mat = towerHeightPipeline.process();
+        if(mat != null) {
+            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(mat, bm);
+            dashboard.sendImage(bm);
 
-                TelemetryPacket packet = new TelemetryPacket();
-                packet.put("stack height", towerHeightPipeline.blocks);
-                packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
-                dashboard.sendTelemetryPacket(packet);
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("stack height", towerHeightPipeline.blocks);
+            packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
+            dashboard.sendTelemetryPacket(packet);
         }
         crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
+        return true;
+    }
+
+    public Mat towerHeightPipelineProcess() {
+        Mat mat = towerHeightPipeline.process();
+        int error = 0;
+        if(mat != null) {
+            error = towerHeightPipeline.x - mat.width() / 2;
+            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(mat, bm);
+            dashboard.sendImage(bm);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("x", towerHeightPipeline.x);
+            packet.put("error", error);
+            dashboard.sendTelemetryPacket(packet);
+        }
+        return mat;
+    }
+
+    public boolean autoAlignArticulation() {
+        Mat mat = towerHeightPipelineProcess();
+
+        alignPID.setSetpoint(mat.width() / 2.0);
+        alignPID.setOutputRange(-0.5, 0.5);
+        alignPID.setTolerance(0.05);
+        alignPID.enable();
+
+        while(!alignPID.onTarget()) {
+            alignPID.setInput(towerHeightPipeline.x);
+            driveMixerDiffSteer(alignPID.performPID(), 0);
+            towerHeightPipeline.process();
+            towerHeightPipelineProcess();
+        }
         return true;
     }
 
@@ -1456,9 +1498,12 @@ public class PoseSkystone {
 
                     articulation = Articulation.retriving2;
                     miniStateRetTow = 0;
-                    return true;
                 }
 
+                break;
+            case (3):
+                articulate(Articulation.cardinalBaseLeft);
+                return true;
         }
         return false;
     }

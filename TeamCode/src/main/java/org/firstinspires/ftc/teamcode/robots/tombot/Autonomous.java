@@ -106,6 +106,20 @@ public class Autonomous {
 //            .build();
 
 
+    public StateMachine simultaneousStateTest = getStateMachine(autoStage)
+            .addSimultaneousStates(
+                    () -> {robot.turret.rotateRight(0.25); return false;},
+                    () -> {robot.driveMixerDiffSteer(0.25, 0.25); return false;}
+            )
+            .build();
+
+    public StateMachine retractFromTower = getStateMachine(autoStage)
+            .addSimultaneousStates(
+                    () -> robot.crane.toggleGripper(),
+                    () -> robot.crane.setElbowTargetAngle(robot.crane.getCurrentAngle() + 15),
+                    () -> {robot.articulate(PoseSkystone.Articulation.retriving2); return true; },
+                    () -> {robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft); return true; }
+            ).build();
 
     public StateMachine visionTest = getStateMachine(autoStage)
             .addState(() ->  {

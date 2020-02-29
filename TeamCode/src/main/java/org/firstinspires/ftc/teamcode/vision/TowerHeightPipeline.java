@@ -50,7 +50,7 @@ public class TowerHeightPipeline {
     //Statistics
     public List<BlobStats> blobs = new ArrayList<BlobStats>();
     public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-    public int towerWidth, towerHeight, blocks;
+    public int towerWidth, towerHeight, blocks, x;
     public double aspectRatio;
     public FtcDashboard dashboard;
 
@@ -137,6 +137,7 @@ public class TowerHeightPipeline {
                 towerWidth = mainBlob.width;
                 towerHeight = mainBlob.height;
                 aspectRatio = (double) towerHeight / towerWidth;
+                x = mainBlob.x;
 
                 if(aspectRatio < ASPECT_RATIOS[0])
                     blocks = 0;

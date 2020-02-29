@@ -499,7 +499,8 @@ public class Skystone_6832 extends LinearOpMode {
                         demo();
                         break;
                     case 9:
-
+                        if(auto.simultaneousStateTest.execute())
+                            active = false;
                         break;
                     case 10:
 
@@ -682,17 +683,22 @@ public class Skystone_6832 extends LinearOpMode {
             robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
         }
 
+        if(toggleAllowed(gamepad1.x, x, 1)) {
+//            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
+            robot.crane.hookToggle();
+        }
+
         if (toggleAllowed(gamepad1.b, b, 1)) {
             robot.crane.setElbowTargetPos(250);
             robot.crane.extendToPosition(1500, 1.0, 20);
         }
 
-        // Foundation Gripper
-        if (toggleAllowed(gamepad1.x, x, 1)) {
-//            robot.crane.hookToggle();
-            robot.crane.currentTowerHeight = 3;
-            robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation);
-        }
+//        // Foundation Gripper
+//        if (toggleAllowed(gamepad1.x, x, 1)) {
+////            robot.crane.hookToggle();
+//            robot.crane.currentTowerHeight = 3;
+//            robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation);
+//        }
 
         if (toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
             robot.articulate(PoseSkystone.Articulation.yoinkStone);
@@ -741,6 +747,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad2.dpad_right, dpad_right, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
+//            auto.retractFromTower.execute();
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {

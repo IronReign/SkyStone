@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
+import static org.firstinspires.ftc.teamcode.vision.Config.SERVO_MAX;
 
 /**
  * Created by 2938061 on 11/10/2017.
@@ -246,7 +247,7 @@ public class Crane {
     public void updateGripper() {
         switch(grabState){
             case 0:
-                servoGripper.setPosition(servoNormalize(2200));
+                servoGripper.setPosition(servoNormalize(SERVO_MAX));
                 //if(setElbowTargetPos(elbow.getCurrentPosition(),.2)) {
                     grabTimer = futureTime(1);
                     grabState++;
