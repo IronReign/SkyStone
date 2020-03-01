@@ -91,6 +91,7 @@ public class Crane {
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
     public int elbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int elbowMaxSafetyOffset = 60; //makes sure that the robot doesn't try and extend to the elbow max exactly
 
     //belt extension encoder values
     public  int extendDeposit;
@@ -528,8 +529,9 @@ public class Crane {
     }
     public void setExtendABobPwr(double pwr){ extendABobPwr = pwr; }
 
+
     public void setElbowTargetPos(int pos){
-        if (pos>=elbowMin && pos<=elbowMax)
+        if (pos>=elbowMin && pos<=elbowMax-elbowMaxSafetyOffset)
         elbowPos = pos;
     }
 
@@ -552,7 +554,7 @@ public class Crane {
     }
 
     public boolean setElbowTargetAngle(double angleDegrees){
-        elbowPos =(int) (ticksPerDegree* angleDegrees);
+        setElbowTargetPos((int) (ticksPerDegree* angleDegrees));
         return true;
     }
     public int getElbowTargetPos(){
@@ -682,7 +684,7 @@ public class Crane {
             speed *= .8;
         if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .5;
-        setElbowTargetPos(Math.max(getElbowCurrentPos() + (int)(200 * speed), elbowMin));
+        setElbowTargetPos(Math.min(Math.max(getElbowCurrentPos() + (int)(200 * speed), elbowMin), elbowMax));
 
 
     }
@@ -707,7 +709,7 @@ public class Crane {
     }
 
     public void adjustBeltNoCap(double speed){
-        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(250 * speed));
+        setExtendABobTargetPosNoCap(getExtendABobCurrentPos() + (int)(250 * speed));
     }
 
     public void runToAngle(double angle){

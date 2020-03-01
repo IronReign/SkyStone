@@ -754,7 +754,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
             robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(2500, 1.0, 20);
+            robot.crane.extendToPosition(2000, 1.0, 20);
         }
 
         if (toggleAllowed(gamepad2.dpad_down, dpad_down, 2)) {
