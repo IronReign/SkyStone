@@ -486,8 +486,10 @@ public class Skystone_6832 extends LinearOpMode {
                         }
                         break;
                     case 5:
-                        if (auto.autoMethodTesterTool.execute())
-                            active = false;
+                        if (auto.autoMethodTesterTool.execute()) {
+                            state = 1;
+
+                        }
                         break;
                     case 6:
                         demo();
@@ -747,7 +749,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad2.dpad_right, dpad_right, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
-//            auto.retractFromTower.execute();
+//            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {

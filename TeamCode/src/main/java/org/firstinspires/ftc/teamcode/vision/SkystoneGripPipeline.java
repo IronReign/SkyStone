@@ -150,12 +150,14 @@ public class SkystoneGripPipeline {
                 Imgproc.drawContours(hsvThresholdOutput, mContours, -1, new Scalar(0, 255, 0, 255), 3);
             }
 
-            BlobStats mainBlob = blobs.get(blobs.size() - 1);
-            StonePos pos = (mainBlob.x <= LEFT_BOUND ? StonePos.SOUTH : (mainBlob.x >= RIGHT_BOUND ? StonePos.NORTH : StonePos.MIDDLE));
+            if(!blobs.isEmpty()) {
+                BlobStats mainBlob = blobs.get(blobs.size() - 1);
+                StonePos pos = (mainBlob.x <= LEFT_BOUND ? StonePos.SOUTH : (mainBlob.x >= RIGHT_BOUND ? StonePos.NORTH : StonePos.MIDDLE));
 
-            info = new SkystoneTargetInfo(mainBlob.x, mainBlob.y, mainBlob.width, mainBlob.height, pos);
+                info = new SkystoneTargetInfo(mainBlob.x, mainBlob.y, mainBlob.width, mainBlob.height, pos);
 
-            this.blobs = blobs;
+                this.blobs = blobs;
+            }
             return hsvThresholdOutput;
         }
         return null;

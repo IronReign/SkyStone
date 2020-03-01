@@ -1408,21 +1408,45 @@ public class PoseSkystone {
         return mat;
     }
 
+//    public boolean autoAlignArticulation() {
+//        Mat mat = towerHeightPipelineProcess();
+//
+//        alignPID.setSetpoint(mat.width() / 2.0);
+//        alignPID.setOutputRange(-0.5, 0.5);
+//        alignPID.setTolerance(0.05);
+//        alignPID.enable();
+//
+//        while(!alignPID.onTarget()) {
+//            alignPID.setInput(towerHeightPipeline.x);
+//            driveMixerDiffSteer(alignPID.performPID(), 0);
+//            towerHeightPipeline.process();
+//            towerHeightPipelineProcess();
+//        }
+//        return true;
+//    }
+
     public boolean autoAlignArticulation() {
         Mat mat = towerHeightPipelineProcess();
+        if(mat == null)
+            return false;
 
-        alignPID.setSetpoint(mat.width() / 2.0);
-        alignPID.setOutputRange(-0.5, 0.5);
-        alignPID.setTolerance(0.05);
-        alignPID.enable();
-
-        while(!alignPID.onTarget()) {
-            alignPID.setInput(towerHeightPipeline.x);
-            driveMixerDiffSteer(alignPID.performPID(), 0);
-            towerHeightPipeline.process();
-            towerHeightPipelineProcess();
+        switch(autoAlignStage) {
+            case 0:
+                alignPID.setSetpoint(mat.width() / 2.0);
+                alignPID.setOutputRange(-0.5, 0.5);
+                alignPID.setTolerance(0.05);
+                alignPID.enable();
+                autoAlignStage++;
+                break;
+            case 1:
+                if(!alignPID.onTarget()) {
+                    alignPID.setInput(towerHeightPipeline.x);
+                    driveMixerDiffSteer(-alignPID.performPID(), 0);
+                    break;
+                } else
+                    return true;
         }
-        return true;
+        return false;
     }
 
     int shootStage = 0;

@@ -190,7 +190,6 @@ public class Autonomous {
             .addState(() ->robot.crane.extendToPosition(1050,1,60))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> {robot.stopAll(); return false; })
 
 //            //drive south to next stone
 //            .addState(() -> (robot.goToBlock(2)))
