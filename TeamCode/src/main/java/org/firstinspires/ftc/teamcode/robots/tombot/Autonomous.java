@@ -20,7 +20,6 @@ import org.opencv.core.Mat;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
- * adb connect 192.168.43.1:5555
  */
 public class Autonomous {
 
@@ -87,7 +86,6 @@ public class Autonomous {
                     break;
                 default:
                     mineralState = 1;
-                    telemetry.addData("vision shit", "default");
                     telemetry.update();
                     break;
             }
