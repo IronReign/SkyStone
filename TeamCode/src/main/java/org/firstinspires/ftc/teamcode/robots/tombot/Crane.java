@@ -90,8 +90,9 @@ public class Crane {
     //elbow safety limits
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
-    public int elbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
-    public int elbowMaxSafetyOffset = 60; //makes sure that the robot doesn't try and extend to the elbow max exactly
+    public int specialElbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int actualElbowMax = 1120;
+    public int elbowMaxSafetyOffset = 70; //makes sure that the robot doesn't try and extend to the elbow max exactly
 
     //belt extension encoder values
     public  int extendDeposit;
@@ -275,7 +276,7 @@ public class Crane {
         return currentTowerHeight;
     }
 
-    public int getElbowMax() {return elbowMax;}
+    public int getSpecialElbowMax() {return specialElbowMax;}
 
     public void extendToTowerHeight(double distance, int stackHeight) {
         double x = distance + DISTANCE_SENSOR_TO_ELBOW - X_LEEWAY;
@@ -438,7 +439,7 @@ public class Crane {
                     //extendToPosition(100,.2,15);
                     toggleSwivel();
                     toggleSwivel();
-                    elbowPos=-elbowMax; //set target explicitly
+                    elbowPos=-specialElbowMax; //set target explicitly
                     elbow.setPower(.3); //set speed explicitly
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
                     calibrateStage++;
@@ -531,8 +532,7 @@ public class Crane {
 
 
     public void setElbowTargetPos(int pos){
-        if (pos>=elbowMin && pos<=elbowMax-elbowMaxSafetyOffset)
-        elbowPos = pos;
+        elbowPos = Math.min(Math.max(pos, elbowMin), actualElbowMax -elbowMaxSafetyOffset);
     }
 
     public void setElbowTargetPosNoCap(int pos){
@@ -686,7 +686,7 @@ public class Crane {
             speed *= .8;
         if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .5;
-        setElbowTargetPos(Math.min(Math.max(getElbowCurrentPos() + (int)(200 * speed), elbowMin), elbowMax));
+        setElbowTargetPos(getElbowCurrentPos() + (int)(200 * speed));
 
 
     }

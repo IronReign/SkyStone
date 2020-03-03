@@ -22,7 +22,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
-import org.firstinspires.ftc.teamcode.util.Conversions;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.TowerHeightPipeline;
@@ -1544,7 +1543,7 @@ public class PoseSkystone {
                 break;
             case (1):
 
-                if (crane.setElbowTargetAngle(crane.getElbowMax() - 100)) {
+                if (crane.setElbowTargetAngle(crane.getSpecialElbowMax() - 100)) {
                     retractTimer2 = futureTime(0f);
                     miniStateRetTow2++;
                 }
