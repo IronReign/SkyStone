@@ -479,7 +479,7 @@ public class Skystone_6832 extends LinearOpMode {
                         joystickDrive();
                         break;
                     case 2:
-                        robot.crane.alignGripperDownFacing();
+                        robot.crane.alignGripperForwardFacing();
                         break;
 
                     case 3: // autonomous that starts in our crater

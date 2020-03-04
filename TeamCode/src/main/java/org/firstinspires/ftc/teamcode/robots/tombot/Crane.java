@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.util.SharpDistanceSensor;
+
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
 import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
 import static org.firstinspires.ftc.teamcode.vision.Config.SERVO_MAX;
@@ -30,6 +32,9 @@ public class Crane {
 
     AnalogInput gripperLeft;
     AnalogInput gripperRight;
+
+    SharpDistanceSensor gripLeftSharp;
+    SharpDistanceSensor gripRightSharp;
 
     public static double gripLeftDist;
     public static double gripRightDist; //these hold the most recently updated values for the gripper distance sensors
@@ -155,7 +160,8 @@ public class Crane {
         intakeServoBack.setDirection(Servo.Direction.REVERSE);
         this.gripperLeft = gripperLeft;
         this.gripperRight = gripperRight;
-
+        this.gripLeftSharp = new SharpDistanceSensor(gripperLeft);
+        this.gripRightSharp = new SharpDistanceSensor(gripperRight);
 
 
         intakePwr = .3; //.35;
@@ -216,6 +222,9 @@ public class Crane {
         }
         gripLeftDist = gripperLeft.getVoltage();
         gripRightDist = gripperRight.getVoltage();
+
+        gripLeftDist = gripLeftSharp.getUnscaledDistance(); //remove these two lines if looking for raw voltage which goes up with proximity
+        gripRightDist = gripLeftSharp.getUnscaledDistance();
 
         updateGripper();
         updateBeltToElbow();
@@ -321,7 +330,47 @@ public class Crane {
             gripperSwivel.setPosition(gripperSwivel.getPosition()+.02);
     }
 
+    public boolean alignGripperForwardFacing(){
+
+        //todo: test and fix this
+        //continuously try to align the gripper with a stone
+        //this version assumes forward or sideways (parallel to ground) directed sharp distance sensors that can get a distance to the stone
+        //A hint of orientation will help - though which sensor triggers first might tell us something
+        //once either sensor detects the stone, we can start rotating in favor of equalizing distances
+        //when distances are roughly equal and below the trigger threshold - that's when we yoink
+        //experiment with waiting on rotation until both sensors see something. this would reduce the chances of aligning one sensor to the broad side and the other to the narrow side
+
+        double stoneDistMin = 1.0; //what is the typical trigger distance to a stone?
+        double stoneDistMax = 1.4; //beyond this distance we should assume we are not trying to do anything
+        double stoneTriggerDist = .4; //what is the typical trigger distance to yoink the stone
+
+        if (gripLeftDist > stoneDistMax || gripRightDist < stoneDistMax) return false; // we are too far away on one sensor or the other
+
+        //if (gripLeftDist < stoneDistMax && gripRightDist < stoneDistMax) return true; //we think we are done - could easily be over extended if we didn't approach correctly
+//
+//        if (gripLeftDist < stoneDistMax && gripLeftDist > stoneDistMin) {
+//            //we might be seeing a stone with the left sensor, so swivel left
+//            swivelGripper(false);
+//        }
+//        if (gripRightDist < stoneDistMax && gripRightDist > stoneDistMin){
+//            //we might be seeing a stone with the left sensor, so swivel left
+//            swivelGripper(true);
+//
+//        }
+
+        double diff = gripRightDist-gripLeftDist;
+        if (diff<0.0)
+            swivelGripper(true);
+        else
+            swivelGripper(false);
+
+
+        return false;
+
+    }
+
     public boolean alignGripperDownFacing(){
+//todo: this likely broke when switching to linearized sharp distance sensor interpretation - fix
         //continuously try to align the gripper with a stone
         //this version assumes downward directed sharp distance sensors that only see the stone when they cross over its edge
         //should not operate while both sensors are seeing a larger distance to the floor than is reasonable
