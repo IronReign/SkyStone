@@ -627,17 +627,29 @@ public class Skystone_6832 extends LinearOpMode {
     int reverse = 1;
 
     private void joystickDrive() {
+        if (notdeadzone(gamepad2.left_stick_y)) {
+            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
+        }
+
+        if (notdeadzone(gamepad2.right_stick_y)) {
+            robot.crane.adjustBelt(-gamepad2.right_stick_y);
+        }
+        if (notdeadzone(gamepad2.right_stick_x)) {
+            robot.turret.adjust(gamepad2.right_stick_x);
+        }
+
         if (stopAll) {
             robot.stopAll();
         }
 
-        if (gamepad1.guide || gamepad2.guide)
-            stopAll = true;
+//        if (gamepad1.guide || gamepad2.guide)  this needs to be checked
+//            stopAll = true;
 
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
             robot.setAutonSingleStep(true);
             joystickDriveStarted = true;
+            robot.crane.setActive(true);
         }
 
         if (robot.getArticulation() == PoseSkystone.Articulation.intake) {
@@ -766,16 +778,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
 
-        if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngle(-gamepad2.left_stick_y);
-        }
 
-        if (notdeadzone(gamepad2.right_stick_y)) {
-            robot.crane.adjustBelt(-gamepad2.right_stick_y);
-        }
-        if (notdeadzone(gamepad2.right_stick_x)) {
-            robot.turret.adjust(gamepad2.right_stick_x);
-        }
         // turret controls
         if (notdeadzone(gamepad2.right_trigger))
             robot.turret.rotateRight(gamepad2.right_trigger * 5);
@@ -894,8 +897,8 @@ public class Skystone_6832 extends LinearOpMode {
             robot.turret.rotateLeft(gamepad2.left_trigger * 5);
         // robot.articulate(PoseSkystone.Articulation.yoinkStone);
 
-        robot.crane.update();
-        robot.turret.update(opModeIsActive());
+        //robot.crane.update();
+        //robot.turret.update(opModeIsActive());
     }
 
     private void joystickDrivePregameMode() {

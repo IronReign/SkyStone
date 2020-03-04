@@ -525,7 +525,6 @@ public class PoseSkystone {
 
     public void updateSensors(boolean isActive) {
         update(imu, 0, 0, isActive);
-
     }
 
     public double getDistForwardDist() {

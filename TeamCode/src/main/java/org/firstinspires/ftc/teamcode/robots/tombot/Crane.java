@@ -586,6 +586,8 @@ public class Crane {
         active = true;
     }
 
+    public void setActive(boolean active){this.active = active;}
+
 
 
     public void resetEncoders() {
