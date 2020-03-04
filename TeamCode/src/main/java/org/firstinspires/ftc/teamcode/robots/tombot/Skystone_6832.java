@@ -443,7 +443,11 @@ public class Skystone_6832 extends LinearOpMode {
             robot.updateSensors(active);
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
-        }
+        } // end of stuff that happens during Init, but before Start
+
+        //
+        // THIS SECTION EXECUTES ONCE RIGHT AFTER START IS PRESSED
+        //
 
         if (auto.vp == null) {
             auto.initDummyVisionProvider(); // this is blocking
@@ -454,6 +458,11 @@ public class Skystone_6832 extends LinearOpMode {
         robot.crane.restart(.4, .5);
 
         lastLoopClockTime = System.nanoTime();
+
+        //
+        // END OF SECTION THAT EXECUTES ONCE RIGHT AFTER START IS PRESSED
+        //
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
