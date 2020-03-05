@@ -95,6 +95,7 @@ public class Crane {
     //elbow safety limits
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
+    public int elbowLow = 300;
     public int specialElbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
     public int actualElbowMax = 1120;
     public int elbowMaxSafetyOffset = 70; //makes sure that the robot doesn't try and extend to the elbow max exactly
@@ -193,9 +194,9 @@ public class Crane {
         motorUnhooked = 5;
         motorMidHooked = 80;
 
-        swivel_Right90 = 0;
-        swivel_Front = 900;
-        swivel_Left90 = 1556;
+        swivel_Right90 = 900;
+        swivel_Front = 1500;
+        swivel_Left90 = 2100;
         swivel_left_Block = 800;
         swivel_Right_Block= 1000;
 
@@ -465,48 +466,47 @@ public class Crane {
     public boolean calibrate(){
 
         switch(calibrateStage){
-            case 0:
+            case 0: //open elbow with limited power until it stalls at top of travel
+                // retract extendabob same way
                 setMotorsForCalibration();
                 elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                elbow.setPower(.15);
+                elbow.setPower(.20);
                 extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                extendABob.setPower(-.20); //retract to zero position
-                calibrateTimer = futureTime(4.0f); //allow enough time for elbow to open fully and arm to retract
+                extendABob.setPower(-.25); //retract to zero position
+                setGripperSwivelRotation(swivel_Right90);
+                calibrateTimer = futureTime(3.0f); //allow enough time for elbow to open fully and arm to retract
                 calibrateStage++;
                 break;
-            case 1:
+            case 1: //reset encoders at max elevation angle
                 if (System.nanoTime() >= calibrateTimer){
-                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
+                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this approximately zeros the extension but at elbowmax and we'll need to redo it at a low elevation
                     extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     extendToLow(); //push out to the minimum extension - this will need to be pulled back to zero for starting position
 
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    //elbow.setTargetPosition(-elbowMax); //normally we set the target through a method, but we have to override the safety here
-                    //extendToPosition(100,.2,15);
-                    toggleSwivel();
-                    toggleSwivel();
-                    elbowPos=-specialElbowMax; //set target explicitly
-                    elbow.setPower(.3); //set speed explicitly
+                    elbow.setTargetPosition(-specialElbowMax); //normally we set the target through a method, but we have to override the safety here
+
+                    elbow.setPower(1); //power down to low position
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
                     calibrateStage++;
 
                 }
                 break;
-            case 2:
+            case 2: //zero the elbow at bottom of travel
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setTargetPosition(elbowMin); //this should not generate a movement
+                    elbow.setTargetPosition(elbowMin); //this should not generate a movement because we should already be there
                     calibrateTimer = futureTime(1f); //allow enough time to raise to starting position
                     calibrateStage++;
                 }
                 break;
-            case 3: //reset elbow and arm to starting position
+            case 3: //reset elbow to near starting position so we can get a better retract for extension
                 if (System.nanoTime() >= calibrateTimer) {
-                    elbow.setTargetPosition(elbowStart);
-                    extendToPosition(0,.6,15);
-                    calibrateTimer = futureTime(4.0f); //enough time for next stage - retract egain
+                    elbow.setTargetPosition(elbowLow);
+
+                    calibrateTimer = futureTime(2.0f); //enough time for next stage - retract egain
                     calibrateStage++;
 
                 }
@@ -514,7 +514,7 @@ public class Crane {
             case 4: //one more retract of extension
                 if (System.nanoTime() >= calibrateTimer) {
                     extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    extendABob.setPower(-.20); //retract to zero position
+                    extendABob.setPower(-.6); //retract to zero position
                     calibrateTimer = futureTime(1.0f); //allow enough time for next stage
                     calibrateStage++;
                 }
@@ -524,6 +524,8 @@ public class Crane {
                 if (System.nanoTime() >= calibrateTimer) {
                     extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
                     extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extendToPosition(0,.6,15);
+                    elbow.setTargetPosition(elbowStart);
                     calibrateStage = 0;
                     return true;
                 }
