@@ -224,7 +224,7 @@ public class Crane {
         gripRightDist = gripperRight.getVoltage();
 
         gripLeftDist = gripLeftSharp.getUnscaledDistance(); //remove these two lines if looking for raw voltage which goes up with proximity
-        gripRightDist = gripLeftSharp.getUnscaledDistance();
+        gripRightDist = gripRightSharp.getUnscaledDistance();
 
         updateGripper();
         updateBeltToElbow();
@@ -330,7 +330,14 @@ public class Crane {
             gripperSwivel.setPosition(gripperSwivel.getPosition()+.02);
     }
 
-    public boolean alignGripperForwardFacing(){
+    public void swivelGripperSlow(boolean right){
+        if(right == true)
+            gripperSwivel.setPosition(gripperSwivel.getPosition()-.01);
+        else
+            gripperSwivel.setPosition(gripperSwivel.getPosition()+.01);
+    }
+
+    public boolean alignGripperForwardFacing() {
 
         //todo: test and fix this
         //continuously try to align the gripper with a stone
@@ -340,30 +347,21 @@ public class Crane {
         //when distances are roughly equal and below the trigger threshold - that's when we yoink
         //experiment with waiting on rotation until both sensors see something. this would reduce the chances of aligning one sensor to the broad side and the other to the narrow side
 
-        double stoneDistMin = 1.0; //what is the typical trigger distance to a stone?
-        double stoneDistMax = 1.4; //beyond this distance we should assume we are not trying to do anything
-        double stoneTriggerDist = .4; //what is the typical trigger distance to yoink the stone
 
-        if (gripLeftDist > stoneDistMax || gripRightDist < stoneDistMax) return false; // we are too far away on one sensor or the other
+        double stoneDistMax = .8; //beyond this distance we should assume we are not trying to do anything
+        double stoneTriggerDist = .13; //what is the typical trigger distance to yoink the stone
 
-        //if (gripLeftDist < stoneDistMax && gripRightDist < stoneDistMax) return true; //we think we are done - could easily be over extended if we didn't approach correctly
-//
-//        if (gripLeftDist < stoneDistMax && gripLeftDist > stoneDistMin) {
-//            //we might be seeing a stone with the left sensor, so swivel left
-//            swivelGripper(false);
-//        }
-//        if (gripRightDist < stoneDistMax && gripRightDist > stoneDistMin){
-//            //we might be seeing a stone with the left sensor, so swivel left
-//            swivelGripper(true);
-//
-//        }
+        if (gripLeftDist > stoneDistMax || gripRightDist > stoneDistMax)
+            return false; // we are too far away on one sensor or the other
 
-        double diff = gripRightDist-gripLeftDist;
-        if (diff<0.0)
-            swivelGripper(true);
-        else
-            swivelGripper(false);
-
+        double diff = gripRightDist - gripLeftDist;
+        if (Math.abs(diff) > .065){ //test to see if the difference is even slightly significant - hysteresis
+            if (diff < 0.0)
+                swivelGripperSlow(true);
+            else
+                swivelGripperSlow(false);
+        }
+        if (gripLeftDist < stoneTriggerDist && gripRightDist < stoneTriggerDist) return true;
 
         return false;
 
