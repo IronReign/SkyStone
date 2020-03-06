@@ -661,13 +661,6 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.setActive(true);
         }
 
-        if (robot.getArticulation() == PoseSkystone.Articulation.intake) {
-            reverse = -1;
-        } else if (robot.getArticulation() != PoseSkystone.Articulation.intake
-                && robot.getArticulation() != PoseSkystone.Articulation.manual) {
-            reverse = 1;
-        }
-
         //robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
 
         reverse = -1;
@@ -815,13 +808,6 @@ public class Skystone_6832 extends LinearOpMode {
             joystickDriveStarted = true;
         }
 
-        if (robot.getArticulation() == PoseSkystone.Articulation.intake) {
-            reverse = -1;
-        } else if (robot.getArticulation() != PoseSkystone.Articulation.intake
-                && robot.getArticulation() != PoseSkystone.Articulation.manual) {
-            reverse = 1;
-        }
-
         reverse = -1;
         pwrDamper = .70;
 
@@ -952,52 +938,6 @@ public class Skystone_6832 extends LinearOpMode {
         // telemetry.update();
     }
 
-    private void joystickDriveEndgameMode() {
-
-        robot.ledSystem.setColor(LEDSystem.Color.SHOT);
-
-        boolean doLatchStage = false;
-        robot.driveMixerDiffSteer(pwrFwd, pwrRot);
-        if (toggleAllowed(gamepad1.b, b, 1)) { // b advances us through latching stages - todo: we should really be
-                                               // calling a pose.nextLatchStage function
-            stateLatched++;
-            if (stateLatched > 2)
-                stateLatched = 0;
-            doLatchStage = true;
-        }
-
-        if (toggleAllowed(gamepad1.x, x, 1)) { // x allows us to back out of latching stages
-            stateLatched--;
-            if (stateLatched < 0)
-                stateLatched = 0;
-            doLatchStage = true;
-        }
-
-        if (doLatchStage) {
-            switch (stateLatched) {
-                case 0:
-                    robot.articulate(PoseSkystone.Articulation.latchApproach);
-                    break;
-                case 1:
-                    robot.articulate(PoseSkystone.Articulation.latchPrep);
-                    break;
-                case 2:
-                    robot.articulate(PoseSkystone.Articulation.latchSet);
-                    break;
-            }
-        }
-
-        if (toggleAllowed(gamepad1.a, a, 1)) {
-            isHooked = !isHooked;
-        }
-
-        // if (isHooked) {
-        // robot.crane.hookOn();
-        // } else {
-        // robot.crane.hookOff();
-        // }
-    }
-
     private void turnTest() {
         if (robot.rotateIMU(90, 3)) {
             telemetry.addData("Angle Error: ", 90 - robot.getHeading());
@@ -1007,126 +947,6 @@ public class Skystone_6832 extends LinearOpMode {
         }
         telemetry.addData("Current Angle: ", robot.getHeading());
         telemetry.addData("Angle Error: ", 90 - robot.getHeading());
-    }
-
-    private void joystickDriveRegularMode() {
-
-        robot.ledSystem.setColor(LEDSystem.Color.CALM);
-
-        robot.crane.hookOff();
-
-        boolean doIntake = false;
-        robot.driveMixerDiffSteer(pwrFwd, pwrRot);
-
-        if (gamepad1.y) {
-            // robot.goToSafeDrive();
-            // isIntakeClosed = true;
-            robot.crane.grabStone();
-        }
-        if (toggleAllowed(gamepad1.a, a, 1)) {
-            // isIntakeClosed = !isIntakeClosed;
-            robot.crane.ejectStone();
-        }
-
-        if (toggleAllowed(gamepad1.b, b, 1)) {
-            // stateIntake++;
-            // if (stateIntake > 3) stateIntake = 0;
-            // doIntake = true;
-            // robot.crane.stopGripper();
-        }
-
-        if (toggleAllowed(gamepad1.x, x, 1)) {
-            stateIntake--;
-            if (stateIntake < 0)
-                stateIntake = 3;
-            doIntake = true;
-        }
-
-        if (doIntake) {
-            switch (stateIntake) {
-                case 0:
-                    robot.articulate(PoseSkystone.Articulation.preIntake);
-                    isIntakeClosed = true;
-                    break;
-                case 1:
-                    robot.articulate(PoseSkystone.Articulation.intake);
-                    isIntakeClosed = true;
-                    break;
-                case 2:
-                    robot.articulate(PoseSkystone.Articulation.deposit);
-                    break;
-                case 3:
-                    robot.articulate(PoseSkystone.Articulation.driving);
-                    isIntakeClosed = true;
-            }
-        }
-
-        /*
-         * if (isIntakeClosed) { robot.crane.closeGate(); } else {
-         * robot.crane.grabStone(); }
-         */
-    }
-
-    private void joystickDriveRegularModeReverse() {
-
-        robot.ledSystem.setColor(LEDSystem.Color.PARTY_MODE_SMOOTH);
-
-        robot.crane.hookOff();
-
-        boolean doIntake = false;
-
-        if (gamepad1.y) {
-            robot.articulate(PoseSkystone.Articulation.reverseDriving);
-            isIntakeClosed = true;
-        }
-        if (toggleAllowed(gamepad1.a, a, 1)) {
-            isIntakeClosed = !isIntakeClosed;
-        }
-
-        if (toggleAllowed(gamepad1.b, b, 1)) {
-            stateIntake++;
-            if (stateIntake > 3)
-                stateIntake = 0;
-            doIntake = true;
-        }
-
-        if (toggleAllowed(gamepad1.x, x, 1)) {
-            stateIntake--;
-            if (stateIntake < 0)
-                stateIntake = 3;
-            doIntake = true;
-        }
-
-        if (doIntake) {
-            switch (stateIntake) {
-                case 0:
-                    robot.articulate(PoseSkystone.Articulation.reverseIntake);
-                    pwrRot -= .25;
-                    // robot.crane.setBeltToElbowModeEnabled();
-                    isIntakeClosed = true;
-                    break;
-                case 1:
-                    robot.articulate(PoseSkystone.Articulation.prereversedeposit);
-                    // robot.crane.setBeltToElbowModeDisabled();
-                    isIntakeClosed = true;
-                    break;
-                case 2:
-                    robot.articulate(PoseSkystone.Articulation.reverseDeposit);
-                    // robot.crane.setBeltToElbowModeDisabled();
-                    break;
-                case 3:
-                    robot.articulate(PoseSkystone.Articulation.reverseDriving);
-                    // robot.crane.setBeltToElbowModeDisabled();
-                    isIntakeClosed = true;
-                    break;
-            }
-        }
-        robot.driveMixerDiffSteer(pwrFwd, pwrRot);
-
-        /*
-         * if (isIntakeClosed) { robot.crane.closeGate(); } else {
-         * robot.crane.grabStone(); }
-         */
     }
 
     // the method that controls the main state of the robot; must be called in the
@@ -1235,26 +1055,14 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine().addData("Turret Current angle ", () -> robot.turret.getHeading()).addData("Joystick Y ",
                 () -> gamepad1.right_stick_y);
         telemetry.addLine().addData("avg motor ticks ", () -> robot.getAverageTicks())
-                .addData("right motor ticks ", () -> robot.getLeftMotorTicks())
-                .addData("left motor ticks ", () -> robot.getRightMotorTicks());
-        telemetry.addLine().addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance())
-                .addData("gripperRight ", () -> robot.crane.gripRightSharp.getUnscaledDistance());
-//                .addData("left distance ", () -> robot.getDistLeftDist())
-//                .addData("right distance ", () -> robot.getDistRightDist())
-//                .addData("front distance ", () -> robot.getDistForwardDist());
-
-        // .addData("calib", () -> robot.imu.getCalibrationStatus().toString());
-        // telemetry.addLine()
-        // .addData("drivedistance", () -> robot.getAverageAbsTicks());
-        // telemetry.addLine()
-        // .addData("status", () -> robot.imu.getSystemStatus().toShortString())
-        // .addData("mineralState", () -> auto.mineralState)
-        // .addData("distForward", () ->
-        // robot.distForward.getDistance(DistanceUnit.METER))
-        // .addData("distLeft", () -> robot.distLeft.getDistance(DistanceUnit.METER))
-        // .addData("distRight", () -> robot.distRight.getDistance(DistanceUnit.METER))
-        // .addData("depositDriveDistaFnce", () -> robot.depositDriveDistance);
-
+                .addData("right motor ticks ", () -> robot.getRightMotorTicks())
+                .addData("left motor ticks ", () -> robot.getLeftMotorTicks());
+        telemetry.addLine()
+                .addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance())
+                .addData("gripperRight ", () -> robot.crane.gripRightSharp.getUnscaledDistance())
+                .addData("left distance ", () -> robot.getDistLeftDist())
+                .addData("right distance ", () -> robot.getDistRightDist())
+                .addData("front distance ", () -> robot.getDistForwardDist());
     }
 
     private void configureDashboardMatch() {

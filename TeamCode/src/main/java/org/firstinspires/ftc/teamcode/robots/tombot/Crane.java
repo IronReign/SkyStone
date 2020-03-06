@@ -39,8 +39,6 @@ public class Crane {
     public static double gripLeftDist;
     public static double gripRightDist; //these hold the most recently updated values for the gripper distance sensors
 
-    double hookPwr = 1;
-
     int elbowPosInternal = 0;
     int elbowPos = 0;
     double elbowPwr = 1;
@@ -87,8 +85,6 @@ public class Crane {
     public int pos_prelatch;
     public int pos_latched;
     public int pos_postlatch;
-    public int glide = 80;
-    public int autodepotthingy=350;
 
     //.374
 
@@ -106,20 +102,13 @@ public class Crane {
     public  int extendMid;
     public  int extendLow; //clears hook and good for retracting prior to deposit without tipping robot
     public  int extendMin;  //prevent crunching collector tray
-    public  int extendPreLatch = extendMax;
 
     //foundation hook servo values
     public int foundation_hook_up = 1665;
     public int foundation_hook_down = 1163;
 
-    public int stow = 650;
-
     public int currentTowerHeight;
     public static final double blockHeightMeter = 0.127;
-    public int anglePerBlock;
-
-    public int craneArticulation = 0;
-
 
     private boolean hookUp = true;
     //private int gripperState = 0;
