@@ -166,47 +166,46 @@ public class PoseSkystone {
 
     protected MoveMode moveMode;
 
-    public enum Articulation { // serves as a desired robot articulation which may include related complex
-                               // movements of the elbow, lift and supermanLeft
-        calibrate, calibrateBlue, calibrateBasic, inprogress, // currently in progress to a final articulation
+    public enum Articulation { // serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
+        calibrate,
+        calibrateBlue,
+        calibrateBasic,
+        inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
-        driving, // optimized for driving - elbow opened a bit, lift extended a bit - shifts
-                 // weight toward drive wheels for better turn and drive traction
-        reverseDriving, retrieving, // retrieve a stone
-        retriving2, yoinkStone, autoGrab, bridgeTransit, extendToTowerHeightArticulation,
-        autoExtendToTowerHeightArticulation, autoAlignArticulation, retractFromTower, retractFromBlock, retractFromBlockAuton,
-        cardinalBaseRight, cardinalBaseLeft, shootOut, shootOutII, recockGripper, deploying, // auton unfolding after
-                                                                                             // initial hang - should
-                                                                                             // only be called from the
-                                                                                             // hanging position during
-                                                                                             // auton - ends when wheels
-                                                                                             // should be on the ground,
-                                                                                             // including supermanLeft,
-                                                                                             // and pressure is off of
-                                                                                             // the hook
-        deployed, // auton settled on ground - involves retracting the hook, moving forward a bit
-                  // to clear lander and then lowering supermanLeft to driving position
-        reversedeploying, reversedeployed, cratered, // auton arm extended over the crater - this might end up being the
-                                                     // same as preIntake
-        preIntake, // teleop mostly - collector retracted and increaseElbowAngle to almost ground
-                   // level
-        intake, // teleop mostly - collector extended low, intaking - intake pushing on ground,
-                // extension overrideable
-        reverseIntake, deposit, // teleop mostly - transition from intake to deposit - decreaseElbowAngle
-                                // collector to low position waiting on completion, retractBelt elbow to deposit
-                                // position, supermanLeft up to deposit position, extendBelt collector to
-                                // deposit position
-        prereversedeposit, reverseDeposit, reverseDepositAssisted, latchApproach, // teleop endgame - driving approach
-                                                                                  // for latching, expected safe to be
-                                                                                  // called from manual, driving,
-                                                                                  // deposit - set collector elbow for
-                                                                                  // drive balance, extended to max and
-                                                                                  // supermanLeft up,
-        latchPrep, // teleop endgame - make sure hook is increaseElbowAngle, set drivespeed slow,
-                   // extendBelt lift to max, finalize elbow angle for latch, elbow overrideable
+        driving, // optimized for driving - elbow opened a bit, lift extended a bit - shifts weight toward drive wheels for better turn and drive traction
+        reverseDriving,
+        retrieving, // retrieve a stone
+        retriving2,
+        yoinkStone,
+        autoGrab,
+        bridgeTransit,
+        extendToTowerHeightArticulation,
+        autoExtendToTowerHeightArticulation,
+        autoAlignArticulation,
+        retractFromTower,
+        retractFromBlock,
+        retractFromBlockAuton,
+        cardinalBaseRight,
+        cardinalBaseLeft,
+        shootOut,
+        shootOutII,
+        recockGripper,
+        deploying, // auton unfolding after initial hang - should only be called from the hanging position during auton - ends when wheels should be on the ground, including supermanLeft, and pressure is off of the hook
+        deployed, // auton settled on ground - involves retracting the hook, moving forward a bit to clear lander and then lowering supermanLeft to driving position
+        reversedeploying,
+        reversedeployed,
+        cratered, // auton arm extended over the crater - this might end up being the same as preIntake
+        preIntake, // teleop mostly - collector retracted and increaseElbowAngle to almost ground level
+        intake, // teleop mostly - collector extended low, intaking - intake pushing on ground, extension overrideable
+        reverseIntake,
+        deposit, // teleop mostly - transition from intake to deposit - decreaseElbowAngle collector to low position waiting on completion, retractBelt elbow to deposit position, supermanLeft up to deposit position, extendBelt collector to deposit position
+        prereversedeposit,
+        reverseDeposit,
+        reverseDepositAssisted,
+        latchApproach, // teleop endgame - driving approach for latching, expected safe to be called from manual, driving, deposit - set collector elbow for drive balance, extended to max and supermanLeft up,
+        latchPrep, // teleop endgame - make sure hook is increaseElbowAngle, set drivespeed slow, extendBelt lift to max, finalize elbow angle for latch, elbow overrideable
         latchSet, // teleop endgame - retractBelt the latch
-        latchHang; // teleop endgame - retractBelt collector elbow to final position, set locks if
-                   // implemented
+        latchHang; // teleop endgame - retractBelt collector elbow to final position, set locks if implemented
     }
 
     public enum RobotType {
@@ -1269,7 +1268,7 @@ public class PoseSkystone {
                 break;
             case 2:
                 if (System.nanoTime() >= retreiveTimer2) {
-                    crane.setElbowTargetPos(0, 1);
+                    crane.setElbowTargetPos(-10, 1);
                     craneArticulation = 0;
                     return true;
                 }
