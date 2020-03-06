@@ -188,7 +188,8 @@ public class PoseSkystone {
         shootOut,
         shootOutII,
         recockGripper,
-        turnToBaseAuton;
+        turnToBaseAuton,
+        turnTurretToBaseAuton;
     }
 
     public enum RobotType {
@@ -758,6 +759,11 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case turnTurretToBaseAuton:
+                if (turnTurretToBaseAuton()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case retractFromTower:
                 if (retractFromTower()) {
                     articulation = Articulation.manual;
@@ -1000,7 +1006,41 @@ public class PoseSkystone {
     }
 
     public boolean turnToBaseAuton(){
-        return true; //about to work on it
+        if(isBlue){
+            if (rotateIMU(90.0, 3)){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            if (rotateIMU(270.0, 3)){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+    }
+
+    public boolean turnTurretToBaseAuton(){
+        if(isBlue){
+            if (turret.rotateIMUTurret(90.0, 3)){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            if (turret.rotateIMUTurret(270.0, 3)){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
     }
 
 
