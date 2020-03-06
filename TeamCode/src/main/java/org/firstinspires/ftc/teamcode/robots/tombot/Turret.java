@@ -24,20 +24,10 @@ public class Turret{
     //motor
     private  DcMotor motor = null;
     private double motorPwr = 1;
-    private double safeTurn = .5;
     long turnTimer;
     boolean turnTimerInit;
     private double minTurnError = 1.0;
-
-    //Position variables
-    private int targetRotationTicks;
-    private double ticksPerDegree;
     private boolean active = true;
-
-    //positions
-    private int a90degrees;
-    private int a180degrees;
-    private int a360degrees;
 
     //PID
     PIDController turretPID;
@@ -53,8 +43,9 @@ public class Turret{
     double turretHeading = 0;
     boolean initialized = false;
     private  double offsetHeading;
-    private double offsetPitch;
     private double offsetRoll;
+    private double offsetPitch;
+
     private double turretTargetHeading = 0.0;
     Orientation imuAngles;
     boolean maintainHeadingInit;
@@ -70,17 +61,9 @@ public class Turret{
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setTargetPosition(motor.getCurrentPosition());
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //motor.setDirection(DcMotorSimple.Direction.REVERSE);
-
         //this.magSensor = magSensor;
 
         this.motor = motor;
-        ticksPerDegree = 170/90;
-        targetRotationTicks= 0;
-        a90degrees= (int) (ticksPerDegree*90);
-        a180degrees= (int) (ticksPerDegree*180);
-        a360degrees= (int) (ticksPerDegree*360);
-        //setActive(true);
 
         turretTargetHeading=0;
         turretPID = new PIDController(0,0,0);
@@ -154,19 +137,12 @@ public class Turret{
 
     }
 
-    public void toggleMaintainHeading(boolean isMaintainingHeading){this.isMaintainingHeading =! isMaintainingHeading;}
-
     public void rotateLeft(double speed){
 
         setTurntableAngle(getHeading(), angleIncrement * -speed);
 
     }
 
-    public void setTurntablePosition(int position, double power) {
-        setTurretMotorMode(false);
-        targetRotationTicks = position;
-        motorPwr = power;
-    }
 
     public void rotateCardinalTurret(boolean right){
 
@@ -191,66 +167,7 @@ public class Turret{
         motor.setPower(pwr);
     }
 
-    public boolean setRotation90(boolean right) {
-        if(right == true) {
-            targetRotationTicks += motor.getCurrentPosition()%a90degrees;
-            motorPwr = safeTurn;
-            return true;
-        }
-        else {
-            targetRotationTicks -= motor.getCurrentPosition()%-a90degrees;
-            motorPwr = safeTurn;
-            return true;
-        }
-    }
-
-//    public void setRotation180() {
-//        if(getCurrentRotationEncoderRaw() < 0)
-//            targetRotationTicks -= getCurrentRotationEncoderRaw()%a180degrees;
-//        if(getCurrentRotationEncoderRaw() > 0)
-//            targetRotationTicks += getCurrentRotationEncoderRaw()%a180degrees;
-//        if(getCurrentRotationEncoderRaw() == 0)
-//            targetRotationTicks -= a180degrees;
-//        motorPwr = safeTurn;
-//    }
-//
-//    public void setToFront(){
-//        if(getTargetRotationTicks() < a360degrees ||  targetRotationTicks > -a360degrees)
-//            setTurntablePosition(0,safeTurn);
-//        else if(getTargetRotationTicks() < 0) {
-//            setTurntablePosition(getTargetRotationTicks() + getTargetRotationTicks() %a360degrees, .5);
-//        }
-//        else {
-//            setTurntablePosition(getTargetRotationTicks() - getTargetRotationTicks() %a360degrees, .5);
-//        }
-
-//    }
-
-    public int getCurrentRotationEncoderRaw(){
-        return motor.getCurrentPosition();
-    }
-    public int getTargetRotationTicks(){
-        return targetRotationTicks;
-    }
-
-    public void returnToZero() {
-        targetRotationTicks = 0;
-        motorPwr = safeTurn;
-    }
-
-//    public boolean calibrate(){
-//        if ()
-//    }
-
-    public void resetEncoder() {
-        //just encoders - only safe to call if we know collector is in normal starting position
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
     public void movePIDTurret(double Kp, double Ki, double Kd, double currentAngle, double targetAngle) {
-        //if (pwr>0) PID.setOutputRange(pwr-(1-pwr),1-pwr);
-        //else PID.setOutputRange(pwr - (-1 - pwr),-1-pwr);
 
         //initialization of the PID calculator's output range, target value and multipliers
         turretPID.setOutputRange(-1, 1);
