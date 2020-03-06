@@ -1047,8 +1047,6 @@ public class Skystone_6832 extends LinearOpMode {
                 .addData("heading", () -> robot.getHeading()).addData("yawraw", () -> robot.getHeading());
         telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000).addData("Loop time", "%.0fHz",
                 () -> 1000000000 / loopAvg); // telemetry.addLine()w
-        telemetry.addLine().addData("Turret Pos", () -> robot.turret.getCurrentRotationEncoderRaw())
-                .addData("Turret Target", () -> robot.turret.getTargetRotationTicks());
         telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading()).addData("Turret Target`s",
                 () -> robot.turret.getTurretTargetHeading());
         telemetry.addLine().addData("Turret Current tower height: ", () -> robot.crane.getCurrentTowerHeight());
