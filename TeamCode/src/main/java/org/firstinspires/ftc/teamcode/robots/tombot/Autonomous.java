@@ -150,7 +150,7 @@ public class Autonomous {
             //open and align gripper for 1st skystone
             .addState(() -> (robot.crane.setElbowTargetPos(500,1)))
             .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
-            .addState(() -> sample())
+            .addState(() -> sample()) //this is a test
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
             .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
