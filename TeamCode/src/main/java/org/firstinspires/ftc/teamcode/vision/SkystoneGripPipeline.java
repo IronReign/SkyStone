@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.vision;
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.vuforia.Image;
@@ -10,12 +11,14 @@ import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.util.BlobStats;
 import org.firstinspires.ftc.teamcode.util.VisionUtils;
+import org.firstinspires.ftc.teamcode.vision.colorblob.ColorBlobDetector;
 import org.opencv.android.Utils;
 import org.opencv.core.*;
 import org.opencv.features2d.Features2d;
@@ -34,230 +37,209 @@ import java.util.concurrent.BlockingQueue;
  *
  * @author GRIP
  */
-public class SkystoneGripPipeline {
 
-    //Outputs
-    private Mat blurOutput = new Mat();
-    private Mat cropOutput = new Mat();
-    private Mat hsvThresholdOutput = new Mat();
-    private Mat contoursOutput = new Mat();
+@Config
+public class SkystoneGripPipeline implements SkystoneVisionProvider {
 
     //vuforia
     private VuforiaLocalizer vuforia;
     private BlockingQueue<VuforiaLocalizer.CloseableFrame> q;
-    private FtcDashboard dashboard;
-    VuforiaLocalizer.CloseableFrame frame;
+    private VuforiaLocalizer.CloseableFrame frame;
 
-    //Statistics
-    public List<BlobStats> blobs = new ArrayList<BlobStats>();
-    public List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-    public SkystoneTargetInfo info;
+    //statistics
+    private SkystoneTargetInfo target;
+    List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+    List<BlobStats> blobs = new ArrayList<BlobStats>();
+
+    //pivs
+    private boolean redAlliance;
+    private boolean enableDashboard;
+    private int state = -1;
+    private Mat mat, overlay;
 
     //cropping
-    Point topLeftRed = new Point(130, 225);
-    Point bottomRightRed = new Point(564, 371);
-    Point topLeftBlue = new Point(133, 148);
-    Point bottomRightBlue = new Point(420, 234);
+    public static Point
+            TOP_LEFT_RED = new Point(130, 225),
+            BOTTOM_RIGHT_RED = new Point(564, 371),
+            TOP_LEFT_BLUE = new Point(133, 148),
+            BOTTOM_RIGHT_BLUE = new Point(420, 234);
 
-    //need to be tuned
-    private static final int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
-    private boolean isBlue;
+    //debugging
+    private Telemetry telemetry;
+    private FtcDashboard dashboard;
 
-    public SkystoneGripPipeline(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
-        this.vuforia = vuforia;
+    //tuned constants
+    public static int LEFT_BOUND = 575, RIGHT_BOUND = 1100;
+    public static double BLUR_RADIUS = 19.82;
+    public static double[][] HSV_THRESHOLD_PARAMETERS = {
+            {0.0, 180},
+            {0.0, 255.0},
+            {4.586, 91.867}
+    };
+
+
+    private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+        if (viewpoint == Viewpoint.BACK)
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        else if (viewpoint == Viewpoint.WEBCAM)
+            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        else
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+        vuforia.setFrameQueueCapacity(1);
+    }
+
+    @Override
+    public void initializeVision(HardwareMap hardwareMap, Telemetry telemetry, boolean enableDashboard, Viewpoint viewpoint, boolean redAlliance) {
+        initVuforia(hardwareMap, viewpoint);
         q = vuforia.getFrameQueue();
-        dashboard = FtcDashboard.getInstance();
-        info = new SkystoneTargetInfo();
-        info.setQuarryPosition(StonePos.NONE_FOUND);
+        state = 0;
+        target = new SkystoneTargetInfo();
+        this.redAlliance = redAlliance;
+        this.telemetry = telemetry;
+        this.enableDashboard = enableDashboard;
+        if (enableDashboard)
+            dashboard = FtcDashboard.getInstance();
     }
 
-    public void setIsBlue(boolean isBlue) {
-        this.isBlue = isBlue;
+    @Override
+    public void shutdownVision() {
     }
 
-    /**
-     * This is the primary method that runs the entire pipeline and updates the outputs.
-     */
-    public Mat process() {
-        if (!q.isEmpty()) {
-            try {
-                frame = q.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            Image img = VisionUtils.getImageFromFrame(frame, PIXEL_FORMAT.RGB565);
-            Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
-            bm.copyPixelsFromBuffer(img.getPixels());
+    @Override
+    public void reset() {
+        state = 0;
+    }
 
-            Mat mat = new Mat(bm.getWidth(), bm.getHeight(), CvType.CV_8UC4);
-            Utils.bitmapToMat(bm, mat);
-
-            // Step Blur0:
-            Mat blurInput = mat;
-            BlurType blurType = BlurType.get("Gaussian Blur");
-            double blurRadius = 19.81981981981982;
-            blur(blurInput, blurType, blurRadius, blurOutput);
-
-            // Step crop:
-            Mat cropInput = blurOutput.clone();
-            if(!isBlue)
-                cropOutput = crop(cropInput, topLeftRed, bottomRightRed);
-            else
-                cropOutput = crop(cropInput, topLeftBlue, bottomRightBlue);
-
-            // Step HSV_Threshold0:
-            Mat hsvThresholdInput = cropOutput;
-            double[] hsvThresholdHue = {0.0, 180.0};
-            double[] hsvThresholdSaturation = {0.0, 255.0};
-            double[] hsvThresholdValue = {4.586330935251798, 91.86868686868685};
-            hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
-
-            // Filter contours by area and resize to fit the original image size
-
-            Mat contoursInput = hsvThresholdOutput;
-            List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-            List<BlobStats> blobs = new ArrayList<BlobStats>();
-
-            Imgproc.findContours(contoursInput, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-            // Find max contour area
-            double maxArea = 0;
-            Iterator<MatOfPoint> each = contours.iterator();
-            while (each.hasNext()) {
-                MatOfPoint wrapper = each.next();
-                double area = Imgproc.contourArea(wrapper);
-                if (area > maxArea)
-                    maxArea = area;
-            }
-
-            // Filter contours by area and resize to fit the original image size
-            mContours.clear();
-            each = contours.iterator();
-            while (each.hasNext()) {
-                MatOfPoint contour = each.next();
-                if (Imgproc.contourArea(contour) > 0.1 * maxArea) {
-                    Core.multiply(contour, new Scalar(4, 4), contour);
-                    mContours.add(contour);
-                    Moments p = Imgproc.moments(contour, false);
-                    int x = (int) (p.get_m10() / p.get_m00());
-                    int y = (int) (p.get_m01() / p.get_m00());
-                    double area = Imgproc.contourArea(contour);
-                    org.opencv.core.Rect blobBox = Imgproc.boundingRect(contour);
-                    BlobStats blob = new BlobStats(p, x, y, blobBox.width, blobBox.height, area);
-                    blobs.add(blob); //put it in the List
-                    Imgproc.circle(hsvThresholdOutput, new Point(x, y), 5, new Scalar(0, 255, 0, 255), 5);
+    @Override
+    public SkystoneTargetInfo detectSkystone() {
+        telemetry.addData("OpenCV State Machine State", state);
+        switch (state) {
+            case 0:
+                if (q.isEmpty()) {
+                    target.confidence = 0;
+                    target.finished = false;
+                    return target;
                 }
-                Imgproc.drawContours(hsvThresholdOutput, mContours, -1, new Scalar(0, 255, 0, 255), 3);
-            }
 
-            if(!blobs.isEmpty()) {
-                BlobStats mainBlob = blobs.get(blobs.size() - 1);
-                StonePos pos = (mainBlob.x <= LEFT_BOUND ? StonePos.SOUTH : (mainBlob.x >= RIGHT_BOUND ? StonePos.NORTH : StonePos.MIDDLE));
+                VuforiaLocalizer.CloseableFrame frame;
+                try {
+                    frame = q.take();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                Image img = VisionUtils.getImageFromFrame(frame, PIXEL_FORMAT.RGB565);
+                Bitmap bm = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.RGB_565);
+                bm.copyPixelsFromBuffer(img.getPixels());
+                mat = VisionUtils.bitmapToMat(bm, CvType.CV_8UC3);
+                overlay = VisionUtils.bitmapToMat(bm, CvType.CV_8UC3);
+                break;
+            case 1:
+                blur(mat, BLUR_RADIUS, overlay);
+                if (redAlliance)
+                    crop(overlay, TOP_LEFT_RED, BOTTOM_RIGHT_RED);
+                else
+                    crop(overlay, TOP_LEFT_BLUE, BOTTOM_RIGHT_BLUE);
+                hsvThreshold(overlay, HSV_THRESHOLD_PARAMETERS, overlay);
+                break;
+            case 2:
+                List<MatOfPoint> contours = new ArrayList<>();
+                Imgproc.findContours(overlay, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-                info = new SkystoneTargetInfo(mainBlob.x, mainBlob.y, mainBlob.width, mainBlob.height, pos);
+                // Find max contour area
+                double maxArea = 0;
+                Iterator<MatOfPoint> each = contours.iterator();
+                while (each.hasNext()) {
+                    MatOfPoint wrapper = each.next();
+                    double area = Imgproc.contourArea(wrapper);
+                    if (area > maxArea)
+                        maxArea = area;
+                }
 
-                this.blobs = blobs;
-            }
-            return hsvThresholdOutput;
+                // Filter contours by area and resize to fit the original image size
+                this.contours.clear();
+                each = contours.iterator();
+                while (each.hasNext()) {
+                    MatOfPoint contour = each.next();
+                    if (Imgproc.contourArea(contour) > 0.1 * maxArea) {
+                        Core.multiply(contour, new Scalar(4, 4), contour);
+                        this.contours.add(contour);
+                        Moments p = Imgproc.moments(contour, false);
+                        int x = (int) (p.get_m10() / p.get_m00());
+                        int y = (int) (p.get_m01() / p.get_m00());
+                        double area = Imgproc.contourArea(contour);
+                        org.opencv.core.Rect blobBox = Imgproc.boundingRect(contour);
+                        BlobStats blob = new BlobStats(p, x, y, blobBox.width, blobBox.height, area);
+                        blobs.add(blob);
+                        Imgproc.circle(overlay, new Point(x, y), 5, new Scalar(0, 255, 0, 255), 5);
+                    }
+                    Imgproc.drawContours(overlay, contours, -1, new Scalar(0, 255, 0, 255), 3);
+                }
+                break;
+            case 3:
+                if (!enableDashboard)
+                    break;
+                Bitmap overlayBitmap = Bitmap.createBitmap(overlay.width(), overlay.height(), Bitmap.Config.RGB_565);
+                Utils.matToBitmap(overlay, overlayBitmap);
+                dashboard.sendImage(overlayBitmap);
+                overlay.release();
+                break;
+            case 4:
+                BlobStats largestBlob = null;
+                for (BlobStats blobStats : blobs) {
+                    if (largestBlob == null)
+                        largestBlob = blobStats;
+                    else if (blobStats.area > largestBlob.area)
+                        largestBlob = blobStats;
+                }
+
+                if (largestBlob == null) {
+                    target.confidence = 0;
+                    target.finished = false;
+                    return target;
+                }
+
+                target.centroidX = largestBlob.x;
+                target.centroidY = largestBlob.y;
+                target.width = largestBlob.width;
+                target.height = largestBlob.height;
+
+                if (largestBlob.x < 320d / 3)
+                    target.quarryPosition = redAlliance ? StonePos.NORTH : StonePos.SOUTH;
+                else if (largestBlob.x < 640d / 3)
+                    target.quarryPosition = StonePos.MIDDLE;
+                else
+                    target.quarryPosition = !redAlliance ? StonePos.NORTH : StonePos.SOUTH;
+
+                target.confidence = 1;
+                return target;
+            default:
+                target.confidence = 0;
+                target.finished = false;
+                return target;
         }
-        return null;
+        state++;
+        target.confidence = 0;
+        target.finished = false;
+        return target;
     }
 
-    /**
-     * An indication of which type of filter to use for a blur.
-     * Choices are BOX, GAUSSIAN, MEDIAN, and BILATERAL
-     */
-    enum BlurType{
-        BOX("Box Blur"), GAUSSIAN("Gaussian Blur"), MEDIAN("Median Filter"),
-        BILATERAL("Bilateral Filter");
-
-        private final String label;
-
-        BlurType(String label) {
-            this.label = label;
-        }
-
-        public static BlurType get(String type) {
-            if (BILATERAL.label.equals(type)) {
-                return BILATERAL;
-            }
-            else if (GAUSSIAN.label.equals(type)) {
-                return GAUSSIAN;
-            }
-            else if (MEDIAN.label.equals(type)) {
-                return MEDIAN;
-            }
-            else {
-                return BOX;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return this.label;
-        }
-    }
-
-    /**
-     * Softens an image using one of several filters.
-     * @param input The image on which to perform the blur.
-     * @param type The blurType to perform.
-     * @param doubleRadius The radius for the blur.
-     * @param output The image in which to store the output.
-     */
-    private void blur(Mat input, BlurType type, double doubleRadius,
-                      Mat output) {
+    private void blur(Mat input, double doubleRadius, Mat output) {
         int radius = (int)(doubleRadius + 0.5);
         int kernelSize;
-        switch(type){
-            case BOX:
-                kernelSize = 2 * radius + 1;
-                Imgproc.blur(input, output, new Size(kernelSize, kernelSize));
-                break;
-            case GAUSSIAN:
-                kernelSize = 6 * radius + 1;
-                Imgproc.GaussianBlur(input,output, new Size(kernelSize, kernelSize), radius);
-                break;
-            case MEDIAN:
-                kernelSize = 2 * radius + 1;
-                Imgproc.medianBlur(input, output, kernelSize);
-                break;
-            case BILATERAL:
-                Imgproc.bilateralFilter(input, output, -1, radius, radius);
-                break;
-        }
+        kernelSize = 6 * radius + 1;
+        Imgproc.GaussianBlur(input,output, new Size(kernelSize, kernelSize), radius);
     }
 
-    /**
-     * Segment an image based on hue, saturation, and value ranges.
-     *
-     * @param input The image on which to perform the HSL threshold.
-     * @param hue The min and max hue
-     * @param sat The min and max saturation
-     * @param val The min and max value
-     * @param out The image in which to store the output.
-     */
-    private void hsvThreshold(Mat input, double[] hue, double[] sat, double[] val,
-                              Mat out) {
+    private void hsvThreshold(Mat input, double[][] threshold, Mat out) {
         Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HSV);
-        Core.inRange(out, new Scalar(hue[0], sat[0], val[0]),
-                new Scalar(hue[1], sat[1], val[1]), out);
-    }
-
-    /**
-     * Detects groups of pixels in an image.
-     * @param input The image on which to perform the find blobs.
-     * @param minArea The minimum size of a blob that will be found
-     * @param circularity The minimum and maximum circularity of blobs that will be found
-     * @param darkBlobs The boolean that determines if light or dark blobs are found.
-     * @param blobList The output where the MatOfKeyPoint is stored.
-     */
-    private void findBlobs(Mat input, double minArea, double[] circularity,
-                           Boolean darkBlobs, MatOfKeyPoint blobList) {
-
-        SimpleBlobDetector blobDet = SimpleBlobDetector.create();
-
-        blobDet.detect(input, blobList);
+        Core.inRange(out,
+                new Scalar(threshold[0][0], threshold[1][0], threshold[2][0]),
+                new Scalar(threshold[0][1], threshold[1][1], threshold[2][1]),
+                out);
     }
 
     private Mat crop(Mat image, Point topLeftCorner, Point bottomRightCorner) {

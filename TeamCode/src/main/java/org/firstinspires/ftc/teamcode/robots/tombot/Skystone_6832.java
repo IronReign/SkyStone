@@ -42,6 +42,8 @@ import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
+import org.firstinspires.ftc.teamcode.vision.SkystoneTargetInfo;
+import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.opencv.core.Mat;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.nearZero;
@@ -145,7 +147,7 @@ public class Skystone_6832 extends LinearOpMode {
     private int soundID = -1;
 
     // auto stuff
-    private GoldPos initGoldPosTest;
+    private SkystoneTargetInfo initGoldPosTest;
     private double pCoeff = 0.14;
     private double dCoeff = 1.31;
     private double targetAngle = 287.25;
@@ -327,6 +329,7 @@ public class Skystone_6832 extends LinearOpMode {
 
                 // red alliance
                 if (toggleAllowed(gamepad1.b, b, 1)) {
+
                     robot.setIsBlue(false);
 
                     if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
@@ -403,37 +406,27 @@ public class Skystone_6832 extends LinearOpMode {
                     // !CenterOfGravityCalculator.drawRobotDiagram;
                 }
                 if (auto.visionProviderFinalized && gamepad1.left_trigger > 0.3) {
-                    GoldPos gp = auto.vp.detect();
-                    if (gp != GoldPos.HOLD_STATE)
-                        initGoldPosTest = gp;
+                    SkystoneTargetInfo sp = auto.vp.detectSkystone();
+                    if (sp.getQuarryPosition() != StonePos.NONE_FOUND)
+                        initGoldPosTest = sp;
                     telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest,
-                            gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
+                            sp.getQuarryPosition() == StonePos.NONE_FOUND ? " (NONE_FOUND)" : "");
                 }
 
                 if (soundState == 0 && toggleAllowed(gamepad1.right_stick_button, right_stick_button, 1)) {
                     initialization_initSound();
                 }
 
-                // telemetry.addData("Vision", "Backend: %s (%s)",
-                // auto.visionProviders[auto.visionProviderState].getSimpleName(),
-                // auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500
-                // % 2 == 0 ? "**NOT FINALIZED**" : " NOT FINALIZED ");
-                // telemetry.addData("Vision", "FtcDashboard Telemetry: %s",
-                // auto.enableTelemetry ? "Enabled" : "Disabled");
-                // telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
-                //
-                // telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" :
-                // soundState == 2 ? "file not found" : "other");
-                //
-                // telemetry.addData("Status", "Initialized");
-                // telemetry.addData("Status", "Auto Delay: " + Integer.toString((int)
-                // auto.autoDelay) + "seconds");
-                // telemetry.addData("Status", "Side: " + getAlliance());
-                // telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-                // telemetry.addData("Status","hook encoder val: " +
-                // robot.crane.hook.getCurrentPosition());
-                // telemetry.addData("Turret", "Turret Position raw: " +
-                // robot.turret.getCurrentRotationEncoderRaw());
+                 telemetry.addData("Vision", "Backend: %s (%s)",
+                 auto.visionProviders[auto.visionProviderState].getSimpleName(),
+                 auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500
+                 % 2 == 0 ? "**NOT FINALIZED**" : " NOT FINALIZED ");
+                 telemetry.addData("Vision", "FtcDashboard Telemetry: %s",
+                 auto.enableTelemetry ? "Enabled" : "Disabled");
+                 telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
+                 telemetry.addData("Status", "Initialized");
+                 telemetry.addData("Status", "Auto Delay: " + Integer.toString((int)
+                 auto.autoDelay) + "seconds");
 
             }
             telemetry.update();
@@ -1167,7 +1160,7 @@ public class Skystone_6832 extends LinearOpMode {
         if (button) {
             if (gpId == 1) {
                 if (!buttonSavedStates[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
-                                                       // was not pressed
+                    // was not pressed
                     buttonSavedStates[buttonIndex] = true;
                     return true;
                 } else { // the button is pressed, but it was last time too - so ignore
@@ -1176,7 +1169,7 @@ public class Skystone_6832 extends LinearOpMode {
                 }
             } else {
                 if (!buttonSavedStates2[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
-                                                        // was not pressed
+                    // was not pressed
                     buttonSavedStates2[buttonIndex] = true;
                     return true;
                 } else { // the button is pressed, but it was last time too - so ignore
@@ -1192,12 +1185,6 @@ public class Skystone_6832 extends LinearOpMode {
         return false; // not pressed
 
     }
-
-    // private String getAlliance() {
-    // if (isBlue)
-    // return "Blue";
-    // return "Red";
-    // }
 
     private void configureDashboardDebug() {
         // Configure the dashboard.

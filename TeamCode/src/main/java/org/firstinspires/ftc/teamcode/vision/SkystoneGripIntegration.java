@@ -86,7 +86,7 @@ public class SkystoneGripIntegration implements SkystoneVisionProvider {
     }
 
     @Override
-    public SkystoneTargetInfo detect() {
+    public SkystoneTargetInfo detectSkystone() {
         Bitmap bm = Bitmap.createBitmap(1,1,Bitmap.Config.RGB_565);
         switch (state) {
             case 0:

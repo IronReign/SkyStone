@@ -13,7 +13,7 @@ public class SkystoneTargetInfo {
     boolean finished = false;
 
     public SkystoneTargetInfo() {
-
+        quarryPosition = StonePos.NONE_FOUND;
     }
 
     public SkystoneTargetInfo(double centroidX, double centroidY, double width, double height, StonePos quarryPosition){

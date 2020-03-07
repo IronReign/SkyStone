@@ -9,12 +9,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
+import org.firstinspires.ftc.teamcode.vision.GoldPos;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
+import org.firstinspires.ftc.teamcode.vision.SkystoneVisionProvider;
 import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
 import org.firstinspires.ftc.teamcode.vision.VisionProvider;
 import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
 import org.firstinspires.ftc.teamcode.vision.VisionProviderSkystoneByMaheshMaybe;
+import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
@@ -28,15 +31,14 @@ public class Autonomous {
     private Gamepad gamepad1;
 
     //vision-related configuration
-    public VisionProvider vp;
-    public VisionProviderSkystoneByMaheshMaybe vps;
+    public SkystoneVisionProvider vp;
     public int visionProviderState;
     public boolean visionProviderFinalized;
     public boolean enableTelemetry = false;
-    public static final Class<? extends VisionProvider>[] visionProviders = VisionProvidersRoverRuckus.visionProviders;
+    public static final Class<? extends SkystoneVisionProvider>[] visionProviders = VisionProvidersSkystone.visionProviders;
     public static final Viewpoint viewpoint = Viewpoint.WEBCAM;
-    public int mineralState = 1;
-    private MineralStateProvider mineralStateProvider = () -> mineralState;
+    public int skystoneState = 1;
+    private MineralStateProvider skystoneStateProvider = () -> skystoneState;
 
     //staging and timer variables
     public float autoDelay = 0;
@@ -54,46 +56,36 @@ public class Autonomous {
         this.gamepad1 = gamepad1;
     }
 
-
     private boolean sample() {
-        Mat output = robot.pipeline.process();
-
-        if(!(output == null)) {
-            Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
-            Utils.matToBitmap(output, bm);
-
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("Position", robot.pipeline.info.toString());
-
-            robot.dashboard.sendImage(bm);
-            robot.dashboard.sendTelemetryPacket(packet);
-        } else {
-            telemetry.addData("Status", "output is null");
-            telemetry.update();
-        }
-
-        StonePos quarryPosition = robot.pipeline.info.getQuarryPosition();
-        if(!quarryPosition.equals(StonePos.NONE_FOUND)) {
-            switch (quarryPosition) {
+        //Turn on camera to see which is gold
+        StonePos gp = vp.detectSkystone().getQuarryPosition();
+        // Hold state lets us know that we haven't finished looping through detection
+        if (gp != StonePos.NONE_FOUND) {
+            switch (gp) {
                 case SOUTH:
-                    mineralState = 0;
+                    skystoneState = 0;
                     break;
                 case MIDDLE:
-                    mineralState = 1;
+                    skystoneState = 1;
                     break;
                 case NORTH:
-                    mineralState = 2;
+                    skystoneState = 2;
                     break;
+                case NONE_FOUND:
+                case ERROR1:
+                case ERROR2:
+                case ERROR3:
                 default:
-                    mineralState = 1;
-                    telemetry.update();
+                    skystoneState = 1;
                     break;
             }
+            telemetry.addData("Vision Detection", "StonePos: %s", gp.toString());
+            vp.shutdownVision();
             return true;
         } else {
+            telemetry.addData("Vision Detection", "NONE_FOUND (still looping through internally)");
             return false;
         }
-
     }
 
 //    public StateMachine visionTest = getStateMachine(autoStage)
@@ -119,29 +111,11 @@ public class Autonomous {
                     () -> {robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft); return true; }
             ).build();
 
-    public StateMachine visionTest = getStateMachine(autoStage)
-            .addState(() ->  {
-                Mat output = robot.pipeline.process();
-
-                if(!(output == null)) {
-                    Bitmap bm = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
-                    Utils.matToBitmap(output, bm);
-
-                    TelemetryPacket packet = new TelemetryPacket();
-                    packet.put("Position", robot.pipeline.info.toString());
-
-                    robot.dashboard.sendImage(bm);
-                    robot.dashboard.sendTelemetryPacket(packet);
-
-                    telemetry.addData("vision shite", () -> robot.pipeline.info.getQuarryPosition());
-                }
-                return false;
-            }).build();
 
     public StateMachine redAutoFull = getStateMachine(autoStage)
             //open and align gripper for 1st skystone
             .addState(() -> (robot.crane.setElbowTargetPos(500,1)))
-            .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
+//            .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
@@ -149,17 +123,17 @@ public class Autonomous {
 
 
             //adjust turret if needed to point to correct stone
-            .addMineralState(mineralStateProvider,
+            .addMineralState(skystoneStateProvider,
                     () -> robot.turret.rotateIMUTurret(260,2),
                     () -> true,
                     () -> robot.turret.rotateIMUTurret(285,2))
 
-            .addMineralState(mineralStateProvider,
+            .addMineralState(skystoneStateProvider,
                     () -> robot.crane.setGripperSwivelRotation(1450),
                     () -> true,
                     () -> robot.crane.setGripperSwivelRotation(1700))
 
-            .addMineralState(mineralStateProvider,
+            .addMineralState(skystoneStateProvider,
                     () -> robot.crane.extendToPosition(2190,1,130),
                     () -> robot.crane.extendToPosition(2190,1,120),
                     () -> robot.crane.extendToPosition(2190,1,120))
@@ -246,18 +220,18 @@ public class Autonomous {
 
     public StateMachine blueAutoFull = getStateMachine(autoStage)
             //open and align gripper for 1st skystone
-            .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
+//            .addState(() -> {vp.(!robot.isBlue); return true;})
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1600))
             .addState(() -> (robot.crane.setElbowTargetPos(300,1)))
 
             //adjust turret if needed to point to correct stone
-            .addMineralState(mineralStateProvider,
+            .addMineralState(skystoneStateProvider,
                     () -> robot.turret.rotateIMUTurret(75,2),
                     () -> true,
                     () -> robot.turret.rotateIMUTurret(105,2))
-            .addMineralState(mineralStateProvider,
+            .addMineralState(skystoneStateProvider,
                     () -> robot.crane.setGripperSwivelRotation(1900),
                     () -> true,
                     () -> robot.crane.setGripperSwivelRotation(1100))
@@ -410,7 +384,7 @@ public class Autonomous {
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
             vp = visionProviders[visionProviderState].newInstance();
-            //vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
+//            vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
@@ -422,7 +396,7 @@ public class Autonomous {
             telemetry.addData("Please wait", "Initializing vision");
             //telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
-            vp = VisionProvidersRoverRuckus.defaultProvider.newInstance();
+            vp = VisionProvidersSkystone.defaultProvider.newInstance();
             //vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);

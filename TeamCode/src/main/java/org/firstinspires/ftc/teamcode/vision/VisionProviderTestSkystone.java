@@ -82,13 +82,11 @@ public class VisionProviderTestSkystone extends LinearOpMode {
                 throw new RuntimeException(e);
             }
         }
-        SkystoneTargetInfo t = null;
         while (opModeIsActive()) {
-            SkystoneTargetInfo tnew = vp.detect();
-            if (!tnew.finished)
-                t = tnew;
-            telemetry.addData("VisionDetection", "%s", t.quarryPosition);
-            telemetry.addData("HoldState", "%s", tnew.finished ? "YES" : "NO");
+            SkystoneTargetInfo target = vp.detectSkystone();
+            telemetry.addData("VisionDetection", "%s", target);
+            if(!target.quarryPosition.equals(StonePos.NONE_FOUND))
+                vp.reset();
             telemetry.update();
         }
         vp.shutdownVision();

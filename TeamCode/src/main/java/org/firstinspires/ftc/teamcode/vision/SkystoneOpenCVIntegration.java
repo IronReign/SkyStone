@@ -84,7 +84,7 @@ public class SkystoneOpenCVIntegration implements SkystoneVisionProvider {
     }
 
     @Override
-    public SkystoneTargetInfo detect() {
+    public SkystoneTargetInfo detectSkystone() {
         switch (state) {
             case 0:
                 if (q.isEmpty()){

@@ -399,7 +399,6 @@ public class PoseSkystone {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforia.setFrameQueueCapacity(1);
-        pipeline = new SkystoneGripPipeline(hwMap, vuforia);
         towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
 
         // dashboard
