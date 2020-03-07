@@ -58,7 +58,7 @@ public class Turret{
 
     public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setTargetPosition(motor.getCurrentPosition());
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //this.magSensor = magSensor;
