@@ -134,6 +134,7 @@ public class Skystone_6832 extends LinearOpMode {
     boolean isIntakeClosed = true;
     boolean isHooked = false;
     boolean enableHookSensors = false;
+    boolean calibrateFirstHalfDone = false;
 
     // game mode configuration
     private int gameMode = 0;
@@ -327,23 +328,14 @@ public class Skystone_6832 extends LinearOpMode {
 
                 // red alliance
                 if (toggleAllowed(gamepad1.b, b, 1)) {
-                    robot.setIsBlue(false);
-
-                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
-                                                        // heading are reset
-                        robot.articulate(PoseSkystone.Articulation.calibrate);
-                    }
+                    calibrateInitStageMethod(false);
                 }
 
                 // blue alliance
                 if (toggleAllowed(gamepad1.x, x, 1)) {
-                    robot.setIsBlue(true);
-
-                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
-                                                        // heading are reset
-                        robot.articulate(PoseSkystone.Articulation.calibrateBlue);
-                    }
+                    calibrateInitStageMethod(true);
                 }
+
                 if (toggleAllowed(gamepad1.y, y, 1)) {
                     robot.setHeadingBase(270.0);
                 }
@@ -354,38 +346,6 @@ public class Skystone_6832 extends LinearOpMode {
             }
 
             else { // if inactive we are in configuration mode
-
-                float initTimer = 0f;
-                int setupStage = 0;
-                // red alliance
-                if (toggleAllowed(gamepad1.b, b, 1)) {
-                    robot.setIsBlue(false);
-
-                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
-                                                        // heading are reset
-                        robot.articulate(PoseSkystone.Articulation.calibrate);
-                    }
-                }
-
-                if (toggleAllowed(gamepad1.y, y, 1)) {
-                    robot.articulate(PoseSkystone.Articulation.calibrateBasic);
-                }
-                // blue alliance
-                if (toggleAllowed(gamepad1.x, x, 1)) {
-                    robot.setIsBlue(true);
-
-                    if (gamepad1.right_trigger < 0.8) { // unless right trigger is being held very hard, encoders and
-                                                        // heading are reset
-                        robot.articulate(PoseSkystone.Articulation.calibrateBlue);
-                    }
-                }
-
-                // if (enableHookSensors && robot.distLeft.getDistance(DistanceUnit.METER) <
-                // .08)
-                // robot.crane.hookOn();
-                // if (enableHookSensors && robot.distRight.getDistance(DistanceUnit.METER) <
-                // .08)
-                // robot.crane.hookOff();
 
                 if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
                     auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; // switch
@@ -938,6 +898,21 @@ public class Skystone_6832 extends LinearOpMode {
         // telemetry.update();
     }
 
+    public void calibrateInitStageMethod(boolean isBlue){
+
+        if(!calibrateFirstHalfDone){
+            robot.setIsBlue(isBlue);
+            robot.articulate(PoseSkystone.Articulation.calibrateFirstHalf);
+            calibrateFirstHalfDone = true;
+        }
+
+        else{
+            robot.articulate(PoseSkystone.Articulation.calibrateLaftHalf);
+            calibrateFirstHalfDone = false;
+        }
+
+    }
+
     private void turnTest() {
         if (robot.rotateIMU(90, 3)) {
             telemetry.addData("Angle Error: ", 90 - robot.getHeading());
@@ -1046,7 +1021,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine().addData("roll", () -> robot.getRoll()).addData("pitch", () -> robot.getPitch())
                 .addData("heading", () -> robot.getHeading()).addData("yawraw", () -> robot.getHeading());
         telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000).addData("Loop time", "%.0fHz",
-                () -> 1000000000 / loopAvg); // telemetry.addLine()w
+                () -> 1000000000 / loopAvg); // telemetry.addLine()
         telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading()).addData("Turret Target`s",
                 () -> robot.turret.getTurretTargetHeading());
         telemetry.addLine().addData("Turret Current tower height: ", () -> robot.crane.getCurrentTowerHeight());

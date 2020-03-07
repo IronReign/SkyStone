@@ -167,8 +167,8 @@ public class PoseSkystone {
     protected MoveMode moveMode;
 
     public enum Articulation { // serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
-        calibrate,
-        calibrateBlue,
+        calibrateFirstHalf,
+        calibrateLaftHalf,
         calibrateBasic,
         inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
@@ -682,12 +682,12 @@ public class PoseSkystone {
         }
 
         switch (articulation) {
-            case calibrate:
-                if (calibrate())
+            case calibrateFirstHalf:
+                if (calibrateFirstHalf())
                     articulation = Articulation.manual;
                 break;
-            case calibrateBlue:
-                if (calibrateBlue())
+            case calibrateLaftHalf:
+                if (calibrateLaftHalf())
                     articulation = Articulation.manual;
                 break;
             case calibrateBasic:
@@ -807,37 +807,60 @@ public class PoseSkystone {
 
     private int calibrateStage = 0;// todo- finish
 
-    public boolean calibrate() {
+    public boolean calibrateFirstHalf() {
         switch (calibrateStage) {
             case 0:
-
                 // calibrate the elbow and arm
                 if (crane.calibrate()) {
-                    // miniTimer = futureTime(1);
                     calibrateStage++;
+                    miniTimer = futureTime(1);
                 }
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
                     resetEncoders();
-                    setZeroHeading();
-                    // if(rotateIMU(270,7))
-                    //
-                    miniTimer = futureTime(1f);
                     calibrateStage++;
                 }
                 break;
             case 2:
-                if (System.nanoTime() > miniTimer) {
-                    if (turret.rotateIMUTurret(270.0, 2))
-                        calibrateStage++;
+                calibrateStage = 0;
+                return true;//no break needed -- it would be unreachable
+        }
+        return false;
+    }
+
+    int cailibrateOtherStage = 0;
+
+    public boolean calibrateLaftHalf() {
+        switch (cailibrateOtherStage) {
+            case 0:
+                setZeroHeading();
+                miniTimer = futureTime(1);
+                cailibrateOtherStage++;
+                break;
+            case 1:
+                if (System.nanoTime() >= miniTimer) {
+                    if (!isBlue) {
+                        if (turret.rotateIMUTurret(270.0, 2))
+                            cailibrateOtherStage++;
+                    } else {
+                        if (turret.rotateIMUTurret(90.0, 2))
+                            cailibrateOtherStage++;
+                    }
                 }
                 break;
-            case 3:
-                if (rotateIMU(270, 6.0)) {
-                    // driveIMUDistance(.3,270,false,.3);
-                    calibrateStage = 0;
-                    return true;
+            case 2:
+                if(!isBlue) {
+                    if (rotateIMU(270, 6.0)) {
+                        cailibrateOtherStage = 0;
+                        return true;
+                    }
+                }
+                else{
+                    if (rotateIMU(90, 6.0)) {
+                        cailibrateOtherStage = 0;
+                        return true;
+                    }
                 }
                 break;
         }
@@ -945,44 +968,6 @@ public class PoseSkystone {
     public boolean calibrateBasic() {
         setZeroHeading();
         return true;
-    }
-
-    private int calibrateStageBlue = 0;// todo- finish
-
-    public boolean calibrateBlue() {
-        switch (calibrateStageBlue) {
-            case 0:
-
-                // calibrate the elbow and arm
-                if (crane.calibrate()) {
-                    // miniTimer = futureTime(1);
-                    calibrateStageBlue++;
-                }
-                break;
-            case 1:
-                if (System.nanoTime() >= miniTimer) {
-                    resetEncoders();
-                    setZeroHeading();
-                    // if(rotateIMU(270,7))
-                    //
-                    miniTimer = futureTime(1f);
-                    calibrateStageBlue++;
-                }
-                break;// ur mom gae lol
-            case 2:// NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
-                if (System.nanoTime() > miniTimer) {
-                    if (turret.rotateIMUTurret(90.0, 2))
-                        calibrateStageBlue++;
-                }
-                break;
-            case 3:
-                if (rotateIMU(90, 6.0)) {
-                    calibrateStageBlue = 0;
-                    return true;
-                }
-                break;
-        }
-        return false;
     }
 
     int grabState = 0;

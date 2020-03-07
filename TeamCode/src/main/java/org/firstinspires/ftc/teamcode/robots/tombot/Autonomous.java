@@ -265,6 +265,7 @@ public class Autonomous {
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
+
             .build();
 
 
