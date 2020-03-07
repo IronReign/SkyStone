@@ -39,8 +39,6 @@ public class Crane {
     public static double gripLeftDist;
     public static double gripRightDist; //these hold the most recently updated values for the gripper distance sensors
 
-    double hookPwr = 1;
-
     int elbowPosInternal = 0;
     int elbowPos = 0;
     double elbowPwr = 1;
@@ -87,14 +85,13 @@ public class Crane {
     public int pos_prelatch;
     public int pos_latched;
     public int pos_postlatch;
-    public int glide = 80;
-    public int autodepotthingy=350;
 
     //.374
 
     //elbow safety limits
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
+    public int elbowLow = 300;
     public int specialElbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
     public int actualElbowMax = 1120;
     public int elbowMaxSafetyOffset = 70; //makes sure that the robot doesn't try and extend to the elbow max exactly
@@ -105,20 +102,13 @@ public class Crane {
     public  int extendMid;
     public  int extendLow; //clears hook and good for retracting prior to deposit without tipping robot
     public  int extendMin;  //prevent crunching collector tray
-    public  int extendPreLatch = extendMax;
 
     //foundation hook servo values
     public int foundation_hook_up = 1665;
     public int foundation_hook_down = 1163;
 
-    public int stow = 650;
-
     public int currentTowerHeight;
     public static final double blockHeightMeter = 0.127;
-    public int anglePerBlock;
-
-    public int craneArticulation = 0;
-
 
     private boolean hookUp = true;
     //private int gripperState = 0;
@@ -193,9 +183,9 @@ public class Crane {
         motorUnhooked = 5;
         motorMidHooked = 80;
 
-        swivel_Right90 = 0;
-        swivel_Front = 900;
-        swivel_Left90 = 1556;
+        swivel_Right90 = 900;
+        swivel_Front = 1500;
+        swivel_Left90 = 2100;
         swivel_left_Block = 800;
         swivel_Right_Block= 1000;
 
@@ -224,7 +214,7 @@ public class Crane {
         gripRightDist = gripperRight.getVoltage();
 
         gripLeftDist = gripLeftSharp.getUnscaledDistance(); //remove these two lines if looking for raw voltage which goes up with proximity
-        gripRightDist = gripLeftSharp.getUnscaledDistance();
+        gripRightDist = gripRightSharp.getUnscaledDistance();
 
         updateGripper();
         updateBeltToElbow();
@@ -330,7 +320,14 @@ public class Crane {
             gripperSwivel.setPosition(gripperSwivel.getPosition()+.02);
     }
 
-    public boolean alignGripperForwardFacing(){
+    public void swivelGripperSlow(boolean right){
+        if(right == true)
+            gripperSwivel.setPosition(gripperSwivel.getPosition()-.01);
+        else
+            gripperSwivel.setPosition(gripperSwivel.getPosition()+.01);
+    }
+
+    public boolean alignGripperForwardFacing() {
 
         //todo: test and fix this
         //continuously try to align the gripper with a stone
@@ -340,30 +337,21 @@ public class Crane {
         //when distances are roughly equal and below the trigger threshold - that's when we yoink
         //experiment with waiting on rotation until both sensors see something. this would reduce the chances of aligning one sensor to the broad side and the other to the narrow side
 
-        double stoneDistMin = 1.0; //what is the typical trigger distance to a stone?
-        double stoneDistMax = 1.4; //beyond this distance we should assume we are not trying to do anything
-        double stoneTriggerDist = .4; //what is the typical trigger distance to yoink the stone
 
-        if (gripLeftDist > stoneDistMax || gripRightDist < stoneDistMax) return false; // we are too far away on one sensor or the other
+        double stoneDistMax = .8; //beyond this distance we should assume we are not trying to do anything
+        double stoneTriggerDist = .13; //what is the typical trigger distance to yoink the stone
 
-        //if (gripLeftDist < stoneDistMax && gripRightDist < stoneDistMax) return true; //we think we are done - could easily be over extended if we didn't approach correctly
-//
-//        if (gripLeftDist < stoneDistMax && gripLeftDist > stoneDistMin) {
-//            //we might be seeing a stone with the left sensor, so swivel left
-//            swivelGripper(false);
-//        }
-//        if (gripRightDist < stoneDistMax && gripRightDist > stoneDistMin){
-//            //we might be seeing a stone with the left sensor, so swivel left
-//            swivelGripper(true);
-//
-//        }
+        if (gripLeftDist > stoneDistMax || gripRightDist > stoneDistMax)
+            return false; // we are too far away on one sensor or the other
 
-        double diff = gripRightDist-gripLeftDist;
-        if (diff<0.0)
-            swivelGripper(true);
-        else
-            swivelGripper(false);
-
+        double diff = gripRightDist - gripLeftDist;
+        if (Math.abs(diff) > .065){ //test to see if the difference is even slightly significant - hysteresis
+            if (diff < 0.0)
+                swivelGripperSlow(true);
+            else
+                swivelGripperSlow(false);
+        }
+        if (gripLeftDist < stoneTriggerDist && gripRightDist < stoneTriggerDist) return true;
 
         return false;
 
@@ -467,48 +455,47 @@ public class Crane {
     public boolean calibrate(){
 
         switch(calibrateStage){
-            case 0:
+            case 0: //open elbow with limited power until it stalls at top of travel
+                // retract extendabob same way
                 setMotorsForCalibration();
                 elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                elbow.setPower(.15);
+                elbow.setPower(.20);
                 extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                extendABob.setPower(-.20); //retract to zero position
-                calibrateTimer = futureTime(4.0f); //allow enough time for elbow to open fully and arm to retract
+                extendABob.setPower(-.25); //retract to zero position
+                setGripperSwivelRotation(swivel_Right90);
+                calibrateTimer = futureTime(3.0f); //allow enough time for elbow to open fully and arm to retract
                 calibrateStage++;
                 break;
-            case 1:
+            case 1: //reset encoders at max elevation angle
                 if (System.nanoTime() >= calibrateTimer){
-                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
+                    extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this approximately zeros the extension but at elbowmax and we'll need to redo it at a low elevation
                     extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     extendToLow(); //push out to the minimum extension - this will need to be pulled back to zero for starting position
 
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    //elbow.setTargetPosition(-elbowMax); //normally we set the target through a method, but we have to override the safety here
-                    //extendToPosition(100,.2,15);
-                    toggleSwivel();
-                    toggleSwivel();
-                    elbowPos=-specialElbowMax; //set target explicitly
-                    elbow.setPower(.3); //set speed explicitly
+                    elbow.setTargetPosition(-specialElbowMax); //normally we set the target through a method, but we have to override the safety here
+
+                    elbow.setPower(1); //power down to low position
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
                     calibrateStage++;
 
                 }
                 break;
-            case 2:
+            case 2: //zero the elbow at bottom of travel
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setTargetPosition(elbowMin); //this should not generate a movement
+                    elbow.setTargetPosition(elbowMin); //this should not generate a movement because we should already be there
                     calibrateTimer = futureTime(1f); //allow enough time to raise to starting position
                     calibrateStage++;
                 }
                 break;
-            case 3: //reset elbow and arm to starting position
+            case 3: //reset elbow to near starting position so we can get a better retract for extension
                 if (System.nanoTime() >= calibrateTimer) {
-                    elbow.setTargetPosition(elbowStart);
-                    extendToPosition(0,.6,15);
-                    calibrateTimer = futureTime(4.0f); //enough time for next stage - retract egain
+                    elbow.setTargetPosition(elbowLow);
+
+                    calibrateTimer = futureTime(2.0f); //enough time for next stage - retract egain
                     calibrateStage++;
 
                 }
@@ -516,7 +503,7 @@ public class Crane {
             case 4: //one more retract of extension
                 if (System.nanoTime() >= calibrateTimer) {
                     extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    extendABob.setPower(-.20); //retract to zero position
+                    extendABob.setPower(-.6); //retract to zero position
                     calibrateTimer = futureTime(1.0f); //allow enough time for next stage
                     calibrateStage++;
                 }
@@ -526,6 +513,8 @@ public class Crane {
                 if (System.nanoTime() >= calibrateTimer) {
                     extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
                     extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extendToPosition(0,.6,15);
+                    elbow.setTargetPosition(elbowStart);
                     calibrateStage = 0;
                     return true;
                 }
