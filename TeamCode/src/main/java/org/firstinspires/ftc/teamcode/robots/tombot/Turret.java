@@ -40,11 +40,12 @@ public class Turret{
     BNO055IMU turretIMU;
     double turretRoll;
     double turretPitch;
-    double turretHeading = 0;
-    boolean initialized = false;
-    private  double offsetHeading;
+    static double turretHeading;
+    static boolean initialized = false;
+    private static double offsetHeading;
     private double offsetRoll;
     private double offsetPitch;
+    static boolean dejaVu = false;
 
     private double turretTargetHeading = 0.0;
     Orientation imuAngles;
@@ -65,10 +66,19 @@ public class Turret{
 
         this.motor = motor;
 
-        turretTargetHeading=0;
         turretPID = new PIDController(0,0,0);
         initIMU(turretIMU);
-
+        if(dejaVu) {
+            setOffsetHeading(turretHeading + offsetHeading);
+            turretTargetHeading= turretHeading;
+            dejaVu = false;
+        }
+        else{
+            turretHeading = 0;
+            initialized = false;
+            setOffsetHeading(offsetHeading);
+            dejaVu = true;
+        }
     }
 
     public void initIMU(BNO055IMU turretIMU){
@@ -111,7 +121,7 @@ public class Turret{
      * @param angle the value that the current heading will be assigned to
      */
     public void setHeading(double angle){
-        turretHeading = angle;
+        setOffsetHeading(offsetHeading+angle);
         initialized = false; //triggers recalc of heading offset at next IMU update cycle
     }
 
@@ -247,7 +257,7 @@ public class Turret{
     }
 
     public boolean setOffsetHeading(double new0){
-        offsetHeading = new0;
+        offsetHeading = new0 % 360;
         return true;
     }
 

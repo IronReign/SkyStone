@@ -130,12 +130,12 @@ public class Crane {
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo servoGripper, Servo intakeServoBack, Servo gripperSwivel, AnalogInput gripperLeft, AnalogInput gripperRight){
 
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
         extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
