@@ -9,10 +9,10 @@ public final class VisionProvidersSkystone {
     private VisionProvidersSkystone() { throw new RuntimeException("Utility Class"); }
 
     public static final Class<? extends SkystoneVisionProvider>[] visionProviders =
-            new Class[]{SkystoneOpenCVIntegration.class, SkystoneGripIntegration.class, MiddleDummyVisionIntegration.class,
+            new Class[]{SkystoneOpenCVIntegration.class, SkystoneGripIntegration.class, SkystoneGripPipeline.class, MiddleDummyVisionIntegration.class,
                     LeftDummyVisionIntegration.class, RightDummyVisionIntegration.class};
 
 
-    public static final Class<? extends VisionProvider> defaultProvider = MiddleDummyVisionIntegration.class;
+    public static final Class<? extends SkystoneVisionProvider> defaultProvider = MiddleDummyVisionIntegration.class;
 
 }

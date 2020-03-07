@@ -42,6 +42,8 @@ import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.vision.GoldPos;
+import org.firstinspires.ftc.teamcode.vision.SkystoneTargetInfo;
+import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.opencv.core.Mat;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.nearZero;
@@ -53,7 +55,6 @@ import static org.firstinspires.ftc.teamcode.util.Conversions.servoNormalize;
  * This file contains the code for Iron Reign's main OpMode, used for both
  * TeleOp and Autonomous.
  */
-
 
 @TeleOp(name = "Skystone_6832", group = "Challenge") // @Autonomous(...) is the other common choice
 // @Autonomous
@@ -146,7 +147,7 @@ public class Skystone_6832 extends LinearOpMode {
     private int soundID = -1;
 
     // auto stuff
-    private GoldPos initGoldPosTest;
+    private SkystoneTargetInfo initGoldPosTest;
     private double pCoeff = 0.14;
     private double dCoeff = 1.31;
     private double targetAngle = 287.25;
@@ -363,37 +364,26 @@ public class Skystone_6832 extends LinearOpMode {
                     // !CenterOfGravityCalculator.drawRobotDiagram;
                 }
                 if (auto.visionProviderFinalized && gamepad1.left_trigger > 0.3) {
-                    GoldPos gp = auto.vp.detect();
-                    if (gp != GoldPos.HOLD_STATE)
-                        initGoldPosTest = gp;
+                    SkystoneTargetInfo sp = auto.vp.detectSkystone();
+                    if (sp.getQuarryPosition() != StonePos.NONE_FOUND)
+                        initGoldPosTest = sp;
                     telemetry.addData("Vision", "Prep detection: %s%s", initGoldPosTest,
-                            gp == GoldPos.HOLD_STATE ? " (HOLD_STATE)" : "");
+                            sp.getQuarryPosition() == StonePos.NONE_FOUND ? " (NONE_FOUND)" : "");
                 }
 
                 if (soundState == 0 && toggleAllowed(gamepad1.right_stick_button, right_stick_button, 1)) {
                     initialization_initSound();
                 }
 
-                // telemetry.addData("Vision", "Backend: %s (%s)",
-                // auto.visionProviders[auto.visionProviderState].getSimpleName(),
-                // auto.visionProviderFinalized ? "finalized" : System.currentTimeMillis() / 500
-                // % 2 == 0 ? "**NOT FINALIZED**" : " NOT FINALIZED ");
-                // telemetry.addData("Vision", "FtcDashboard Telemetry: %s",
-                // auto.enableTelemetry ? "Enabled" : "Disabled");
-                // telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
-                //
-                // telemetry.addData("Sound", soundState == 0 ? "off" : soundState == 1 ? "on" :
-                // soundState == 2 ? "file not found" : "other");
-                //
-                // telemetry.addData("Status", "Initialized");
-                // telemetry.addData("Status", "Auto Delay: " + Integer.toString((int)
-                // auto.autoDelay) + "seconds");
-                // telemetry.addData("Status", "Side: " + getAlliance());
-                // telemetry.addData("Status", "Hook sensors: " + enableHookSensors);
-                // telemetry.addData("Status","hook encoder val: " +
-                // robot.crane.hook.getCurrentPosition());
-                // telemetry.addData("Turret", "Turret Position raw: " +
-                // robot.turret.getCurrentRotationEncoderRaw());
+                telemetry.addData("Vision", "Backend: %s (%s)",
+                        auto.visionProviders[auto.visionProviderState].getSimpleName(),
+                        auto.visionProviderFinalized ? "finalized"
+                                : System.currentTimeMillis() / 500 % 2 == 0 ? "**NOT FINALIZED**" : " NOT FINALIZED ");
+                telemetry.addData("Vision", "FtcDashboard Telemetry: %s",
+                        auto.enableTelemetry ? "Enabled" : "Disabled");
+                telemetry.addData("Vision", "Viewpoint: %s", auto.viewpoint);
+                telemetry.addData("Status", "Initialized");
+                telemetry.addData("Status", "Auto Delay: " + Integer.toString((int) auto.autoDelay) + "seconds");
 
             }
             telemetry.update();
@@ -470,7 +460,7 @@ public class Skystone_6832 extends LinearOpMode {
                         demo();
                         break;
                     case 9:
-                        if(auto.simultaneousStateTest.execute())
+                        if (auto.simultaneousStateTest.execute())
                             active = false;
                         break;
                     case 10:
@@ -569,7 +559,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.changeTowerHeight(-1);
         }
         if (toggleAllowed(gamepad1.a, a, 1)) {
-//            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+            // robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
             Mat mat = robot.towerHeightPipeline.process();
 
         }
@@ -611,8 +601,8 @@ public class Skystone_6832 extends LinearOpMode {
             robot.stopAll();
         }
 
-//        if (gamepad1.guide || gamepad2.guide)  this needs to be checked
-//            stopAll = true;
+        // if (gamepad1.guide || gamepad2.guide) this needs to be checked
+        // stopAll = true;
 
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
@@ -621,7 +611,7 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.setActive(true);
         }
 
-        //robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
+        // robot.crane.extendToTowerHeight(0.25, Config.currentTowerHeight);
 
         reverse = -1;
         pwrDamper = .70;
@@ -659,8 +649,8 @@ public class Skystone_6832 extends LinearOpMode {
             robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
         }
 
-        if(toggleAllowed(gamepad1.x, x, 1)) {
-//            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
+        if (toggleAllowed(gamepad1.x, x, 1)) {
+            // robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
             robot.crane.hookToggle();
         }
 
@@ -669,12 +659,12 @@ public class Skystone_6832 extends LinearOpMode {
             robot.crane.extendToPosition(1500, 1.0, 20);
         }
 
-//        // Foundation Gripper
-//        if (toggleAllowed(gamepad1.x, x, 1)) {
-////            robot.crane.hookToggle();
-//            robot.crane.currentTowerHeight = 3;
-//            robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation);
-//        }
+        // // Foundation Gripper
+        // if (toggleAllowed(gamepad1.x, x, 1)) {
+        //// robot.crane.hookToggle();
+        // robot.crane.currentTowerHeight = 3;
+        // robot.articulate(PoseSkystone.Articulation.extendToTowerHeightArticulation);
+        // }
 
         if (toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
             robot.articulate(PoseSkystone.Articulation.yoinkStone);
@@ -723,7 +713,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad2.dpad_right, dpad_right, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
-//            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
+            // robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
@@ -739,7 +729,6 @@ public class Skystone_6832 extends LinearOpMode {
         if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
         }
-
 
         // turret controls
         if (notdeadzone(gamepad2.right_trigger))
@@ -852,8 +841,8 @@ public class Skystone_6832 extends LinearOpMode {
             robot.turret.rotateLeft(gamepad2.left_trigger * 5);
         // robot.articulate(PoseSkystone.Articulation.yoinkStone);
 
-        //robot.crane.update();
-        //robot.turret.update(opModeIsActive());
+        // robot.crane.update();
+        // robot.turret.update(opModeIsActive());
     }
 
     private void joystickDrivePregameMode() {
@@ -898,15 +887,15 @@ public class Skystone_6832 extends LinearOpMode {
         // telemetry.update();
     }
 
-    public void calibrateInitStageMethod(boolean isBlue){
+    public void calibrateInitStageMethod(boolean isBlue) {
 
-        if(!calibrateFirstHalfDone){
+        if (!calibrateFirstHalfDone) {
             robot.setIsBlue(isBlue);
             robot.articulate(PoseSkystone.Articulation.calibrateFirstHalf);
             calibrateFirstHalfDone = true;
         }
 
-        else{
+        else {
             robot.articulate(PoseSkystone.Articulation.calibrateLaftHalf);
             calibrateFirstHalfDone = false;
         }
@@ -962,7 +951,7 @@ public class Skystone_6832 extends LinearOpMode {
         if (button) {
             if (gpId == 1) {
                 if (!buttonSavedStates[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
-                                                       // was not pressed
+                    // was not pressed
                     buttonSavedStates[buttonIndex] = true;
                     return true;
                 } else { // the button is pressed, but it was last time too - so ignore
@@ -971,7 +960,7 @@ public class Skystone_6832 extends LinearOpMode {
                 }
             } else {
                 if (!buttonSavedStates2[buttonIndex]) { // we just pushed the button, and when we last looked at it, it
-                                                        // was not pressed
+                    // was not pressed
                     buttonSavedStates2[buttonIndex] = true;
                     return true;
                 } else { // the button is pressed, but it was last time too - so ignore
@@ -987,12 +976,6 @@ public class Skystone_6832 extends LinearOpMode {
         return false; // not pressed
 
     }
-
-    // private String getAlliance() {
-    // if (isBlue)
-    // return "Blue";
-    // return "Red";
-    // }
 
     private void configureDashboardDebug() {
         // Configure the dashboard.
@@ -1030,8 +1013,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine().addData("avg motor ticks ", () -> robot.getAverageTicks())
                 .addData("right motor ticks ", () -> robot.getRightMotorTicks())
                 .addData("left motor ticks ", () -> robot.getLeftMotorTicks());
-        telemetry.addLine()
-                .addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance())
+        telemetry.addLine().addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance())
                 .addData("gripperRight ", () -> robot.crane.gripRightSharp.getUnscaledDistance())
                 .addData("left distance ", () -> robot.getDistLeftDist())
                 .addData("right distance ", () -> robot.getDistRightDist())

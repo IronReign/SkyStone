@@ -10,8 +10,7 @@ public interface SkystoneVisionProvider {
 
     public void shutdownVision();
 
-    public SkystoneTargetInfo detect();
+    public SkystoneTargetInfo detectSkystone();
 
     public void reset();
-
 }
