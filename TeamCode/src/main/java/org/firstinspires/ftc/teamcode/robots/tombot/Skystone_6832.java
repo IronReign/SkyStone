@@ -991,33 +991,24 @@ public class Skystone_6832 extends LinearOpMode {
 
         // );
 
-        telemetry.addLine().addData("active", () -> active).addData("state", () -> state)
-                .addData("autoStage", () -> auto.autoStage).addData("Game Mode", () -> GAME_MODES[gameMode])
-                .addData("Articulation", () -> robot.getArticulation());
-        // .addData("skystonePos: ", () -> robot.xPos);
-
-        telemetry.addLine()
-                // .addData("elbowA", () -> robot.crane.isActive())
-                .addData("elbowC", () -> robot.crane.getElbowCurrentPos())
-                .addData("elbowT", () -> robot.crane.getElbowTargetPos());
+        telemetry.addLine().addData("active", () -> active);
+        telemetry.addLine().addData("state", () -> state);
+        telemetry.addLine() .addData("autoStage", () -> auto.autoStage).addData("Game Mode", () -> GAME_MODES[gameMode]);
+        telemetry.addLine() .addData("Articulation", () -> robot.getArticulation());
+        telemetry.addLine().addData("elbowC", () -> robot.crane.getElbowCurrentPos());
+        telemetry.addLine().addData("elbowT", () -> robot.crane.getElbowTargetPos());
         telemetry.addLine().addData("liftPos", () -> robot.crane.getExtendABobCurrentPos());
-        telemetry.addLine().addData("roll", () -> robot.getRoll()).addData("pitch", () -> robot.getPitch())
-                .addData("heading", () -> robot.getHeading()).addData("yawraw", () -> robot.getHeading());
-        telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000).addData("Loop time", "%.0fHz",
-                () -> 1000000000 / loopAvg); // telemetry.addLine()
-        telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading()).addData("Turret Target`s",
-                () -> robot.turret.getTurretTargetHeading());
+        telemetry.addLine()  .addData("base heading", () -> robot.getHeading());
+        telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000);
+        telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading());
+        telemetry.addLine().addData("Turret Target`s", () -> robot.turret.getTurretTargetHeading());
         telemetry.addLine().addData("Turret Current tower height: ", () -> robot.crane.getCurrentTowerHeight());
-        telemetry.addLine().addData("Turret Current angle ", () -> robot.turret.getHeading()).addData("Joystick Y ",
-                () -> gamepad1.right_stick_y);
-        telemetry.addLine().addData("avg motor ticks ", () -> robot.getAverageTicks())
-                .addData("right motor ticks ", () -> robot.getRightMotorTicks())
-                .addData("left motor ticks ", () -> robot.getLeftMotorTicks());
-        telemetry.addLine().addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance())
-                .addData("gripperRight ", () -> robot.crane.gripRightSharp.getUnscaledDistance())
-                .addData("left distance ", () -> robot.getDistLeftDist())
-                .addData("right distance ", () -> robot.getDistRightDist())
-                .addData("front distance ", () -> robot.getDistForwardDist());
+        telemetry.addLine().addData("Turret Current angle ", () -> robot.turret.getHeading());
+        telemetry.addLine().addData("gripperLeft ", () -> robot.crane.gripLeftSharp.getUnscaledDistance());
+        telemetry.addLine().addData("gripperRight ", () -> robot.crane.gripRightSharp.getUnscaledDistance());
+        telemetry.addLine() .addData("left distance ", () -> robot.getDistLeftDist());
+        telemetry.addLine() .addData("right distance ", () -> robot.getDistRightDist());
+        telemetry.addLine() .addData("front distance ", () -> robot.getDistForwardDist());
     }
 
     private void configureDashboardMatch() {
