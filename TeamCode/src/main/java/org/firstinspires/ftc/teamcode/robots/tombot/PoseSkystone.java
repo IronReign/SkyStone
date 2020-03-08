@@ -387,13 +387,13 @@ public class PoseSkystone {
 
         // initialize vision
 
-        VuforiaLocalizer vuforia;
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
-        parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
-        vuforia.setFrameQueueCapacity(1);
+//        VuforiaLocalizer vuforia;
+//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+//        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+//        parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
+//        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+//        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+//        vuforia.setFrameQueueCapacity(1);
 //        towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
 
         // dashboard
@@ -851,7 +851,7 @@ public class PoseSkystone {
         switch (cailibrateOtherStage) {
             case 0:
                 setZeroHeading();
-                miniTimer = futureTime(1);
+                miniTimer = futureTime(2);
                 cailibrateOtherStage++;
                 break;
             case 1:
