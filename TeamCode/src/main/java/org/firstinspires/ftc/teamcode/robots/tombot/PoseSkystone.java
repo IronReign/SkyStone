@@ -394,7 +394,7 @@ public class PoseSkystone {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforia.setFrameQueueCapacity(1);
-        towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
+//        towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
 
         // dashboard
         dashboard = FtcDashboard.getInstance();
@@ -1348,12 +1348,13 @@ public class PoseSkystone {
                 if (System.nanoTime() >= retractTimer) {
 
                     articulation = Articulation.retriving2;
-                    miniStateRetTow = 0;
+                    miniStateRetTow++;
                 }
 
                 break;
             case (3):
                 articulate(Articulation.cardinalBaseLeft);
+                miniStateRetTow = 0;
                 return true;
         }
         return false;

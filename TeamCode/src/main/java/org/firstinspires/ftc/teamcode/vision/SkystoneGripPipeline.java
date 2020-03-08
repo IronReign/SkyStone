@@ -116,7 +116,7 @@ public class SkystoneGripPipeline implements SkystoneVisionProvider {
 
     @Override
     public SkystoneTargetInfo detectSkystone() {
-        telemetry.addData("OpenCV State Machine State", state);
+//        telemetry.addData("OpenCV State Machine State", state);
         switch (state) {
             case 0:
                 if (q.isEmpty()) {
@@ -140,9 +140,9 @@ public class SkystoneGripPipeline implements SkystoneVisionProvider {
             case 1:
                 blur(mat, BLUR_RADIUS, overlay);
                 if (redAlliance)
-                    crop(overlay, TOP_LEFT_RED, BOTTOM_RIGHT_RED);
+                    overlay = crop(overlay, TOP_LEFT_RED, BOTTOM_RIGHT_RED);
                 else
-                    crop(overlay, TOP_LEFT_BLUE, BOTTOM_RIGHT_BLUE);
+                    overlay = crop(overlay, TOP_LEFT_BLUE, BOTTOM_RIGHT_BLUE);
                 hsvThreshold(overlay, HSV_THRESHOLD_PARAMETERS, overlay);
                 break;
             case 2:
@@ -208,11 +208,11 @@ public class SkystoneGripPipeline implements SkystoneVisionProvider {
                 target.height = largestBlob.height;
 
                 if (largestBlob.x < 320d / 3)
-                    target.quarryPosition = redAlliance ? StonePos.NORTH : StonePos.SOUTH;
+                    target.quarryPosition = !redAlliance ? StonePos.NORTH : StonePos.SOUTH;
                 else if (largestBlob.x < 640d / 3)
                     target.quarryPosition = StonePos.MIDDLE;
                 else
-                    target.quarryPosition = !redAlliance ? StonePos.NORTH : StonePos.SOUTH;
+                    target.quarryPosition = redAlliance ? StonePos.NORTH : StonePos.SOUTH;
 
                 target.confidence = 1;
                 return target;

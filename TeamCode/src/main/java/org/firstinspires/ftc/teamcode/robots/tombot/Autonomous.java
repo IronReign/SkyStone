@@ -123,14 +123,20 @@ public class Autonomous {
             .addState(() -> (robot.crane.setElbowTargetPos(300, 1)))
 
             // adjust turret if needed to point to correct stone
-            .addMineralState(skystoneStateProvider, () -> robot.turret.rotateIMUTurret(260, 2), () -> true,
+            .addMineralState(skystoneStateProvider,
+                    () -> robot.turret.rotateIMUTurret(260, 2),
+                    () -> true,
                     () -> robot.turret.rotateIMUTurret(285, 2))
 
-            .addMineralState(skystoneStateProvider, () -> robot.crane.setGripperSwivelRotation(1450), () -> true,
+            .addMineralState(skystoneStateProvider,
+                    () -> robot.crane.setGripperSwivelRotation(1450),
+                    () -> true,
                     () -> robot.crane.setGripperSwivelRotation(1700))
 
-            .addMineralState(skystoneStateProvider, () -> robot.crane.extendToPosition(2190, 1, 130),
-                    () -> robot.crane.extendToPosition(2190, 1, 120), () -> robot.crane.extendToPosition(2190, 1, 120))
+            .addMineralState(skystoneStateProvider,
+                    () -> robot.crane.extendToPosition(2190, 1, 130),
+                    () -> robot.crane.extendToPosition(2190, 1, 120),
+                    () -> robot.crane.extendToPosition(2190, 1, 120))
 
             // drop and snap gripper
             .addState(() -> robot.crane.setElbowTargetPos(-10, 1))
@@ -142,8 +148,8 @@ public class Autonomous {
 
             //pull away from wall half a meter
             .addState(() -> (robot.isBlue ?
-                    robot.driveIMUDistance(.6,90,true,.470) :
-                    robot.driveIMUDistance(.6,270,true,.470))
+                    robot.driveIMUDistance(.6,270,true,.470) :
+                    robot.driveIMUDistance(.6,90,true,.470))
             )//this and ^^^^ put the robot in front of the build plate
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
@@ -256,7 +262,7 @@ public class Autonomous {
             // telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
             vp = visionProviders[visionProviderState].newInstance();
-            // vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
+             vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint, !robot.isBlue);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
@@ -269,7 +275,7 @@ public class Autonomous {
             // telemetry.update();
             robot.ledSystem.setColor(LEDSystem.Color.CALM);
             vp = VisionProvidersSkystone.defaultProvider.newInstance();
-            // vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint);
+             vp.initializeVision(robot.hwMap, telemetry, enableTelemetry, viewpoint, !robot.isBlue);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
