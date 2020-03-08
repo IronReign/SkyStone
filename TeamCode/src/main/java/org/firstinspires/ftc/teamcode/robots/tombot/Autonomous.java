@@ -118,7 +118,8 @@ public class Autonomous {
             // open and align gripper for 1st skystone
             .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
             // .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
-            .addState(() -> sample()).addState(() -> robot.crane.toggleGripper())
+            .addState(() -> sample())
+            .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
             .addState(() -> (robot.crane.setElbowTargetPos(300, 1)))
 
@@ -201,6 +202,7 @@ public class Autonomous {
             // robot.articulate(PoseSkystone.Articulation.retractFromTower))
 
             // drive to and hook onto foundation
+            
             .addSingleState(() -> robot.crane.hookOff()) // makes sure the hook is up properly
             .addState(() -> (robot.driveIMUUntilDistance(.3, 0, true, .35)))
             .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
