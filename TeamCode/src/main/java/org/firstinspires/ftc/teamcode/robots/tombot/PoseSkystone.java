@@ -161,8 +161,8 @@ public class PoseSkystone {
     protected MoveMode moveMode;
 
     public enum Articulation { // serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
-        calibrateFirstHalf,
-        calibrateLaftHalf,
+        calibratePartOne,
+        calibratePartTwo,
         calibrateBasic,
         inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
@@ -173,7 +173,7 @@ public class PoseSkystone {
         autoExtendToTowerHeightArticulation,
         autoAlignArticulation,
         retractFromTower,
-        retractFromStone,
+        retrieveStone,
         cardinalBaseRight,
         cardinalBaseLeft,
         shootOut,
@@ -672,12 +672,12 @@ public class PoseSkystone {
         }
 
         switch (articulation) {
-            case calibrateFirstHalf:
-                if (calibrateFirstHalf())
+            case calibratePartOne:
+                if (calibratePartOne())
                     articulation = Articulation.manual;
                 break;
-            case calibrateLaftHalf:
-                if (calibrateLaftHalf())
+            case calibratePartTwo:
+                if (calibratePartTwo())
                     articulation = Articulation.manual;
                 break;
             case calibrateBasic:
@@ -691,8 +691,8 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
-            case retractFromStone:
-                if (retrieve(true)) {
+            case retrieveStone:
+                if (retrieveStone(true)) {
                     articulation = Articulation.manual;
                 }
                 break;
@@ -776,7 +776,7 @@ public class PoseSkystone {
 
     private int calibrateStage = 0;// todo- finish
 
-    public boolean calibrateFirstHalf() {
+    public boolean calibratePartOne() {
         switch (calibrateStage) {
             case 0:
                 // calibrate the elbow and arm
@@ -800,7 +800,7 @@ public class PoseSkystone {
 
     int cailibrateOtherStage = 0;
 
-    public boolean calibrateLaftHalf() {
+    public boolean calibratePartTwo() {
         switch (cailibrateOtherStage) {
             case 0:
                 setZeroHeading();
@@ -927,33 +927,33 @@ public class PoseSkystone {
 
     // todo these need to be tested - those that are used in articulate() have
     // probably been fixed up by now
-    double retreiveTimer;
+    double retrieveTimer;
 
-    public boolean retrieve(boolean endsAtNorth) {
+    public boolean retrieveStone(boolean endsAtNorth) {
         switch (craneArticulation) {
             case 0:
                 if (crane.getElbowCurrentPos() < crane.elbowMid)
                     crane.setElbowTargetPos(crane.elbowMid, 1); //make sure were not dragging the stone across the floor
                 crane.setGripperSwivelRotation(crane.swivel_Front);
                 crane.extendToPosition(crane.extendMin, 1.0, 20); //gets it in very close so we don't strain the arm
-                retreiveTimer = futureTime(1);
+                retrieveTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
-                if (System.nanoTime() >= retreiveTimer) {
+                if (System.nanoTime() >= retrieveTimer) {
                     turret.setPower(.4); //this is so that the turret doesn't yeet the block while turning
                     if(endsAtNorth)
                         turret.setTurntableAngle(0.0); //faces the north
                     else
                         turret.setTurntableAngle(180.0); //faces the south
                     craneArticulation++;
-                    retreiveTimer = futureTime(1);
+                    retrieveTimer = futureTime(1);
                     turret.setPower(1); //sets the turret power back
 
                 }
                 break;
             case 2:
-                if (System.nanoTime() >= retreiveTimer) {
+                if (System.nanoTime() >= retrieveTimer) {
                     crane.setElbowTargetPos(10, 1); //sets it down for transition to base
                     craneArticulation = 0;
                     return true;
@@ -1193,7 +1193,7 @@ public class PoseSkystone {
             case (2):
 
                 if (System.nanoTime() >= retractTimer) {
-                    if(retrieve(false)) {
+                    if(retrieveStone(false)) {
                         miniStateRetTow++;
                     }
                 }

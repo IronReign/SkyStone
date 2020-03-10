@@ -41,7 +41,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.vision.GoldPos;
 import org.firstinspires.ftc.teamcode.vision.SkystoneTargetInfo;
 import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.opencv.core.Mat;
@@ -453,7 +452,7 @@ public class Skystone_6832 extends LinearOpMode {
                         demo();
                         break;
                     case 7:
-                        joystickDriveNoCap();
+                        //joystickDriveNoCap();
                         break;
                     case 8:
                         demo();
@@ -718,7 +717,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {
-            robot.articulate(PoseSkystone.Articulation.retractFromStone);
+            robot.articulate(PoseSkystone.Articulation.retrieveStone);
         }
 
         // turret controls
@@ -732,108 +731,6 @@ public class Skystone_6832 extends LinearOpMode {
 
         robot.crane.update();
         robot.turret.update(opModeIsActive());
-    }
-
-    private void joystickDriveNoCap() { // todo - untested
-        if (stopAll) {
-            robot.stopAll();
-        }
-
-        if (gamepad1.guide || gamepad2.guide)
-            stopAll = true;
-
-        if (!joystickDriveStarted) {
-            robot.resetMotors(true);
-            robot.setAutonSingleStep(true);
-            joystickDriveStarted = true;
-        }
-
-        reverse = -1;
-        pwrDamper = .70;
-
-        pwrFwd = 0;
-        pwrRot = 0;
-
-        if (notdeadzone(gamepad1.left_stick_y))
-            pwrFwd = reverse * direction * pwrDamper * gamepad1.left_stick_y;
-        if (notdeadzone(gamepad1.right_stick_x))
-            pwrRot = pwrDamper * .75 * gamepad1.right_stick_x;
-
-        if (nearZero(pwrFwd) && nearZero(pwrRot) && robot.isNavigating) {
-        } else {
-            robot.isNavigating = false; // take control back from any auton navigation if any joystick input is running
-            robot.autonTurnInitialized = false;
-            robot.driveMixerDiffSteer(pwrFwd * pwrDamper, pwrRot);
-        }
-
-        // Foundation Gripper
-        if (toggleAllowed(gamepad1.x, x, 1)) {
-            robot.crane.hookToggle();
-        }
-
-        if (toggleAllowed(gamepad1.y, y, 1) && toggleAllowed(gamepad1.dpad_down, dpad_down, 1)) {
-            robot.crane.servoGripper.setPosition(servoNormalize(800));
-
-        }
-
-        // Pad1 Bumbers - Rotate Cardinal
-        if (toggleAllowed(gamepad1.right_bumper, right_bumper, 1)) {
-            robot.articulate(PoseSkystone.Articulation.cardinalBaseRight);
-
-        }
-
-        if (toggleAllowed(gamepad1.left_bumper, left_bumper, 1)) {
-            robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
-        }
-
-        // gamepad2 controls
-
-        if (toggleAllowed(gamepad2.a, a, 2)) {
-            robot.crane.toggleGripper();
-        }
-
-        if (toggleAllowed(gamepad2.b, b, 2)) {
-            robot.turret.rotateCardinalTurret(true);
-        }
-
-        if (toggleAllowed(gamepad2.y, y, 2)) {
-            robot.crane.toggleSwivel();
-        }
-
-        if (toggleAllowed(gamepad2.x, x, 2)) {
-            robot.turret.rotateCardinalTurret(false);
-        }
-
-        if (gamepad2.left_bumper) {
-            robot.crane.swivelGripper(false);
-        }
-
-        if (gamepad2.right_bumper) {
-            robot.crane.swivelGripper(true);
-        }
-
-        if (notdeadzone(gamepad2.left_stick_y)) {
-            robot.crane.adjustElbowAngleNoCap(-gamepad2.left_stick_y);
-        }
-
-        if (notdeadzone(gamepad2.right_stick_y)) {
-            robot.crane.adjustBeltNoCap(-gamepad2.right_stick_y);
-        }
-        if (notdeadzone(gamepad2.right_stick_x)) {
-            robot.turret.adjust(gamepad2.right_stick_x);
-        }
-
-        // turret controls
-        if (notdeadzone(gamepad2.right_trigger))
-            robot.turret.rotateRight(gamepad2.right_trigger * 5);
-        // robot.articulate(PoseSkystone.Articulation.autoGrab);
-
-        if (notdeadzone(gamepad2.left_trigger))
-            robot.turret.rotateLeft(gamepad2.left_trigger * 5);
-        // robot.articulate(PoseSkystone.Articulation.yoinkStone);
-
-        // robot.crane.update();
-        // robot.turret.update(opModeIsActive());
     }
 
     private void joystickDrivePregameMode() {
@@ -882,12 +779,12 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (!calibrateFirstHalfDone) {
             robot.setIsBlue(isBlue);
-            robot.articulate(PoseSkystone.Articulation.calibrateFirstHalf);
+            robot.articulate(PoseSkystone.Articulation.calibratePartOne);
             calibrateFirstHalfDone = true;
         }
 
         else {
-            robot.articulate(PoseSkystone.Articulation.calibrateLaftHalf);
+            robot.articulate(PoseSkystone.Articulation.calibratePartTwo);
             calibrateFirstHalfDone = false;
         }
 
@@ -989,7 +886,10 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine().addData("elbowC", () -> robot.crane.getElbowCurrentPos());
         telemetry.addLine().addData("elbowT", () -> robot.crane.getElbowTargetPos());
         telemetry.addLine().addData("liftPos", () -> robot.crane.getExtendABobCurrentPos());
-        telemetry.addLine()  .addData("base heading", () -> robot.getHeading());
+        telemetry.addLine()  .addData("chassis heading", () -> robot.getHeading());
+        telemetry.addLine()  .addData("chassis ticks left", () -> robot.getLeftMotorTicks());
+        telemetry.addLine()  .addData("chassis ticks right", () -> robot.getRightMotorTicks());
+        telemetry.addLine()  .addData("chassis avg ticks", () -> robot.getAverageTicks());
         telemetry.addLine().addData("Loop time", "%.0fms", () -> loopAvg / 1000000);
         telemetry.addLine().addData("Turret Heading", () -> robot.turret.getHeading());
         telemetry.addLine().addData("Turret Target`s", () -> robot.turret.getTurretTargetHeading());

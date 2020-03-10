@@ -122,7 +122,7 @@ public class Autonomous {
 
             // retrieve stone
             .addState(() -> robot.crane.setElbowTargetPos(30, 1))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromStone))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retrieveStone))
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //pull away from wall half a meter
@@ -212,7 +212,7 @@ public class Autonomous {
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromStone))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retrieveStone))
             .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
