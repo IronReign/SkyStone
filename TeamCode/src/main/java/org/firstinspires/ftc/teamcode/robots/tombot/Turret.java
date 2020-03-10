@@ -40,13 +40,11 @@ public class Turret{
     BNO055IMU turretIMU;
     double turretRoll;
     double turretPitch;
-    static double turretHeading;
+    double turretHeading;
     static boolean initialized = false;
     private static double offsetHeading;
     private double offsetRoll;
     private double offsetPitch;
-    static boolean dejaVu = false;
-
     private double turretTargetHeading = 0.0;
     Orientation imuAngles;
     boolean maintainHeadingInit;
@@ -60,25 +58,14 @@ public class Turret{
     public Turret(DcMotor motor, BNO055IMU turretIMU) {
 
         //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setTargetPosition(motor.getCurrentPosition());
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motor.setTargetPosition(motor.getCurrentPosition());
+        //motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //this.magSensor = magSensor;
 
         this.motor = motor;
-
+        turretTargetHeading=0;
         turretPID = new PIDController(0,0,0);
         initIMU(turretIMU);
-        if(dejaVu) {
-            setOffsetHeading(turretHeading + offsetHeading);
-            turretTargetHeading= turretHeading;
-            dejaVu = false;
-        }
-        else{
-            turretHeading = 0;
-            initialized = false;
-            setOffsetHeading(offsetHeading);
-            dejaVu = true;
-        }
     }
 
     public void initIMU(BNO055IMU turretIMU){
@@ -121,7 +108,7 @@ public class Turret{
      * @param angle the value that the current heading will be assigned to
      */
     public void setHeading(double angle){
-        setOffsetHeading(offsetHeading+angle);
+        turretHeading = angle;
         initialized = false; //triggers recalc of heading offset at next IMU update cycle
     }
 
@@ -254,11 +241,6 @@ public class Turret{
             maintainHeadingInit = false;
             setPower(0);
         }
-    }
-
-    public boolean setOffsetHeading(double new0){
-        offsetHeading = new0 % 360;
-        return true;
     }
 
     public double getHeading(){

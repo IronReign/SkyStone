@@ -114,7 +114,7 @@ public class PoseSkystone {
                                   // minimech will be different
     private double poseX;
     private double poseY;
-    private static double baseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading
+    private static double poseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading
                                 // when strafing
     private double poseHeadingRad; // current heading converted to radians
     private double poseSpeed;
@@ -125,8 +125,6 @@ public class PoseSkystone {
     public static  double offsetHeading;
     private double offsetPitch;
     private double offsetRoll;
-    static boolean dejaVu = false;
-
 
     private double displacement;
     private double displacementPrev;
@@ -236,7 +234,7 @@ public class PoseSkystone {
 
         poseX = x;
         poseY = y;
-        baseHeading = heading;
+        poseHeading = heading;
         poseSpeed = speed;
         posePitch = 0;
         poseRoll = 0;
@@ -254,7 +252,7 @@ public class PoseSkystone {
 
         poseX = x;
         poseY = y;
-        baseHeading = angle;
+        poseHeading = angle;
         poseSpeed = 0;
 
     }
@@ -267,6 +265,7 @@ public class PoseSkystone {
 
         poseX = 0;
         poseY = 0;
+        poseHeading = 0;
         poseSpeed = 0;
         posePitch = 0;
         poseRoll = 0;
@@ -365,17 +364,6 @@ public class PoseSkystone {
         imu = hwMap.get(BNO055IMU.class, "baseIMU");
         imu.initialize(parametersIMU);
 
-        if(dejaVu) {
-            setOffsetHeading(baseHeading + offsetHeading);
-            dejaVu = false;
-        }
-        else{
-            baseHeading = 0;
-            initialized = false;
-            setOffsetHeading(offsetHeading);
-            dejaVu = true;
-        }
-
         // initialize vision
 
 //        VuforiaLocalizer vuforia;
@@ -393,11 +381,6 @@ public class PoseSkystone {
 
     private void initVuforia(HardwareMap hardwareMap, Viewpoint viewpoint) {
 
-    }
-
-    public boolean setOffsetHeading(double new0){
-        offsetHeading = new0 % 360;
-        return true;
     }
 
     public void resetIMU() {
@@ -444,12 +427,12 @@ public class PoseSkystone {
             // orientation values are set to the current absolute orientation
             // so first set of imu readings are effectively offsets
 
-            offsetHeading = wrapAngleMinus((double) (360 - imuAngles.firstAngle), baseHeading);
+            offsetHeading = wrapAngleMinus((double) (360 - imuAngles.firstAngle), poseHeading);
             offsetRoll = wrapAngleMinus(imuAngles.secondAngle, poseRoll);
             offsetPitch = wrapAngleMinus(imuAngles.thirdAngle, posePitch);
             initialized = true;
         }
-        baseHeading = wrapAngle(360 - imuAngles.firstAngle, offsetHeading);
+        poseHeading = wrapAngle(360 - imuAngles.firstAngle, offsetHeading);
         posePitch = wrapAngle(imuAngles.thirdAngle, offsetPitch);
         poseRoll = wrapAngle(imuAngles.secondAngle, offsetRoll);
 
@@ -487,7 +470,7 @@ public class PoseSkystone {
             case backward:
                 displacement = (getAverageTicks() - displacementPrev) * forwardTPM;
                 odometer += Math.abs(displacement);
-                poseHeadingRad = Math.toRadians(baseHeading);
+                poseHeadingRad = Math.toRadians(poseHeading);
                 break;
             default:
                 displacement = 0; // when rotating or in an undefined moveMode, ignore/reset displacement
@@ -546,7 +529,7 @@ public class PoseSkystone {
      * @param targetAngle the heading the robot will try to maintain while driving
      */
     public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle) {
-        movePID(Kp, Ki, Kd, pwr, baseHeading, targetAngle);
+        movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle);
     }
 
     /**
@@ -713,10 +696,6 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
-
-
-
-
             case yoinkStone: // todo: fixup comments for deploy actions - moved stuff around
                 // auton initial hang at the beginning of a match
                 if (YoinkStone()) {
@@ -881,79 +860,6 @@ public class PoseSkystone {
 
     }
 
-    public boolean goToBlock(int blockNum) {
-        switch (blockNum) {
-            case 1:
-                if (driveIMUDistance(.4, 0.0, false, 2.4)) {
-                    return true;
-                }
-                break;
-            case 2:
-                if (driveIMUDistance(.4, 0.0, false, 2.2)) {
-                    return true;
-                }
-                break;
-            case 3:
-                if (driveIMUDistance(.4, 0.0, false, 2)) {
-                    return true;
-                }
-                break;
-            case 4:
-                if (driveIMUDistance(.4, 0.0, false, 1.8)) {
-                    return true;
-                }
-                break;
-            case 5:
-                if (driveIMUDistance(.4, 0.0, false, 1.6)) {
-                    return true;
-                }
-                break;
-            case 6:
-                if (driveIMUDistance(.4, 0.0, false, 1.4)) {
-                    return true;
-                }
-                break;
-
-        }
-        return false;
-    }
-
-    public boolean returnFromBlock(int blockNum) {
-        switch (blockNum) {
-            case 1:
-                if (driveIMUDistance(.4, 0.0, false, 2.4)) {
-                    return true;
-                }
-                break;
-            case 2:
-                if (driveIMUDistance(.4, 0.0, false, 2.2)) {
-                    return true;
-                }
-                break;// ur mom gae lol
-            case 3:// NO SHES NO!!!1!!!! GUYS I"M TELLING YOU SHESNOT!!!!Q!1!!!
-                if (driveIMUDistance(.4, 0.0, false, 2)) {
-                    return true;
-                }
-                break;
-            case 4:
-                if (driveIMUDistance(.4, 0.0, false, 1.8)) {
-                    return true;
-                }
-                break;
-            case 5:
-                if (driveIMUDistance(.4, 0.0, false, 1.6)) {
-                    return true;
-                }
-                break;
-            case 6:
-                if (driveIMUDistance(.4, 0.0, false, 1.4)) {
-                    return true;
-                }
-                break;
-
-        }
-        return false;
-    }
 
     public boolean calibrateBasic() {
         setZeroHeading();
@@ -1743,7 +1649,7 @@ public class PoseSkystone {
      */
     // this version is for omnidirectional robots
     public void driveIMU(double Kp, double Ki, double Kd, double pwr, double targetAngle, boolean strafe) {
-        movePID(Kp, Ki, Kd, pwr, baseHeading, targetAngle, strafe);
+        movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle, strafe);
     }
 
     /**
@@ -1838,7 +1744,7 @@ public class PoseSkystone {
             // that the robot will hold at and set a variable to tell that the heading has
             // been saved
             if (!maintainHeadingInit) {
-                poseSavedHeading = baseHeading;
+                poseSavedHeading = poseHeading;
                 maintainHeadingInit = true;
             }
             // hold the saved heading with PID
@@ -1970,7 +1876,7 @@ public class PoseSkystone {
      * @param angle the value that the current heading will be assigned to
      */
     public void setHeading(double angle) {
-        setOffsetHeading(offsetHeading + angle);
+        poseHeading = angle;
         initialized = false; // triggers recalc of heading offset at next IMU update cycle
     }
 
@@ -2009,7 +1915,7 @@ public class PoseSkystone {
      * @param poseHeading
      */
     public void setPoseHeading(double poseHeading) {
-        this.baseHeading = poseHeading;
+        this.poseHeading = poseHeading;
         initialized = false; // trigger recalc of offset on next update
     }
 
@@ -2057,7 +1963,7 @@ public class PoseSkystone {
      * @return The current angle of the robot
      */
     public double getHeading() {
-        return baseHeading;
+        return poseHeading;
     }
 
     public double getHeadingRaw() {
