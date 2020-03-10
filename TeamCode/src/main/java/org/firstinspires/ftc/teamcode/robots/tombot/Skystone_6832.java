@@ -452,7 +452,7 @@ public class Skystone_6832 extends LinearOpMode {
                         demo();
                         break;
                     case 7:
-                        //joystickDriveNoCap();
+                        robot.driveIMUDistance(.6,90,true,.470);
                         break;
                     case 8:
                         demo();
