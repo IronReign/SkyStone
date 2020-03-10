@@ -532,6 +532,13 @@ public class PoseSkystone {
         movePID(Kp, Ki, Kd, pwr, poseHeading, targetAngle);
     }
 
+    public boolean driveIMUDistanceWithReset(double pwr, double targetAngle, boolean forward, double targetMeters) {
+        if (!driveIMUDistanceInitialzed) {
+            resetMotors(false);
+        }
+        return driveIMUDistance(pwr,  targetAngle,  forward,  targetMeters);
+    }
+
     /**
      * Drive with a set power for a set distance while maintaining an IMU heading
      * using PID This is a relative version

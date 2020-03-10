@@ -127,8 +127,8 @@ public class Autonomous {
 
             //pull away from wall half a meter
             .addState(() -> robot.isBlue ?
-                    robot.driveIMUDistance(.6,90,true,.470) :
-                    robot.driveIMUDistance(.6,270,true,.470)
+                    robot.driveIMUDistanceWithReset(.6,90,true,.470) :
+                    robot.driveIMUDistanceWithReset(.6,270,true,.470)
             )//this and ^^^^ put the robot in front of the build plate
 
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
