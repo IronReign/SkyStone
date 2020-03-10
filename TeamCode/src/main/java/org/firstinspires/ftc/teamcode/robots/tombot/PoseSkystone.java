@@ -11,17 +11,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.vuforia.PIXEL_FORMAT;
-import com.vuforia.Vuforia;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.teamcode.RC;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.TowerHeightPipeline;
@@ -174,8 +168,6 @@ public class PoseSkystone {
         calibrateBasic,
         inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
-        retrieving, // retrieve a stone
-        retriving2,
         yoinkStone,
         autoGrab,
         bridgeTransit,
@@ -183,8 +175,7 @@ public class PoseSkystone {
         autoExtendToTowerHeightArticulation,
         autoAlignArticulation,
         retractFromTower,
-        retractFromBlock,
-        retractFromBlockAuton,
+        retractFromStone,
         cardinalBaseRight,
         cardinalBaseLeft,
         shootOut,
@@ -712,18 +703,20 @@ public class PoseSkystone {
                 break;
             case manual:
                 break; // do nothing here - likely we are directly overriding articulations in game
-            case retrieving: // todo: fixup comments for deploy actions - moved stuff around
-                // auton initial hang at the beginning of a match
-                if (retrieveStone()) {
+            case retractFromTower:
+                if (retractFromTower()) {
                     articulation = Articulation.manual;
                 }
                 break;
-            case retriving2: // todo: fixup comments for deploy actions - moved stuff around
-                // auton initial hang at the beginning of a match
-                if (retrieveStoneTower()) {
+            case retractFromStone:
+                if (retrieve(true)) {
                     articulation = Articulation.manual;
                 }
                 break;
+
+
+
+
             case yoinkStone: // todo: fixup comments for deploy actions - moved stuff around
                 // auton initial hang at the beginning of a match
                 if (YoinkStone()) {
@@ -734,10 +727,6 @@ public class PoseSkystone {
                 // auton initial hang at the beginning of a match
                 if (autoPickStone()) {
                     articulation = Articulation.manual;
-                }
-                break;
-            case bridgeTransit:
-                if (bridgeTransit()) {
                 }
                 break;
             case extendToTowerHeightArticulation:
@@ -777,21 +766,6 @@ public class PoseSkystone {
                 break;
             case turnTurretToBaseAuton:
                 if (turnTurretToBaseAuton()) {
-                    articulation = Articulation.manual;
-                }
-                break;
-            case retractFromTower:
-                if (retractFromTower()) {
-                    articulation = Articulation.manual;
-                }
-                break;
-            case retractFromBlock:
-                if (retractFromBlock()) {
-                    articulation = Articulation.manual;
-                }
-                break;
-            case retractFromBlockAuton:
-                if (retractFromBlockAuton()) {
                     articulation = Articulation.manual;
                 }
                 break;
@@ -1049,59 +1023,32 @@ public class PoseSkystone {
     // probably been fixed up by now
     double retreiveTimer;
 
-    public boolean retrieveStone() {
+    public boolean retrieve(boolean endsAtNorth) {
         switch (craneArticulation) {
             case 0:
-                if (crane.getElbowCurrentPos() < 32)
-                    crane.setElbowTargetPos(32, 1);
-                crane.extendToPosition(445, 1.0, 20);
+                if (crane.getElbowCurrentPos() < crane.elbowMid)
+                    crane.setElbowTargetPos(crane.elbowMid, 1); //make sure were not dragging the stone across the floor
+                crane.setGripperSwivelRotation(crane.swivel_Front);
+                crane.extendToPosition(crane.extendMin, 1.0, 20); //gets it in very close so we don't strain the arm
                 retreiveTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
                 if (System.nanoTime() >= retreiveTimer) {
-                    turret.setPower(.4);
-                    turret.setTurntableAngle(0.0);
+                    turret.setPower(.4); //this is so that the turret doesn't yeet the block while turning
+                    if(endsAtNorth)
+                        turret.setTurntableAngle(0.0); //faces the north
+                    else
+                        turret.setTurntableAngle(180.0); //faces the south
                     craneArticulation++;
                     retreiveTimer = futureTime(1);
-                    turret.setPower(1);
+                    turret.setPower(1); //sets the turret power back
 
                 }
                 break;
             case 2:
                 if (System.nanoTime() >= retreiveTimer) {
-                    crane.setElbowTargetPos(10, 1);
-                    craneArticulation = 0;
-                    return true;
-                }
-        }
-        return false;
-    }
-
-    double retreiveTimer2;
-
-    public boolean retrieveStoneTower() {
-        switch (craneArticulation) {
-            case 0:
-                if (crane.getElbowCurrentPos() < 32)
-                    crane.setElbowTargetPos(32, 1);
-                crane.extendToPosition(445, 1.0, 20);
-                retreiveTimer2 = futureTime(1);
-                craneArticulation++;
-                break;
-            case 1:
-                if (System.nanoTime() >= retreiveTimer2) {
-                    turret.setPower(.4);
-                    turret.setTurntableAngle(180.0);
-                    craneArticulation++;
-                    retreiveTimer2 = futureTime(1);
-                    turret.setPower(1);
-
-                }
-                break;
-            case 2:
-                if (System.nanoTime() >= retreiveTimer2) {
-                    crane.setElbowTargetPos(-10, 1);
+                    crane.setElbowTargetPos(10, 1); //sets it down for transition to base
                     craneArticulation = 0;
                     return true;
                 }
@@ -1191,13 +1138,7 @@ public class PoseSkystone {
         return false;
     }
 
-    public boolean bridgeTransit() {
-        if (!retrieveStone())
-            return false;
-        crane.extendToPosition(crane.getExtendABobCurrentPos() + 50, 1, 5);
-        crane.setElbowTargetPos(elbow.getCurrentPosition() - 50, 1);
-        return true;
-    }
+
 
     public boolean extendToTowerHeightArticulation() {
         crane.extendToTowerHeight();
@@ -1346,78 +1287,16 @@ public class PoseSkystone {
             case (2):
 
                 if (System.nanoTime() >= retractTimer) {
-
-                    articulation = Articulation.retriving2;
-                    miniStateRetTow++;
+                    if(retrieve(false)) {
+                        miniStateRetTow++;
+                    }
                 }
 
                 break;
             case (3):
-                articulate(Articulation.cardinalBaseLeft);
+                //articulate(Articulation.cardinalBaseLeft);
                 miniStateRetTow = 0;
                 return true;
-        }
-        return false;
-    }
-
-    int miniStateRetTow2 = 0;
-    double retractTimer2;
-
-    public boolean retractFromBlock() {
-        switch (miniStateRetTow2) {
-            case (0):
-                // crane.toggleGripper();
-                retractTimer2 = futureTime(0);
-                miniStateRetTow2++;
-                break;
-            case (1):
-
-                if (crane.setElbowTargetAngle(crane.getSpecialElbowMax() - 100)) {
-                    retractTimer2 = futureTime(0f);
-                    miniStateRetTow2++;
-                }
-
-                break;
-            case (2):
-
-                if (System.nanoTime() >= retractTimer2) {
-
-                    articulation = Articulation.retrieving;
-                    miniStateRetTow2 = 0;
-                    return true;
-                }
-
-        }
-        return false;
-    }
-
-    int retractBlockAutonStage = 0;
-    double retractTimer3;
-
-    public boolean retractFromBlockAuton() {
-        switch (retractBlockAutonStage) {
-            case (0):
-                // crane.toggleGripper();
-                retractTimer3 = futureTime(0);
-                retractBlockAutonStage++;
-                break;
-            case (1):
-                // if (crane.setElbowTargetAngle(450)) {
-                retractTimer3 = futureTime(0f);
-
-                retractBlockAutonStage++;
-                // }
-
-                break;
-            case (2):
-
-                if (System.nanoTime() >= retractTimer3) {
-
-                    articulation = Articulation.retriving2;
-                    retractBlockAutonStage = 0;
-                    return true;
-                }
-
         }
         return false;
     }

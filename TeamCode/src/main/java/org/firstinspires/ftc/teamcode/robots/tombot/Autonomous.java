@@ -1,25 +1,15 @@
 package org.firstinspires.ftc.teamcode.robots.tombot;
 
-import android.graphics.Bitmap;
-
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.statemachine.MineralStateProvider;
 import org.firstinspires.ftc.teamcode.statemachine.Stage;
 import org.firstinspires.ftc.teamcode.statemachine.StateMachine;
-import org.firstinspires.ftc.teamcode.vision.GoldPos;
-import org.firstinspires.ftc.teamcode.vision.SkystoneGripPipeline;
 import org.firstinspires.ftc.teamcode.vision.SkystoneVisionProvider;
 import org.firstinspires.ftc.teamcode.vision.StonePos;
 import org.firstinspires.ftc.teamcode.vision.Viewpoint;
-import org.firstinspires.ftc.teamcode.vision.VisionProvider;
-import org.firstinspires.ftc.teamcode.vision.VisionProvidersRoverRuckus;
-import org.firstinspires.ftc.teamcode.vision.VisionProviderSkystoneByMaheshMaybe;
 import org.firstinspires.ftc.teamcode.vision.VisionProvidersSkystone;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
 
 /**
  * Class to keep all autonomous-related functions and state-machines in
@@ -103,21 +93,9 @@ public class Autonomous {
         return false;
     }).build();
 
-    public StateMachine retractFromTower = getStateMachine(autoStage)
-            .addSimultaneousStates(() -> robot.crane.toggleGripper(),
-                    () -> robot.crane.setElbowTargetAngle(robot.crane.getCurrentAngle() + 15), () -> {
-                        robot.articulate(PoseSkystone.Articulation.retriving2);
-                        return true;
-                    }, () -> {
-                        robot.articulate(PoseSkystone.Articulation.cardinalBaseLeft);
-                        return true;
-                    })
-            .build();
-
     public StateMachine AutoFull = getStateMachine(autoStage)
             // open and align gripper for 1st skystone
             .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
-            // .addState(() -> {robot.pipeline.setIsBlue(!robot.isBlue); return true;})
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
@@ -135,23 +113,24 @@ public class Autonomous {
                     () -> robot.crane.setGripperSwivelRotation(1700))
 
             .addMineralState(skystoneStateProvider,
-                    () -> robot.crane.extendToPosition(2190, 1, 130),
-                    () -> robot.crane.extendToPosition(2190, 1, 120),
-                    () -> robot.crane.extendToPosition(2190, 1, 120))
+                    () -> robot.crane.extendToPosition(2130, 1, 130),
+                    () -> robot.crane.extendToPosition(2130, 1, 120),
+                    () -> robot.crane.extendToPosition(2130, 1, 120))
 
             // drop and snap gripper
             .addState(() -> robot.crane.setElbowTargetPos(-10, 1))
 
             // retrieve stone
             .addState(() -> robot.crane.setElbowTargetPos(30, 1))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromBlockAuton))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromStone))
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             //pull away from wall half a meter
             .addState(() -> (robot.isBlue ?
-                    robot.driveIMUDistance(.6,270,true,.470) :
-                    robot.driveIMUDistance(.6,90,true,.470))
+                    robot.driveIMUDistance(.6,90,true,.470) :
+                    robot.driveIMUDistance(.6,270,true,.470))
             )//this and ^^^^ put the robot in front of the build plate
+
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             // rotate north
@@ -228,14 +207,12 @@ public class Autonomous {
             .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.5)).build();
 
     public StateMachine walkOfShamePointNorth = getStateMachine(autoStage)
+            .addState(() -> robot.crane.setElbowTargetPos(robot.crane.elbowMin-10, 1))
             .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.25))
-            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> robot.crane.setElbowTargetPos(robot.crane.elbowMin, 1))
-            .addState(() -> robot.turret.rotateIMUTurret(0.0, 6))
-            .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.5)).build();
+            .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
-
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromStone))
             .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +222,8 @@ public class Autonomous {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private StateMachine.Builder getStateMachine(Stage stage) {
-        return StateMachine.builder().stateSwitchAction(() -> robot.crane.setGripperPos(robot.crane.toggleGripper())) // resetMotors(true)
+        return
+                StateMachine.builder().stateSwitchAction(() -> robot.crane.setGripperPos(robot.crane.toggleGripper())) // resetMotors(true)
                 .stateEndAction(() -> robot.turret.maintainHeadingTurret(false)).stage(stage);
     }
 

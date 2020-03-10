@@ -92,8 +92,9 @@ public class Crane {
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
     public int elbowLow = 300;
-    public int specialElbowMax = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int elbowMinCalibration = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
     public int actualElbowMax = 1120;
+    public int elbowMid = (actualElbowMax + elbowMin)/2;
     public int elbowMaxSafetyOffset = 70; //makes sure that the robot doesn't try and extend to the elbow max exactly
 
     //belt extension encoder values
@@ -121,12 +122,15 @@ public class Crane {
     public static final double X_LEEWAY = 0.02;
     public static final double ELBOW_HEIGHT = 0.24;
     public static final double CRANE_LENGTH = .3683;
-
     public boolean active = true;
 
     public boolean getGripperState() {
         return gripperState;
     }
+
+
+
+
 
     public Crane(DcMotor elbow, DcMotor extendABob, Servo hook, Servo servoGripper, Servo intakeServoBack, Servo gripperSwivel, AnalogInput gripperLeft, AnalogInput gripperRight){
 
@@ -275,7 +279,7 @@ public class Crane {
         return currentTowerHeight;
     }
 
-    public int getSpecialElbowMax() {return specialElbowMax;}
+    public int getElbowMinCalibration() {return elbowMinCalibration;}
 
     public void extendToTowerHeight(double distance, int stackHeight) {
         double x = distance + DISTANCE_SENSOR_TO_ELBOW - X_LEEWAY;
@@ -474,7 +478,7 @@ public class Crane {
 
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setTargetPosition(-specialElbowMax); //normally we set the target through a method, but we have to override the safety here
+                    elbow.setTargetPosition(-elbowMinCalibration); //normally we set the target through a method, but we have to override the safety here
 
                     elbow.setPower(1); //power down to low position
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully

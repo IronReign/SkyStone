@@ -447,7 +447,6 @@ public class Skystone_6832 extends LinearOpMode {
                     case 5:
                         if (auto.autoMethodTesterTool.execute()) {
                             state = 1;
-
                         }
                         break;
                     case 6:
@@ -472,7 +471,7 @@ public class Skystone_6832 extends LinearOpMode {
                 }
                 robot.updateSensors(active);
             } else {
-                robot.stopAll();
+                //robot.stopAll();
             }
 
             long loopClockTime = System.nanoTime();
@@ -597,13 +596,6 @@ public class Skystone_6832 extends LinearOpMode {
             robot.turret.adjust(gamepad2.right_stick_x);
         }
 
-        if (stopAll) {
-            robot.stopAll();
-        }
-
-        // if (gamepad1.guide || gamepad2.guide) this needs to be checked
-        // stopAll = true;
-
         if (!joystickDriveStarted) {
             robot.resetMotors(true);
             robot.setAutonSingleStep(true);
@@ -713,7 +705,6 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad2.dpad_right, dpad_right, 2)) {
             robot.articulate(PoseSkystone.Articulation.retractFromTower);
-            // robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
@@ -727,7 +718,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {
-            robot.articulate(PoseSkystone.Articulation.retractFromTower);
+            robot.articulate(PoseSkystone.Articulation.retractFromStone);
         }
 
         // turret controls
@@ -1009,6 +1000,7 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine() .addData("left distance ", () -> robot.getDistLeftDist());
         telemetry.addLine() .addData("right distance ", () -> robot.getDistRightDist());
         telemetry.addLine() .addData("front distance ", () -> robot.getDistForwardDist());
+
     }
 
     private void configureDashboardMatch() {
