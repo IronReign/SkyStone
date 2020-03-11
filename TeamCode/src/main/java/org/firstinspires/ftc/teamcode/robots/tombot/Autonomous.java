@@ -102,7 +102,7 @@ public class Autonomous {
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
-            .addState(() -> (robot.crane.setElbowTargetPos(300, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(250, 1)))
 
             // adjust turret if needed to point to correct stone
             .addMineralState(skystoneStateProvider,
@@ -124,18 +124,27 @@ public class Autonomous {
             .addState(() -> robot.crane.setElbowTargetPos(-10, 1))
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
+            .addState(() -> robot.crane.setElbowTargetPos(30, 1))
+//            .addState(() -> robot.crane.extendToMin())
+//            //pull away from wall half a meter
+//            .addState(() -> robot.isBlue ?
+//                    robot.driveIMUDistanceWithReset(.6,90,true,.470) :
+//                    robot.driveIMUDistanceWithReset(.6,270,true,.470))//this and ^^^^ put the robot in front of the build plate
+//
+            .addSimultaneousStates( //retract arm while driving forward - trying to get about the same speed so stone doesn't really move
+                    () -> robot.crane.setElbowTargetPos(30, 1),
+                    ()-> robot.crane.extendToMin(),
+                    //pull away from wall half a meter
+                    () -> robot.isBlue ?
+                    robot.driveIMUDistanceWithReset(.6,90,true,.470) :
+                    robot.driveIMUDistanceWithReset(.6,270,true,.470))
+
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             // retrieve stone
-            .addState(() -> robot.crane.setElbowTargetPos(30, 1))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retrieveStone))
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
-            //pull away from wall half a meter
-            .addState(() -> robot.isBlue ?
-                    robot.driveIMUDistanceWithReset(.6,90,true,.470) :
-                    robot.driveIMUDistanceWithReset(.6,270,true,.470))//this and ^^^^ put the robot in front of the build plate
-
-            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             // rotate north
             .addState(() -> (robot.rotateIMU(0.0, 4)))

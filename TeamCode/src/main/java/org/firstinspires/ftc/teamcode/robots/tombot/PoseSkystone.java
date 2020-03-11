@@ -787,12 +787,6 @@ public class PoseSkystone {
                 }
                 break;
             case 1:
-                if (System.nanoTime() >= miniTimer) {
-                    resetEncoders();
-                    calibrateStage++;
-                }
-                break;
-            case 2:
                 calibrateStage = 0;
                 return true;//no break needed -- it would be unreachable
         }
