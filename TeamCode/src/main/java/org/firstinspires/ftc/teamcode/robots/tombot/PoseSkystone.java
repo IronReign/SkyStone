@@ -799,7 +799,7 @@ public class PoseSkystone {
         switch (cailibrateOtherStage) {
             case 0:
                 setZeroHeading();
-                miniTimer = futureTime(2);
+                miniTimer = futureTime(0.2f);
                 cailibrateOtherStage++;
                 break;
             case 1:
@@ -1814,6 +1814,21 @@ public class PoseSkystone {
     public void setZeroHeading() {
         setHeading(0);
         turret.setHeading(0);
+    }
+
+    /**
+     * assign the current heading of the robot to alliance setup values
+     */
+    public void setHeadingAlliance() {
+        if(isBlue){
+            setHeading(90);
+            turret.setHeading(90);
+        }
+        else
+        {
+            setHeading(270);
+            turret.setHeading(270);
+        }
     }
 
     public void setHeadingBase(double offset) {

@@ -335,10 +335,11 @@ public class Skystone_6832 extends LinearOpMode {
                 if (toggleAllowed(gamepad1.x, x, 1)) {
                     calibrateInitStageMethod(true);
                 }
-
+                //resets the headings of the turret and chassis to initial values - press only after careful alignment perpendicular to alliance wall
                 if (toggleAllowed(gamepad1.y, y, 1)) {
-                    robot.setHeadingBase(270.0);
+                    robot.setHeadingAlliance();
                 }
+
                 if (toggleAllowed(gamepad1.a, a, 1)) {
                     robot.setHeadingBase(90.0);
                 }

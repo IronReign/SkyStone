@@ -198,7 +198,7 @@ public class Crane {
         extendMax = 2700;
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
-        extendMin = 200;  //prevent crunching foundation grabber
+        extendMin = 250;  //prevent crunching foundation grabber
         gripperState = false;
     }
 

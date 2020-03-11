@@ -102,7 +102,7 @@ public class Autonomous {
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
             .addState(() -> robot.crane.setGripperSwivelRotation(1630))
-            .addState(() -> (robot.crane.setElbowTargetPos(250, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(300, 1)))
 
             // adjust turret if needed to point to correct stone
             .addMineralState(skystoneStateProvider,
@@ -117,7 +117,7 @@ public class Autonomous {
 
             .addMineralState(skystoneStateProvider,
                     () -> robot.crane.extendToPosition(2100, 1, 120),
-                    () -> robot.crane.extendToPosition(2110, 1, 120),
+                    () -> robot.crane.extendToPosition(2150, 1, 120),
                     () -> robot.crane.extendToPosition(2100, 1, 120))
 
             // drop and snap gripper
@@ -133,7 +133,7 @@ public class Autonomous {
 //
             .addSimultaneousStates( //retract arm while driving forward - trying to get about the same speed so stone doesn't really move
                     () -> robot.crane.setElbowTargetPos(30, 1),
-                    ()-> robot.crane.extendToMin(),
+                    ()-> robot.crane.extendToPosition(robot.crane.extendMin, 1, 120),
                     //pull away from wall half a meter
                     () -> robot.isBlue ?
                     robot.driveIMUDistanceWithReset(.6,90,true,.470) :
@@ -151,7 +151,7 @@ public class Autonomous {
 
             // drive to foundation
             .addState(() -> (robot.driveIMUDistanceWithReset(.6, 0.0, true, 1.95)))
-            .addState(() -> (robot.crane.setElbowTargetPosWithSlop(200, 50, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPosWithSlop(300, 50, 1)))
 
             // deposit stone
             .addState(() -> robot.isBlue ?
