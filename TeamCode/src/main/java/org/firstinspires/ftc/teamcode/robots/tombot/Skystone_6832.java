@@ -432,16 +432,12 @@ public class Skystone_6832 extends LinearOpMode {
                         break;
 
                     case 3: // autonomous that starts in our crater
-                        if (auto.walkOfShamePointNorth.execute()) {
+                        if (auto.walkOfShame.execute()) {
                             active = false;
                             state = 1;
                         }
                         break;
                     case 4:
-                        if (auto.walkOfShamePointsSouth.execute()) {
-                            active = false;
-                            state = 1;
-                        }
                         break;
                     case 5:
                         if (auto.autoMethodTesterTool.execute()) {

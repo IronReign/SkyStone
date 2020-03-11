@@ -55,7 +55,7 @@ public class PoseSkystone {
 
     public static double kpDrive = 0.02; // proportional constant multiplier
     public static double kiDrive = 0.01; // integral constant multiplier
-    public static double kdDrive = 2.3; // derivative constant multiplier //increase
+    public static double kdDrive = 0.68; // derivative constant multiplier //increase
     public static double cutout = 1.0;
 
     public double headingP = 0.007;
@@ -114,8 +114,7 @@ public class PoseSkystone {
                                   // minimech will be different
     private double poseX;
     private double poseY;
-    private static double poseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading
-                                // when strafing
+    private static double poseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading when strafing
     private double poseHeadingRad; // current heading converted to radians
     private double poseSpeed;
     private double posePitch;
@@ -178,9 +177,7 @@ public class PoseSkystone {
         cardinalBaseLeft,
         shootOut,
         shootOutII,
-        recockGripper,
-        turnToBaseAuton,
-        turnTurretToBaseAuton;
+        recockGripper;
     }
 
     public enum RobotType {
@@ -539,6 +536,13 @@ public class PoseSkystone {
         return driveIMUDistance(pwr,  targetAngle,  forward,  targetMeters);
     }
 
+    public boolean driveIMUUntilDistanceWithReset(double pwr, double targetAngle, boolean forward, double targetMeters) {
+        if (!driveIMUDistanceInitialzed) {
+            resetMotors(false);
+        }
+        return driveIMUUntilDistance(pwr,  targetAngle,  forward,  targetMeters);
+    }
+
     /**
      * Drive with a set power for a set distance while maintaining an IMU heading
      * using PID This is a relative version
@@ -745,16 +749,6 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
-            case turnToBaseAuton:
-                if (turnToBaseAuton()) {
-                    articulation = Articulation.manual;
-                }
-                break;
-            case turnTurretToBaseAuton:
-                if (turnTurretToBaseAuton()) {
-                    articulation = Articulation.manual;
-                }
-                break;
             case cardinalBaseLeft:
                 if (cardinalBaseTurn(false)) {
                     articulation = Articulation.manual;
@@ -891,44 +885,6 @@ public class PoseSkystone {
                 break;
         }
         return false;
-    }
-
-    public boolean turnToBaseAuton(){
-        if(isBlue){
-            if (rotateIMU(90.0, 3)){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else{
-            if (rotateIMU(270.0, 3)){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-    }
-
-    public boolean turnTurretToBaseAuton(){
-        if(isBlue){
-            if (turret.rotateIMUTurret(90.0, 3)){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else{
-            if (turret.rotateIMUTurret(270.0, 3)){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
     }
 
 

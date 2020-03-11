@@ -95,6 +95,9 @@ public class Autonomous {
 
     public StateMachine AutoFull = getStateMachine(autoStage)
             // open and align gripper for 1st skystone
+            .addState(() -> robot.isBlue ?
+                    robot.turret.rotateIMUTurret(90,3) :
+                    robot.turret.rotateIMUTurret(270,3))
             .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
             .addState(() -> sample())
             .addState(() -> robot.crane.toggleGripper())
@@ -113,12 +116,14 @@ public class Autonomous {
                     () -> robot.crane.setGripperSwivelRotation(1700))
 
             .addMineralState(skystoneStateProvider,
-                    () -> robot.crane.extendToPosition(2130, 1, 130),
-                    () -> robot.crane.extendToPosition(2130, 1, 120),
-                    () -> robot.crane.extendToPosition(2130, 1, 120))
+                    () -> robot.crane.extendToPosition(2100, 1, 120),
+                    () -> robot.crane.extendToPosition(2110, 1, 120),
+                    () -> robot.crane.extendToPosition(2100, 1, 120))
 
             // drop and snap gripper
             .addState(() -> robot.crane.setElbowTargetPos(-10, 1))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+
 
             // retrieve stone
             .addState(() -> robot.crane.setElbowTargetPos(30, 1))
@@ -128,8 +133,7 @@ public class Autonomous {
             //pull away from wall half a meter
             .addState(() -> robot.isBlue ?
                     robot.driveIMUDistanceWithReset(.6,90,true,.470) :
-                    robot.driveIMUDistanceWithReset(.6,270,true,.470)
-            )//this and ^^^^ put the robot in front of the build plate
+                    robot.driveIMUDistanceWithReset(.6,270,true,.470))//this and ^^^^ put the robot in front of the build plate
 
             .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
@@ -137,12 +141,15 @@ public class Autonomous {
             .addState(() -> (robot.rotateIMU(0.0, 4)))
 
             // drive to foundation
-            .addState(() -> (robot.driveIMUDistance(.6, 0.0, true, 1.95)))
+            .addState(() -> (robot.driveIMUDistanceWithReset(.6, 0.0, true, 1.95)))
             .addState(() -> (robot.crane.setElbowTargetPosWithSlop(200, 50, 1)))
 
             // deposit stone
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.turnTurretToBaseAuton))
+            .addState(() -> robot.isBlue ?
+                    robot.turret.rotateIMUTurret(90,3) :
+                    robot.turret.rotateIMUTurret(270,3))
             .addState(() -> robot.crane.extendToPosition(1050, 1, 60))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retractFromTower))
             .addTimedState(3f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
@@ -183,36 +190,40 @@ public class Autonomous {
             // drive to and hook onto foundation
             
             .addSingleState(() -> robot.crane.hookOff()) // makes sure the hook is up properly
-            .addState(() -> (robot.driveIMUUntilDistance(.3, 0, true, .35)))
+            //.addState(() -> (robot.driveIMUUntilDistanceWithReset(.3, 0, true, .35)))
             .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.turnToBaseAuton))
-            .addState(() -> (robot.driveForward(true, robot.getDistForwardDist() + .07, .30)))
-            .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> robot.isBlue ?
+                    robot.rotateIMU(90,3) :
+                    robot.rotateIMU(270,3))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> robot.isBlue ? //this is to drive and center it todo- is use this ^^^^ line, which should do the job better when distForward gets good
+                    robot.driveIMUDistanceWithReset(.3,90,true,.2) :
+                    robot.driveIMUDistanceWithReset(.3,270,true,.2))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addSingleState(() -> robot.crane.hookOn())
 
             // backup and try and turn
-            .addState(() -> (robot.driveIMUDistance(.6, 340, false, 1)))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> robot.isBlue ? //this is to drive and center it todo- is use this ^^^^ line, which should do the job better when distForward gets good
+                    robot.driveIMUDistanceWithReset(.3,90,true,.05) :
+                    robot.driveIMUDistanceWithReset(.3,270,true,.05))
+            .addTimedState(1f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> (robot.driveIMUDistance(1, 290, false, .6)))
+            .addState(() -> (robot.rotateIMU(0.0,4.0)))
             .addState(() -> (robot.driveIMUDistance(.5, 0.0, true, .45)))
 
             // hook off and drive back into the bridge
             .addSingleState(() -> robot.crane.hookOff())
             .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> (robot.driveIMUDistance(.4, 45.0, false, 1))).build();
+            .addState(() -> (robot.driveIMUDistance(.4, 45.0, false, 1)))
+            .build();
 
-    public StateMachine walkOfShamePointsSouth = getStateMachine(autoStage)
-            .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.25))
-            .addTimedState(2f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
-            .addState(() -> robot.crane.setElbowTargetPos(robot.crane.elbowMin, 1))
-            .addState(() -> robot.turret.rotateIMUTurret(180.0, 6))
-            .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.5)).build();
-
-    public StateMachine walkOfShamePointNorth = getStateMachine(autoStage)
+    public StateMachine walkOfShame = getStateMachine(autoStage)
             .addState(() -> robot.crane.setElbowTargetPos(robot.crane.elbowMin-10, 1))
             .addSingleState(() -> robot.crane.setExtendABobLengthMeters(0.25))
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
-            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.retrieveStone))
             .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
