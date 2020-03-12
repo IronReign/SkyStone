@@ -3,8 +3,13 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.SharpDistanceSensor;
 
 import static org.firstinspires.ftc.teamcode.util.Conversions.futureTime;
@@ -24,6 +29,18 @@ public class Crane {
     DcMotor extendABob = null;
     Servo hook = null;
 
+    PIDController extendPID;
+    public static double kpExtendABob = 0.02; //proportional constant multiplier goodish
+    public static  double kiExtendABob = 0.01; //integral constant multiplier
+    public static  double kdExtendABob= .05; //derivative constant multiplier
+    double extendCorrection = 0.00; //correction to apply to turret motor
+
+    PIDController elbowPID;
+    public static double kpElbow = 0.02; //proportional constant multiplier goodish
+    public static  double kiElbow = 0.01; //integral constant multiplier
+    public static  double kdElbow= .05; //derivative constant multiplier
+    double ElbowCorrection = 0.00; //correction to apply to turret motor
+
     Servo intakeRight = null;
     Servo intakeLeft = null;
     Servo servoGripper = null;
@@ -38,6 +55,8 @@ public class Crane {
 
     public static double gripLeftDist;
     public static double gripRightDist; //these hold the most recently updated values for the gripper distance sensors
+
+
 
     int elbowPosInternal = 0;
     int elbowPos = 0;
@@ -136,12 +155,14 @@ public class Crane {
 
         //elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setTargetPosition(elbow.getCurrentPosition());
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //elbow.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendABob.setTargetPosition(extendABob.getCurrentPosition());
-        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //hook.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -156,7 +177,6 @@ public class Crane {
         this.gripperRight = gripperRight;
         this.gripLeftSharp = new SharpDistanceSensor(gripperLeft);
         this.gripRightSharp = new SharpDistanceSensor(gripperRight);
-
 
         intakePwr = .3; //.35;
         //normal Teleop encoder values
@@ -200,6 +220,11 @@ public class Crane {
         extendLow = 600; //clears foundation grabber at all times
         extendMin = 250;  //prevent crunching foundation grabber
         gripperState = false;
+
+        //PID
+        extendPID = new PIDController(0,0,0);
+        elbowPID = new PIDController(0,0,0);
+
     }
 
 
@@ -214,6 +239,7 @@ public class Crane {
             extendABob.setTargetPosition(extendABobPos);
             extendABob.setPower(extendABobPwr);
         }
+
         gripLeftDist = gripperLeft.getVoltage();
         gripRightDist = gripperRight.getVoltage();
 
@@ -222,6 +248,7 @@ public class Crane {
 
         updateGripper();
         updateBeltToElbow();
+
     }
 
     public void updateBeltToElbow() {
@@ -559,6 +586,8 @@ public class Crane {
     public void setExtendABobTargetPos(int pos){
         extendABobPos = Math.min(Math.max(pos, extendMin),extendMax);
     }
+
+
 
     public void setExtendABobTargetPosNoCap(int pos){
         extendABobPos = pos;

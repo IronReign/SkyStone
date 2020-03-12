@@ -304,6 +304,8 @@ public class Skystone_6832 extends LinearOpMode {
         auto.visionProviderFinalized = false;
 
         while (!isStarted()) { // Wait for the game to start (driver presses PLAY)
+
+
             synchronized (this) {
                 try {
                     this.wait();
@@ -347,6 +349,9 @@ public class Skystone_6832 extends LinearOpMode {
             }
 
             else { // if inactive we are in configuration mode
+
+                if(auto.visionProviderFinalized)
+                    auto.sample();
 
                 if (!auto.visionProviderFinalized && toggleAllowed(gamepad1.dpad_left, dpad_left, 1)) {
                     auto.visionProviderState = (auto.visionProviderState + 1) % auto.visionProviders.length; // switch
@@ -634,11 +639,13 @@ public class Skystone_6832 extends LinearOpMode {
         // }
 
         if (toggleAllowed(gamepad1.a, a, 1)) {
-            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+//            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
+
         }
 
         if (toggleAllowed(gamepad1.x, x, 1)) {
-            // robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
+
             robot.crane.hookToggle();
         }
 

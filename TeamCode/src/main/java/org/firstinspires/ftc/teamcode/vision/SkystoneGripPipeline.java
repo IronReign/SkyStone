@@ -207,9 +207,9 @@ public class SkystoneGripPipeline implements SkystoneVisionProvider {
                 target.width = largestBlob.width;
                 target.height = largestBlob.height;
 
-                if (largestBlob.x < 320d / 3)
+                if (largestBlob.x < (mat.width() / 3))
                     target.quarryPosition = !redAlliance ? StonePos.NORTH : StonePos.SOUTH;
-                else if (largestBlob.x < 640d / 3)
+                else if (largestBlob.x < (2 * mat.width() / 3))
                     target.quarryPosition = StonePos.MIDDLE;
                 else
                     target.quarryPosition = redAlliance ? StonePos.NORTH : StonePos.SOUTH;

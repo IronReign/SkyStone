@@ -121,7 +121,7 @@ public class PoseSkystone {
     private double poseRoll;
     private long timeStamp; // timestamp of last update
     private static boolean initialized = false;
-    public static  double offsetHeading;
+    public  double offsetHeading;
     private double offsetPitch;
     private double offsetRoll;
 
@@ -1076,8 +1076,10 @@ public class PoseSkystone {
                     alignPID.setInput(towerHeightPipeline.x);
                     driveMixerDiffSteer(-alignPID.performPID(), 0);
                     break;
-                } else
+                } else {
+                    driveMixerDiffSteer(0, 0);
                     return true;
+                }
         }
         return false;
     }
