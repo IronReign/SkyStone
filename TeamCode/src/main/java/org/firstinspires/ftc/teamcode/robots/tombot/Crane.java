@@ -39,7 +39,7 @@ public class Crane {
     public static double kpElbow = 0.02; //proportional constant multiplier goodish
     public static  double kiElbow = 0.01; //integral constant multiplier
     public static  double kdElbow= .05; //derivative constant multiplier
-    double ElbowCorrection = 0.00; //correction to apply to turret motor
+    double elbowCorrection = 0.00; //correction to apply to turret motor
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
@@ -229,16 +229,6 @@ public class Crane {
 
 
     public void update(){
-        if(active && elbowPosInternal!=elbowPos) { //don't keep updating if we are retractBelt to target position
-            elbowPosInternal = elbowPos;
-            elbow.setTargetPosition(elbowPos);
-            elbow.setPower(elbowPwr);
-        }
-        if(active && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
-            extendABobPosInternal = extendABobPos;
-            extendABob.setTargetPosition(extendABobPos);
-            extendABob.setPower(extendABobPwr);
-        }
 
         gripLeftDist = gripperLeft.getVoltage();
         gripRightDist = gripperRight.getVoltage();
@@ -249,6 +239,56 @@ public class Crane {
         updateGripper();
         updateBeltToElbow();
 
+        //
+
+        if(active && elbowPosInternal!=elbowPos) { //don't keep updating if we are retractBelt to target position
+            elbowPosInternal = elbowPos;
+//            elbow.setTargetPosition(elbowPos);
+            movePIDElbow(kpElbow, kiElbow, kdElbow, elbow.getCurrentPosition(), elbowPos);
+        }
+        if(active && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
+            extendABobPosInternal = extendABobPos;
+//            extendABob.setTargetPosition(extendABobPos);
+            movePIDExtend(kpExtendABob, kiExtendABob, kdExtendABob, extendABob.getCurrentPosition(), extendABobPos);
+        }
+    }
+
+    public void movePIDExtend(double Kp, double Ki, double Kd, double currentTicks, double targetTicks) {
+
+        //initialization of the PID calculator's output range, target value and multipliers
+        extendPID.setOutputRange(-1, 1);
+        extendPID.setPID(Kp, Ki, Kd);
+        extendPID.setSetpoint(targetTicks);
+        extendPID.enable();
+
+        //initialization of the PID calculator's input range and current value
+        extendPID.setInputRange(0, 360);
+        extendPID.setContinuous();
+        extendPID.setInput(currentTicks);
+
+        //calculates the angular correction to apply
+        extendCorrection = extendPID.performPID();
+
+        //performs the turn with the correction applied
+        extendABob.setPower(extendCorrection);
+    }
+
+    public void movePIDElbow(double Kp, double Ki, double Kd, double currentTicks, double targetTicks) {
+
+        //initialization of the PID calculator's output range, target value and multipliers
+        elbowPID.setOutputRange(-1, 1);
+        elbowPID.setPID(Kp, Ki, Kd);
+        elbowPID.setSetpoint(targetTicks);
+        elbowPID.enable();
+
+        //initialization of the PID calculator's input range and current value
+        elbowPID.setInput(currentTicks);
+
+        //calculates the angular correction to apply
+        elbowCorrection = elbowPID.performPID();
+
+        //performs the turn with the correction applied
+        elbow.setPower(elbowCorrection);
     }
 
     public void updateBeltToElbow() {
