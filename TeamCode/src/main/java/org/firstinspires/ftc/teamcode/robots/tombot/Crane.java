@@ -3,10 +3,6 @@ package org.firstinspires.ftc.teamcode.robots.tombot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -30,16 +26,16 @@ public class Crane {
     Servo hook = null;
 
     PIDController extendPID;
-    public static double kpExtendABob = 0.02; //proportional constant multiplier goodish
-    public static  double kiExtendABob = 0.01; //integral constant multiplier
-    public static  double kdExtendABob= .05; //derivative constant multiplier
-    double extendCorrection = 0.00; //correction to apply to turret motor
+    public static double kpExtendABob = 0.006; //proportional constant multiplier goodish
+    public static  double kiExtendABob = 0.0; //integral constant multiplier
+    public static  double kdExtendABob= 0.0; //derivative constant multiplier
+    double extendCorrection = 0.00; //correction to apply to extention motor
 
     PIDController elbowPID;
-    public static double kpElbow = 0.02; //proportional constant multiplier goodish
-    public static  double kiElbow = 0.01; //integral constant multiplier
-    public static  double kdElbow= .05; //derivative constant multiplier
-    double elbowCorrection = 0.00; //correction to apply to turret motor
+    public static double kpElbow = 0.006; //proportional constant multiplier goodish
+    public static  double kiElbow = 0.0; //integral constant multiplier
+    public static  double kdElbow= 0.0; //derivative constant multiplier
+    double elbowCorrection = 0.00; //correction to apply to elbow motor
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
@@ -218,12 +214,14 @@ public class Crane {
         extendMax = 2700;
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
-        extendMin = 250;  //prevent crunching foundation grabber
+        extendMin = 270;  //prevent crunching foundation grabber
         gripperState = false;
 
         //PID
         extendPID = new PIDController(0,0,0);
         elbowPID = new PIDController(0,0,0);
+        elbowPID.setIntegralCutIn(40);
+        elbowPID.enableIntegralZeroCrossingReset(false);
 
     }
 
@@ -241,13 +239,13 @@ public class Crane {
 
         //
 
-        if(active && elbowPosInternal!=elbowPos) { //don't keep updating if we are retractBelt to target position
-            elbowPosInternal = elbowPos;
+        if(active) {// && elbowPosInternal!=elbowPos) { //don't keep updating if we are retractBelt to target position
+            //elbowPosInternal = elbowPos;
 //            elbow.setTargetPosition(elbowPos);
             movePIDElbow(kpElbow, kiElbow, kdElbow, elbow.getCurrentPosition(), elbowPos);
         }
-        if(active && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
-            extendABobPosInternal = extendABobPos;
+        if(active) {// && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
+            //extendABobPosInternal = extendABobPos;
 //            extendABob.setTargetPosition(extendABobPos);
             movePIDExtend(kpExtendABob, kiExtendABob, kdExtendABob, extendABob.getCurrentPosition(), extendABobPos);
         }
@@ -262,14 +260,14 @@ public class Crane {
         extendPID.enable();
 
         //initialization of the PID calculator's input range and current value
-        extendPID.setInputRange(0, 360);
-        extendPID.setContinuous();
+        //extendPID.setInputRange(0, 360);
+        //extendPID.setContinuous();
         extendPID.setInput(currentTicks);
 
-        //calculates the angular correction to apply
+        //calculates the correction to apply
         extendCorrection = extendPID.performPID();
 
-        //performs the turn with the correction applied
+        //performs the extension with the correction applied
         extendABob.setPower(extendCorrection);
     }
 
@@ -284,10 +282,10 @@ public class Crane {
         //initialization of the PID calculator's input range and current value
         elbowPID.setInput(currentTicks);
 
-        //calculates the angular correction to apply
+        //calculates the correction to apply
         elbowCorrection = elbowPID.performPID();
 
-        //performs the turn with the correction applied
+        //moves elbow with the correction applied
         elbow.setPower(elbowCorrection);
     }
 

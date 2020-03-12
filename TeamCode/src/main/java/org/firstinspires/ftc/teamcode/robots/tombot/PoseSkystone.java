@@ -1554,7 +1554,7 @@ public class PoseSkystone {
         // initialization of the PID calculator's output range, target value and
         // multipliers
         drivePID.setOutputRange(-.5, .5);
-        drivePID.seIntegralCutIn(cutout);
+        drivePID.setIntegralCutIn(cutout);
         drivePID.setPID(Kp, Ki, Kd);
         drivePID.setSetpoint(targetAngle);
         drivePID.enable();

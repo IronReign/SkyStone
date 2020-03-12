@@ -67,6 +67,10 @@ public class Conversions {
         return false;
     }
 
+    public static boolean between(double value, double minValue, double maxValue){
+        return (value>=minValue && value<=maxValue);
+    }
+
     public static double wrapAngle(double angle){
         return (angle) % 360;
     }

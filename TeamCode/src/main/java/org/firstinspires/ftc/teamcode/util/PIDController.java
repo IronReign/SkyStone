@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import android.util.Log;
+import android.util.Range;
+
+import static org.firstinspires.ftc.teamcode.util.Conversions.between;
+
 /**
  * Created on 6/28/2015.
  */
@@ -128,7 +132,7 @@ public class PIDController {
                 if (Math.abs(m_integralCutIn) > Math.abs(m_error)) //we are outside of intended integral regime - reset accumulated error
                     m_totalError = 0.0;
             }
-            else {
+            else if(between(m_I * m_totalError, m_minimumOutput, m_maximumOutput)){ //extra sanity check - only accumulate error if the integral output on it's own is inside the output range
                 //integral calculation factored for time
                 m_totalError += (m_error * m_deltaTime);
             }
@@ -261,7 +265,7 @@ public class PIDController {
      * if zero, then the error will always be integrated regardless of current error size - almost guaranteed to lead to wind-up
      * @param cutIn
      */
-    public void seIntegralCutIn(double cutIn){
+    public void setIntegralCutIn(double cutIn){
         m_integralCutIn = cutIn;
     }
 
