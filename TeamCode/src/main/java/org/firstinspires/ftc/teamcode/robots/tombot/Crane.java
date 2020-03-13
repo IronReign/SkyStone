@@ -36,6 +36,8 @@ public class Crane {
     public static  double kiElbow = 0.0; //integral constant multiplier
     public static  double kdElbow= 0.0; //derivative constant multiplier
     double elbowCorrection = 0.00; //correction to apply to elbow motor
+    boolean elbowActivePID = true;
+    boolean extendABobActivePID = true;
 
     Servo intakeRight = null;
     Servo intakeLeft = null;
@@ -84,6 +86,7 @@ public class Crane {
     public int pos_PartialDeposit;
     public int pos_SafeDrive;
     public int swivel_Right90;
+    public int swivel_Calibrate;
     public int swivel_Front;
     public int swivel_Left90;
     public int swivel_left_Block;
@@ -203,6 +206,7 @@ public class Crane {
         motorUnhooked = 5;
         motorMidHooked = 80;
 
+        swivel_Calibrate = 1200;
         swivel_Right90 = 900;
         swivel_Front = 1500;
         swivel_Left90 = 2100;
@@ -223,6 +227,7 @@ public class Crane {
         elbowPID.setIntegralCutIn(40);
         elbowPID.enableIntegralZeroCrossingReset(false);
 
+
     }
 
 
@@ -242,12 +247,19 @@ public class Crane {
         if(active) {// && elbowPosInternal!=elbowPos) { //don't keep updating if we are retractBelt to target position
             //elbowPosInternal = elbowPos;
 //            elbow.setTargetPosition(elbowPos);
-            movePIDElbow(kpElbow, kiElbow, kdElbow, elbow.getCurrentPosition(), elbowPos);
+            if(elbowActivePID)
+                movePIDElbow(kpElbow, kiElbow, kdElbow, elbow.getCurrentPosition(), elbowPos);
+//            else
+//                elbowPos = elbow.getCurrentPosition();
+
         }
         if(active) {// && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
             //extendABobPosInternal = extendABobPos;
 //            extendABob.setTargetPosition(extendABobPos);
-            movePIDExtend(kpExtendABob, kiExtendABob, kdExtendABob, extendABob.getCurrentPosition(), extendABobPos);
+            if(extendABobActivePID)
+                movePIDExtend(kpExtendABob, kiExtendABob, kdExtendABob, extendABob.getCurrentPosition(), extendABobPos);
+//            else
+//                extendABobPos = extendABob.getCurrentPosition();
         }
     }
 
@@ -526,26 +538,30 @@ public class Crane {
         switch(calibrateStage){
             case 0: //open elbow with limited power until it stalls at top of travel
                 // retract extendabob same way
-                setMotorsForCalibration();
-                elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                setElbowActivePID(false);
                 elbow.setPower(.20);
-                extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                setExtendABobActivePID(false);
                 extendABob.setPower(-.25); //retract to zero position
-                setGripperSwivelRotation(swivel_Right90);
+                setGripperSwivelRotation(swivel_Calibrate); //put gripper in position where it doesn't tangle belts
                 calibrateTimer = futureTime(3.0f); //allow enough time for elbow to open fully and arm to retract
                 calibrateStage++;
                 break;
             case 1: //reset encoders at max elevation angle
                 if (System.nanoTime() >= calibrateTimer){
                     extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this approximately zeros the extension but at elbowmax and we'll need to redo it at a low elevation
-                    extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    setExtendABobActivePID(true);
                     extendToLow(); //push out to the minimum extension - this will need to be pulled back to zero for starting position
 
-                    elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
-                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setTargetPosition(-elbowMinCalibration); //normally we set the target through a method, but we have to override the safety here
 
-                    elbow.setPower(1); //power down to low position
+                    elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
+                    elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    //elbow.setTargetPosition(-elbowMinCalibration); //normally we set the target through a method, but we have to override the safety here
+                    setElbowTargetPos(-elbowMinCalibration);
+                    setElbowActivePID(true);
+
+
+                    //elbow.setPower(1); //power down to low position
                     calibrateTimer = futureTime(1.5f); //allow enough time for elbow to close fully
                     calibrateStage++;
 
@@ -554,16 +570,18 @@ public class Crane {
             case 2: //zero the elbow at bottom of travel
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
-                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setTargetPosition(elbowMin); //this should not generate a movement because we should already be there
+                    elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    //elbow.setTargetPosition(elbowMin); //this should not generate a movement because we should already be there
+                    setElbowTargetPos(elbowMin);
+                    setElbowActivePID(true);
                     calibrateTimer = futureTime(1f); //allow enough time to raise to starting position
                     calibrateStage++;
                 }
                 break;
             case 3: //reset elbow to near starting position so we can get a better retract for extension
                 if (System.nanoTime() >= calibrateTimer) {
-                    elbow.setTargetPosition(elbowLow);
-
+                    //elbow.setTargetPosition(elbowLow);
+                    setElbowTargetPos(elbowLow);
                     calibrateTimer = futureTime(2.0f); //enough time for next stage - retract egain
                     calibrateStage++;
 
@@ -571,7 +589,7 @@ public class Crane {
                 break;
             case 4: //one more retract of extension
                 if (System.nanoTime() >= calibrateTimer) {
-                    extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    setExtendABobActivePID(false);
                     extendABob.setPower(-.6); //retract to zero position
                     calibrateTimer = futureTime(1.0f); //allow enough time for next stage
                     calibrateStage++;
@@ -581,9 +599,11 @@ public class Crane {
             case 5: //final zero of extension
                 if (System.nanoTime() >= calibrateTimer) {
                     extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
-                    extendABob.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    setExtendABobActivePID(true);
                     extendToPosition(0,.6,15);
-                    elbow.setTargetPosition(elbowStart);
+                    //elbow.setTargetPosition(elbowStart);
+                    setElbowTargetPos(elbowStart);
                     calibrateStage = 0;
                     return true;
                 }
@@ -601,6 +621,10 @@ public class Crane {
             elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
+    public void setElbowActivePID(boolean isActive){elbowActivePID = isActive;}
+    public void setExtendABobActivePID(boolean isActive){extendABobActivePID = isActive;}
+
 
     public boolean toggleGripper() {
         grabState = 0;
