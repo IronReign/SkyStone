@@ -892,13 +892,13 @@ public class PoseSkystone {
                 if (crane.getElbowCurrentPos() < crane.elbowMid)
                     crane.setElbowTargetPos(crane.elbowMid, 1); //make sure were not dragging the stone across the floor
                 crane.setGripperSwivelRotation(crane.swivel_Front);
-                crane.extendToPosition(crane.extendMin, 1.0); //gets it in very close so we don't strain the arm
+                crane.extendToPosition(crane.extensionBridgeTransit, 1.0); //gets it in very close so we don't strain the arm
                 retrieveTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
                 if (System.nanoTime() >= retrieveTimer) {
-                    turret.setPower(.4); //this is so that the turret doesn't yeet the block while turning
+                    turret.setPower(.2); //this is so that the turret doesn't yeet the block while turning
                     if(endsAtNorth)
                         turret.setTurntableAngle(0.0); //faces the north
                     else
@@ -911,7 +911,7 @@ public class PoseSkystone {
                 break;
             case 2:
                 if (System.nanoTime() >= retrieveTimer) {
-                    crane.setElbowTargetPos(10, 1); //sets it down for transition to base
+                    crane.setElbowTargetPos(crane.elbowBrigeTransit, 1); //sets it down for transition to base
                     craneArticulation = 0;
                     return true;
                 }
@@ -927,7 +927,7 @@ public class PoseSkystone {
                                   // already
         switch (yoinkStage) {
             case 0:
-                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, 1)) {
+                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, .5)) {
                     yoinkStage++;
                 }
 

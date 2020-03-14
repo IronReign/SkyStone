@@ -99,12 +99,12 @@ public class Autonomous {
             .addState(() -> robot.isBlue ?
                     robot.turret.rotateIMUTurret(90,3) :
                     robot.turret.rotateIMUTurret(270,3))
-            .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(600, 1)))
             .addTimedState(3f, () -> sample(),  () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.crane.toggleGripper())
             .addSingleState(() -> robot.crane.hookOff()) // makes sure the hook is down properly
             .addState(() -> robot.crane.setGripperSwivelRotation(robot.crane.swivel_Front-100))
-            .addState(() -> (robot.crane.setElbowTargetPos(350, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
 
             // adjust turret if needed to point to correct stone
             .addMineralState(skystoneStateProvider,
@@ -123,7 +123,7 @@ public class Autonomous {
                     () -> robot.crane.extendToPosition(2200, 1))
 
             // drop and snap gripper
-            .addState(() -> robot.crane.setElbowTargetPos(0, 1))
+            .addState(() -> robot.crane.setElbowTargetPos(30, 1))
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             .addState(() -> robot.crane.setElbowTargetPos(30, 1))

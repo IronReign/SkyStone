@@ -691,7 +691,8 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.y, y, 2)) {
-            robot.crane.toggleSwivel();
+//            robot.crane.toggleSwivel();
+            robot.crane.setGripperSwivelRotation(robot.crane.swivel_Front);
         }
 
         if (toggleAllowed(gamepad2.x, x, 2)) {

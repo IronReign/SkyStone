@@ -87,7 +87,7 @@ public class Crane {
     public int pos_SafeDrive;
     public int swivel_Right90;
     public int swivel_Calibrate;
-    public int swivel_Front;
+    public static int swivel_Front;
     public int swivel_Left90;
     public int swivel_left_Block;
     public int swivel_Right_Block;
@@ -121,6 +121,8 @@ public class Crane {
     public  int extendMid;
     public  int extendLow; //clears hook and good for retracting prior to deposit without tipping robot
     public  int extendMin;  //prevent crunching collector tray
+    public  int elbowBrigeTransit;
+    public  int extensionBridgeTransit;
 
     //foundation hook servo values
     public int foundation_hook_up = 1665;
@@ -208,7 +210,7 @@ public class Crane {
 
         swivel_Calibrate = 1200;
         swivel_Right90 = 900;
-        swivel_Front = 1500;
+        swivel_Front = 1600;
         swivel_Left90 = 2100;
         swivel_left_Block = 800;
         swivel_Right_Block= 1000;
@@ -219,6 +221,8 @@ public class Crane {
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
         extendMin = 300;  //prevent crunching foundation grabber
+        elbowBrigeTransit = 230;
+        extensionBridgeTransit = 500;
         gripperState = false;
 
         //PID
