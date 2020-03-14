@@ -58,11 +58,11 @@ public class Crane {
 
     int elbowPosInternal = 0;
     int elbowPos = 0;
-    double elbowPwr = 1;
+    double elbowPwr = 0;
 
     int extendABobPosInternal = 0;
     int extendABobPos = 0;
-    double extendABobPwr = 1;
+    double extendABobPwr = 0;
 
     int intakeState = 3;
     boolean beltToElbowEnabled;
@@ -110,7 +110,7 @@ public class Crane {
     public int elbowMin = -50;
     public int elbowStart = 180; //put arm just under 18" from ground
     public int elbowLow = 300;
-    public int elbowMinCalibration = 1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
+    public int elbowMinCalibration = -1340; //measure this by turning on the robot with the elbow fully opened and then physically push it down to the fully closed position and read the encoder value, dropping the minus sign
     public int actualElbowMax = 1120;
     public int elbowMid = (actualElbowMax + elbowMin)/2;
     public int elbowMaxSafetyOffset = 70; //makes sure that the robot doesn't try and extend to the elbow max exactly
@@ -218,7 +218,7 @@ public class Crane {
         extendMax = 2700;
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
-        extendMin = 270;  //prevent crunching foundation grabber
+        extendMin = 300;  //prevent crunching foundation grabber
         gripperState = false;
 
         //PID
@@ -249,8 +249,8 @@ public class Crane {
 //            elbow.setTargetPosition(elbowPos);
             if(elbowActivePID)
                 movePIDElbow(kpElbow, kiElbow, kdElbow, elbow.getCurrentPosition(), elbowPos);
-//            else
-//                elbowPos = elbow.getCurrentPosition();
+            else
+                elbowPos = elbow.getCurrentPosition();
 
         }
         if(active) {// && extendABobPosInternal!=extendABobPos) { //don't keep updating if we are retractBelt to target position
@@ -258,15 +258,15 @@ public class Crane {
 //            extendABob.setTargetPosition(extendABobPos);
             if(extendABobActivePID)
                 movePIDExtend(kpExtendABob, kiExtendABob, kdExtendABob, extendABob.getCurrentPosition(), extendABobPos);
-//            else
-//                extendABobPos = extendABob.getCurrentPosition();
+            else
+                extendABobPos = extendABob.getCurrentPosition();
         }
     }
 
     public void movePIDExtend(double Kp, double Ki, double Kd, double currentTicks, double targetTicks) {
 
         //initialization of the PID calculator's output range, target value and multipliers
-        extendPID.setOutputRange(-1, 1);
+        extendPID.setOutputRange(-extendABobPwr, extendABobPwr);
         extendPID.setPID(Kp, Ki, Kd);
         extendPID.setSetpoint(targetTicks);
         extendPID.enable();
@@ -286,7 +286,7 @@ public class Crane {
     public void movePIDElbow(double Kp, double Ki, double Kd, double currentTicks, double targetTicks) {
 
         //initialization of the PID calculator's output range, target value and multipliers
-        elbowPID.setOutputRange(-1, 1);
+        elbowPID.setOutputRange(-elbowPwr, elbowPwr);
         elbowPID.setPID(Kp, Ki, Kd);
         elbowPID.setSetpoint(targetTicks);
         elbowPID.enable();
@@ -539,6 +539,8 @@ public class Crane {
             case 0: //open elbow with limited power until it stalls at top of travel
                 // retract extendabob same way
                 setElbowActivePID(false);
+                setExtendABobPwr(1);
+                setElbowPwr(1);
                 elbow.setPower(.20);
                 setExtendABobActivePID(false);
                 extendABob.setPower(-.25); //retract to zero position
@@ -557,8 +559,9 @@ public class Crane {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //temporarily zero at top of travel
                     elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     //elbow.setTargetPosition(-elbowMinCalibration); //normally we set the target through a method, but we have to override the safety here
-                    setElbowTargetPos(-elbowMinCalibration);
+                    setElbowMin(elbowMinCalibration);
                     setElbowActivePID(true);
+                    setElbowTargetPos(elbowMinCalibration);
 
 
                     //elbow.setPower(1); //power down to low position
@@ -571,9 +574,10 @@ public class Crane {
                 if (System.nanoTime() >= calibrateTimer) {
                     elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //zero elbow at bottom of travel
                     elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    setElbowMin(-50);
                     //elbow.setTargetPosition(elbowMin); //this should not generate a movement because we should already be there
-                    setElbowTargetPos(elbowMin);
                     setElbowActivePID(true);
+                    setElbowTargetPos(elbowMin);
                     calibrateTimer = futureTime(1f); //allow enough time to raise to starting position
                     calibrateStage++;
                 }
@@ -601,7 +605,7 @@ public class Crane {
                     extendABob.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // this should be correct zero for extension
                     extendABob.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     setExtendABobActivePID(true);
-                    extendToPosition(0,.6,15);
+                    extendToPosition(0,.6);
                     //elbow.setTargetPosition(elbowStart);
                     setElbowTargetPos(elbowStart);
                     calibrateStage = 0;
@@ -645,11 +649,9 @@ public class Crane {
 //    }
 
 
-    public void setExtendABobTargetPos(int pos){
+    private void setExtendABobTargetPos(int pos){
         extendABobPos = Math.min(Math.max(pos, extendMin),extendMax);
     }
-
-
 
     public void setExtendABobTargetPosNoCap(int pos){
         extendABobPos = pos;
@@ -664,13 +666,15 @@ public class Crane {
     public void setExtendABobPwr(double pwr){ extendABobPwr = pwr; }
 
 
-    public void setElbowTargetPos(int pos){
+    private void setElbowTargetPos(int pos){
         elbowPos = Math.min(Math.max(pos, elbowMin), actualElbowMax -elbowMaxSafetyOffset);
     }
 
     public void setElbowTargetPosNoCap(int pos){
             elbowPos = pos;
     }
+
+    private void setElbowMin(int newMin){elbowMin = newMin;}
 
     public boolean setElbowTargetPos(int pos, double speed){
         setElbowTargetPos(pos);
@@ -679,12 +683,6 @@ public class Crane {
         else return false;
     }
 
-    public boolean setElbowTargetPosWithSlop(int pos, int slop, double speed){
-        setElbowTargetPos(pos);
-        setElbowPwr(speed);
-        if (nearTargetElbowWithSlop(slop)) return true;
-        else return false;
-    }
 
     public boolean setElbowTargetAngle(double angleDegrees){
         setElbowTargetPos((int) (ticksPerDegree* angleDegrees));
@@ -710,6 +708,8 @@ public class Crane {
     public void stopAll(){
         setElbowPwr(0);
         setExtendABobPwr(0);
+        setElbowActivePID(false);
+        setExtendABobActivePID(false);
         update();
         active = false;
     }
@@ -763,10 +763,10 @@ public class Crane {
         }
         return false;
     }
-    public boolean extendToPosition(int position, double speed, int range){
+    public boolean extendToPosition(int position, double speed){
         setExtendABobPwr(speed);
         setExtendABobTargetPos(position);
-        if((Math.abs(getExtendABobCurrentPos()-getExtendABobTargetPos()))<range){
+        if((Math.abs(getExtendABobCurrentPos()-getExtendABobTargetPos()))<15){
             return true;
         }
         return false;
@@ -801,10 +801,6 @@ public class Crane {
     }
     public boolean nearTargetElbow(){
         if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<55) return true;
-        else return false;
-    }
-    public boolean nearTargetElbowWithSlop(int Slop){
-        if ((Math.abs( getElbowCurrentPos()-getElbowTargetPos()))<Slop) return true;
         else return false;
     }
     public boolean nearTarget(){

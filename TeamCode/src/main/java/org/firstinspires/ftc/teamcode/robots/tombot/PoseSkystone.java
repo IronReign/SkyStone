@@ -892,7 +892,7 @@ public class PoseSkystone {
                 if (crane.getElbowCurrentPos() < crane.elbowMid)
                     crane.setElbowTargetPos(crane.elbowMid, 1); //make sure were not dragging the stone across the floor
                 crane.setGripperSwivelRotation(crane.swivel_Front);
-                crane.extendToPosition(crane.extendMin, 1.0, 20); //gets it in very close so we don't strain the arm
+                crane.extendToPosition(crane.extendMin, 1.0); //gets it in very close so we don't strain the arm
                 retrieveTimer = futureTime(1);
                 craneArticulation++;
                 break;
@@ -962,7 +962,7 @@ public class PoseSkystone {
             case 1:
                 if (crane.getExtendABobCurrentPos() == crane.extendMax)
                     return false;
-                if (crane.extendToPosition(crane.getExtendABobCurrentPos() + 10, 1, 0)) { // extends out the arm just a
+                if (crane.extendToPosition(crane.getExtendABobCurrentPos() + 10, 1)) { // extends out the arm just a
                                                                                           // bit
 
                 }

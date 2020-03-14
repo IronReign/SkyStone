@@ -650,8 +650,8 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad1.b, b, 1)) {
-            robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(1500, 1.0, 20);
+            robot.crane.setElbowTargetPos(250,1);
+            robot.crane.extendToPosition(1500, 1.0);
         }
 
         // // Foundation Gripper
@@ -711,13 +711,13 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
-            robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(2000, 1.0, 20);
+            robot.crane.setElbowTargetPos(250,1);
+            robot.crane.extendToPosition(2000, 1.0);
         }
 
         if (toggleAllowed(gamepad2.dpad_down, dpad_down, 2)) {
-            robot.crane.setElbowTargetPos(250);
-            robot.crane.extendToPosition(1500, 1.0, 20);
+            robot.crane.setElbowTargetPos(2501,1);
+            robot.crane.extendToPosition(1500, 1.0);
         }
 
         if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {
@@ -887,9 +887,10 @@ public class Skystone_6832 extends LinearOpMode {
         telemetry.addLine().addData("state", () -> state);
         telemetry.addLine() .addData("autoStage", () -> auto.autoStage).addData("Game Mode", () -> GAME_MODES[gameMode]);
         telemetry.addLine() .addData("Articulation", () -> robot.getArticulation());
-        telemetry.addLine().addData("elbowC", () -> robot.crane.getElbowCurrentPos());
-        telemetry.addLine().addData("elbowT", () -> robot.crane.getElbowTargetPos());
-        telemetry.addLine().addData("liftPos", () -> robot.crane.getExtendABobCurrentPos());
+        telemetry.addLine().addData("elbow Current Position", () -> robot.crane.getElbowCurrentPos());
+        telemetry.addLine().addData("elbow Target Position", () -> robot.crane.getElbowTargetPos());
+        telemetry.addLine().addData("Extension Current Position", () -> robot.crane.getExtendABobCurrentPos());
+        telemetry.addLine().addData("Extension Target Position", () -> robot.crane.getExtendABobTargetPos());
         telemetry.addLine()  .addData("chassis heading", () -> robot.getHeading());
         telemetry.addLine()  .addData("chassis ticks left", () -> robot.getLeftMotorTicks());
         telemetry.addLine()  .addData("chassis ticks right", () -> robot.getRightMotorTicks());
