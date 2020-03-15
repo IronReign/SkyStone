@@ -656,8 +656,11 @@ public class Crane {
     private void setExtendABobTargetPos(int pos){
         extendABobPos = Math.min(Math.max(pos, extendMin),extendMax);
     }
+    private void setExtendABobTargetPosUnsafe(int pos){
+        extendABobPos = Math.min(Math.max(pos, 0),extendMax);
+    }
 
-    public void setExtendABobTargetPosNoCap(int pos){
+    public void setExtendABobTargetPosUnsafeReally(int pos){
         extendABobPos = pos;
     }
 
@@ -775,6 +778,14 @@ public class Crane {
         }
         return false;
     }
+    public boolean extendToPositionUnsafe(int position, double speed){
+        setExtendABobPwr(speed);
+        setExtendABobTargetPosUnsafeReally(position);
+        if((Math.abs(getExtendABobCurrentPos()-getExtendABobTargetPos()))<15){
+            return true;
+        }
+        return false;
+    }
     public boolean extendToMax(){
         return extendToMax(extendABobPwr, 15);
     }
@@ -846,7 +857,7 @@ public class Crane {
     }
 
     public void adjustBeltNoCap(double speed){
-        setExtendABobTargetPosNoCap(getExtendABobCurrentPos() + (int)(250 * speed));
+        setExtendABobTargetPosUnsafeReally(getExtendABobCurrentPos() + (int)(250 * speed));
     }
 
     public void runToAngle(double angle){

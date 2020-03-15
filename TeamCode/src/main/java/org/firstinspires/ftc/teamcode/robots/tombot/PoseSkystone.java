@@ -793,44 +793,50 @@ public class PoseSkystone {
         return false;
     }
 
-    int cailibrateOtherStage = 0;
+    int calibrateOtherStage = 0;
 
     public boolean calibratePartTwo() {
-        switch (cailibrateOtherStage) {
+        switch (calibrateOtherStage) {
             case 0:
                 setZeroHeading();
                 miniTimer = futureTime(0.2f);
-                cailibrateOtherStage++;
+                calibrateOtherStage++;
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
                     if (!isBlue) {
                         if (turret.rotateIMUTurret(270.0, 2))
-                            cailibrateOtherStage++;
+                            calibrateOtherStage++;
                     } else {
                         if (turret.rotateIMUTurret(90.0, 2))
-                            cailibrateOtherStage++;
+                            calibrateOtherStage++;
                     }
                 }
                 break;
             case 2:
                 if(!isBlue) {
                     if (rotateIMU(270, 6.0)) {
-                        if(crane.setElbowTargetPos(474, 1.0)) {
-                            cailibrateOtherStage = 0;
+                        if(crane.setElbowTargetPos(460, 1.0)) {
+                            calibrateOtherStage++;
                             return true;
                         }
                     }
                 }
                 else{
                     if (rotateIMU(90, 6.0)) {
-                        if(crane.setElbowTargetPos(474, 1.0)) {
-                            cailibrateOtherStage = 0;
+                        if(crane.setElbowTargetPos(460, 1.0)) {
+                            calibrateOtherStage++;
                             return true;
                         }
                     }
                 }
                 break;
+            case 3:
+                ///todo: DANGER - we are temporarily overriding extendMin so the robat can fully retract to a start-legal position Onece the opmode goes active it is very important that extendMin gets reset to 320
+                if(crane.extendToPositionUnsafe(0, 1)) {
+                    calibrateOtherStage = 0;
+                    return true;
+                }
         }
         return false;
     }
