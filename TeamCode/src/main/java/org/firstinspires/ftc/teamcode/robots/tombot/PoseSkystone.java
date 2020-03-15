@@ -816,14 +816,18 @@ public class PoseSkystone {
             case 2:
                 if(!isBlue) {
                     if (rotateIMU(270, 6.0)) {
-                        cailibrateOtherStage = 0;
-                        return true;
+                        if(crane.setElbowTargetPos(474, 1.0)) {
+                            cailibrateOtherStage = 0;
+                            return true;
+                        }
                     }
                 }
                 else{
                     if (rotateIMU(90, 6.0)) {
-                        cailibrateOtherStage = 0;
-                        return true;
+                        if(crane.setElbowTargetPos(474, 1.0)) {
+                            cailibrateOtherStage = 0;
+                            return true;
+                        }
                     }
                 }
                 break;

@@ -20,6 +20,11 @@ public class Autonomous {
     private Telemetry telemetry;
     private Gamepad gamepad1;
 
+    public static int sampleExtendMiddle = 2210;
+    public static int sampleExtendLeft = 2200;
+    public static int sampleExtendRight = 2200;
+    public static boolean sampleContinue = false;
+
     // vision-related configuration
     public SkystoneVisionProvider vp;
     public int visionProviderState = 2;
@@ -92,6 +97,7 @@ public class Autonomous {
         robot.driveMixerDiffSteer(0.25, 0.25);
         return false;
     }).build();
+
 
     public StateMachine AutoFull = getStateMachine(autoStage)
             // open and align gripper for 1st skystone
@@ -232,6 +238,36 @@ public class Autonomous {
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
+            // open and align gripper for 1st skystone
+            .addSingleState(() -> robot.crane.hookOn()) // makes sure the hook is down properly
+            .addState(() -> robot.isBlue ?
+                    robot.turret.rotateIMUTurret(90,3) :
+                    robot.turret.rotateIMUTurret(270,3))
+            .addState(() -> (robot.crane.setElbowTargetPos(600, 1)))
+            .addTimedState(3f, () -> sample(),  () -> telemetry.addData("DELAY", "DONE"))
+            .addState(() -> robot.crane.toggleGripper())
+            .addSingleState(() -> robot.crane.hookOff()) // makes sure the hook is down properly
+            .addState(() -> robot.crane.setGripperSwivelRotation(robot.crane.swivel_Front-100))
+            .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
+
+            // adjust turret if needed to point to correct stone
+            .addMineralState(skystoneStateProvider,
+                    () -> robot.turret.rotateIMUTurret(260, 2),
+                    () -> true,
+                    () -> robot.turret.rotateIMUTurret(285, 2))
+
+            .addMineralState(skystoneStateProvider,
+                    () -> robot.crane.setGripperSwivelRotation(1450),
+                    () -> true,
+                    () -> robot.crane.setGripperSwivelRotation(1700))
+
+            .addMineralState(skystoneStateProvider,
+                    () -> {robot.crane.extendToPosition(sampleExtendLeft, 1); return sampleContinue; },
+                    () -> {robot.crane.extendToPosition(sampleExtendMiddle, 1); return sampleContinue;},
+                    () -> {robot.crane.extendToPosition(sampleExtendRight, 1); return sampleContinue; })
+            // drop and snap gripper
+            .addState(() -> robot.crane.setElbowTargetPos(30, 1))
+            .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

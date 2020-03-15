@@ -821,7 +821,7 @@ public class Crane {
             speed *= .8;
         if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .5;
-        setElbowTargetPos(getElbowCurrentPos() + (int)(200 * speed));
+        setElbowTargetPos(getElbowCurrentPos() + (int)(150 * speed));
 
 
     }
@@ -842,7 +842,7 @@ public class Crane {
     }
 
     public void adjustBelt(double speed){
-        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(250 * speed));
+        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(200 * speed));
     }
 
     public void adjustBeltNoCap(double speed){
