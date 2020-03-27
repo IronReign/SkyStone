@@ -815,18 +815,16 @@ public class PoseSkystone {
                 break;
             case 2:
                 if(!isBlue) {
-                    if (rotateIMU(270, 6.0)) {
+                    if (rotateIMU(270, 2.0)) {
                         if(crane.setElbowTargetPos(460, 1.0)) {
                             calibrateOtherStage++;
-                            return true;
                         }
                     }
                 }
                 else{
-                    if (rotateIMU(90, 6.0)) {
+                    if (rotateIMU(90, 2.0)) {
                         if(crane.setElbowTargetPos(460, 1.0)) {
                             calibrateOtherStage++;
-                            return true;
                         }
                     }
                 }
@@ -834,6 +832,7 @@ public class PoseSkystone {
             case 3:
                 ///todo: DANGER - we are temporarily overriding extendMin so the robat can fully retract to a start-legal position Onece the opmode goes active it is very important that extendMin gets reset to 320
                 if(crane.extendToPositionUnsafe(0, 1)) {
+                    crane.toggleGripper();
                     calibrateOtherStage = 0;
                     return true;
                 }
