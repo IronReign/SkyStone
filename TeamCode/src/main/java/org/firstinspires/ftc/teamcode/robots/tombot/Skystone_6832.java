@@ -691,7 +691,8 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.y, y, 2)) {
-            robot.crane.toggleSwivel();
+//            robot.crane.toggleSwivel();
+            robot.crane.setGripperSwivelRotation(robot.crane.swivel_Front);
         }
 
         if (toggleAllowed(gamepad2.x, x, 2)) {
@@ -711,13 +712,14 @@ public class Skystone_6832 extends LinearOpMode {
         }
 
         if (toggleAllowed(gamepad2.dpad_up, dpad_up, 2)) {
-            robot.crane.setElbowTargetPos(250,1);
-            robot.crane.extendToPosition(2000, 1.0);
+            robot.crane.setElbowTargetPos(2501,1);
+            robot.crane.extendToPosition(1500, 1.0);
+
         }
 
         if (toggleAllowed(gamepad2.dpad_down, dpad_down, 2)) {
-            robot.crane.setElbowTargetPos(2501,1);
-            robot.crane.extendToPosition(1500, 1.0);
+            robot.crane.setElbowTargetPos(350,1);
+            robot.crane.extendToPosition(1200, 1.0);
         }
 
         if (toggleAllowed(gamepad2.dpad_left, dpad_left, 2)) {

@@ -20,6 +20,11 @@ public class Autonomous {
     private Telemetry telemetry;
     private Gamepad gamepad1;
 
+    public static int sampleExtendMiddle = 2210;
+    public static int sampleExtendLeft = 2200;
+    public static int sampleExtendRight = 2200;
+    public static boolean sampleContinue = false;
+
     // vision-related configuration
     public SkystoneVisionProvider vp;
     public int visionProviderState = 2;
@@ -93,18 +98,19 @@ public class Autonomous {
         return false;
     }).build();
 
+
     public StateMachine AutoFull = getStateMachine(autoStage)
             // open and align gripper for 1st skystone
             .addSingleState(() -> robot.crane.hookOn()) // makes sure the hook is down properly
             .addState(() -> robot.isBlue ?
                     robot.turret.rotateIMUTurret(90,3) :
                     robot.turret.rotateIMUTurret(270,3))
-            .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(600, 1)))
             .addTimedState(3f, () -> sample(),  () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.crane.toggleGripper())
             .addSingleState(() -> robot.crane.hookOff()) // makes sure the hook is down properly
             .addState(() -> robot.crane.setGripperSwivelRotation(robot.crane.swivel_Front-100))
-            .addState(() -> (robot.crane.setElbowTargetPos(350, 1)))
+            .addState(() -> (robot.crane.setElbowTargetPos(500, 1)))
 
             // adjust turret if needed to point to correct stone
             .addMineralState(skystoneStateProvider,
@@ -123,7 +129,7 @@ public class Autonomous {
                     () -> robot.crane.extendToPosition(2200, 1))
 
             // drop and snap gripper
-            .addState(() -> robot.crane.setElbowTargetPos(0, 1))
+            .addState(() -> robot.crane.setElbowTargetPos(30, 1))
             .addTimedState(.5f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
 
             .addState(() -> robot.crane.setElbowTargetPos(30, 1))
@@ -201,6 +207,7 @@ public class Autonomous {
             // drive to and hook onto foundation
             
             //.addState(() -> (robot.driveIMUUntilDistanceWithReset(.3, 0, true, .35)))
+
             .addTimedState(.4f, () -> telemetry.addData("DELAY", "STARTED"), () -> telemetry.addData("DELAY", "DONE"))
             .addState(() -> robot.isBlue ?
                     robot.rotateIMU(90,3) :
@@ -232,6 +239,8 @@ public class Autonomous {
             .build();
 
     public StateMachine autoMethodTesterTool = getStateMachine(autoStage) // I do actually use this, do not delete
+            .addState(() -> robot.crane.setGripperSwivelRotation(robot.crane.swivel_Right90))
+            .addSingleState(() -> robot.articulate(PoseSkystone.Articulation.autoRotateToFaceStone))
             .build();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
