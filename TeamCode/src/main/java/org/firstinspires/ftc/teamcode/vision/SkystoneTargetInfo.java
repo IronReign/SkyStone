@@ -10,7 +10,10 @@ public class SkystoneTargetInfo {
     double height;
     double errorX;
     double errorY;
+    double aspectRatio;
+    double stackHeight;
     boolean finished = false;
+
 
     public SkystoneTargetInfo() {
         quarryPosition = StonePos.NONE_FOUND;
@@ -35,4 +38,12 @@ public class SkystoneTargetInfo {
     public void setQuarryPosition(StonePos quarryPosition) {
         this.quarryPosition = quarryPosition;
     }
+
+    public double getAspectRatio() { return aspectRatio; }
+
+    public void setAspectRatio(double aspectRatio) {this.aspectRatio = aspectRatio;}
+
+    public double getStackHeight() { return stackHeight;}
+
+    public void setStackHeight(int stackHeight) { this.stackHeight = stackHeight; }
 }
