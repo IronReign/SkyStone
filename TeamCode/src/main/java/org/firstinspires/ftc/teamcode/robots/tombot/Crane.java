@@ -85,10 +85,10 @@ public class Crane {
     public int pos_reverseSafeDrive;
     public int pos_PartialDeposit;
     public int pos_SafeDrive;
-    public int swivel_Right90;
+    public  int swivel_Right90;
     public int swivel_Calibrate;
-    public static int swivel_Front;
-    public int swivel_Left90;
+    public int swivel_Front;
+    public  int swivel_Left90;
     public int swivel_left_Block;
     public int swivel_Right_Block;
     private boolean gripperState;
