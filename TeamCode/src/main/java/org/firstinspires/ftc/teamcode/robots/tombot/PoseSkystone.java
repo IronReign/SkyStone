@@ -1038,7 +1038,11 @@ public class PoseSkystone {
     public boolean RotateToFaceStone(){
         switch(RotateToFaceStoneStage) {
             case 0:
-                crane.setElbowTargetPos(250,.5);
+                if (isBlue)
+                    crane.setGripperSwivelRotation(crane.swivel_left_Block);
+                else
+                    crane.setGripperSwivelRotation(crane.swivel_Right_Block);
+                crane.setElbowTargetPos(270,.5);
                 crane.extendToPosition(1100,.5);
                 RotateToFaceStoneStage++;
                 break;
@@ -1051,7 +1055,7 @@ public class PoseSkystone {
             case 2:
                 crane.setElbowTargetPos(50, .5);
                 if (System.nanoTime() >= miniTimer) {
-                    crane.setElbowTargetPos(250,.5);
+                    crane.setElbowTargetPos(300,.5);
                     RotateToFaceStoneStage = 0;
                     return true;
                 }
