@@ -150,6 +150,7 @@ public class PoseSkystone {
     private int craneArticulation = 0;
 
     // vision related
+    public SkystoneGripPipeline pipeline;
     public TowerHeightPipeline towerHeightPipeline;
 
     public enum MoveMode {
@@ -168,17 +169,15 @@ public class PoseSkystone {
         autoGrab,
         bridgeTransit,
         extendToTowerHeightArticulation,
-        autoExtendToTowerHeight,
-        autoAlign,
+        autoExtendToTowerHeightArticulation,
+        autoAlignArticulation,
         retractFromTower,
         retrieveStone,
         cardinalBaseRight,
         cardinalBaseLeft,
         shootOut,
         shootOutII,
-        recockGripper,
-        alignGripperForwardFacing,
-        alignGripperDownFacing;
+        recockGripper;
     }
 
     public enum RobotType {
@@ -361,6 +360,17 @@ public class PoseSkystone {
 
         imu = hwMap.get(BNO055IMU.class, "baseIMU");
         imu.initialize(parametersIMU);
+
+        // initialize vision
+
+//        VuforiaLocalizer vuforia;
+//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+//        parameters.vuforiaLicenseKey = RC.VUFORIA_LICENSE_KEY;
+//        parameters.cameraName = hwMap.get(WebcamName.class, "Webcam 1");
+//        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+//        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+//        vuforia.setFrameQueueCapacity(1);
+//        towerHeightPipeline = new TowerHeightPipeline(hwMap, vuforia);
 
         // dashboard
         dashboard = FtcDashboard.getInstance();
@@ -714,26 +724,16 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
-            case autoExtendToTowerHeight:
+            case autoExtendToTowerHeightArticulation:
                 if (autoExtendToTowerHeightArticulation()) {
                     articulation = Articulation.manual;
                 }
                 break;
-            case autoAlign:
+            case autoAlignArticulation:
                 if(autoAlignArticulation()) {
                     articulation = Articulation.manual;
                 }
                 break;
-            case alignGripperDownFacing:
-                if(crane.alignGripperDownFacing()) {
-                    articulation = Articulation.manual;
-                }
-                break;
-            case alignGripperForwardFacing:
-                if(crane.alignGripperForwardFacing()) {
-                    articulation = Articulation.manual;
-                }
-                 break;
             case shootOut:
                 if (shootOut()) {
                     articulation = Articulation.manual;
@@ -1009,44 +1009,78 @@ public class PoseSkystone {
     }
 
     public boolean autoExtendToTowerHeightArticulation() {
-//        Mat mat = towerHeightPipeline.process();
-//        if(mat != null) {
-//            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
-//            Utils.matToBitmap(mat, bm);
-//            dashboard.sendImage(bm);
-//
-//            TelemetryPacket packet = new TelemetryPacket();
-//            packet.put("stack height", towerHeightPipeline.blocks);
-//            packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
-//            dashboard.sendTelemetryPacket(packet);
-//        }
-//        crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
+        Mat mat = towerHeightPipeline.process();
+        if(mat != null) {
+            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(mat, bm);
+            dashboard.sendImage(bm);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("stack height", towerHeightPipeline.blocks);
+            packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
+            dashboard.sendTelemetryPacket(packet);
+        }
+        crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
         return true;
     }
 
-    public boolean autoAlignArticulation() {
+    public Mat towerHeightPipelineProcess() {
+        Mat mat = towerHeightPipeline.process();
+        int error = 0;
+        if(mat != null) {
+            error = towerHeightPipeline.x - mat.width() / 2;
+            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(mat, bm);
+            dashboard.sendImage(bm);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("x", towerHeightPipeline.x);
+            packet.put("error", error);
+            dashboard.sendTelemetryPacket(packet);
+        }
+        return mat;
+    }
+
+//    public boolean autoAlignArticulation() {
 //        Mat mat = towerHeightPipelineProcess();
-//        if(mat == null)
-//            return false;
 //
-//        switch(autoAlignStage) {
-//            case 0:
-//                alignPID.setSetpoint(mat.width() / 2.0);
-//                alignPID.setOutputRange(-0.5, 0.5);
-//                alignPID.setTolerance(0.05);
-//                alignPID.enable();
-//                autoAlignStage++;
-//                break;
-//            case 1:
-//                if(!alignPID.onTarget()) {
-//                    alignPID.setInput(towerHeightPipeline.x);
-//                    driveMixerDiffSteer(-alignPID.performPID(), 0);
-//                    break;
-//                } else {
-//                    driveMixerDiffSteer(0, 0);
-//                    return true;
-//                }
+//        alignPID.setSetpoint(mat.width() / 2.0);
+//        alignPID.setOutputRange(-0.5, 0.5);
+//        alignPID.setTolerance(0.05);
+//        alignPID.enable();
+//
+//        while(!alignPID.onTarget()) {
+//            alignPID.setInput(towerHeightPipeline.x);
+//            driveMixerDiffSteer(alignPID.performPID(), 0);
+//            towerHeightPipeline.process();
+//            towerHeightPipelineProcess();
 //        }
+//        return true;
+//    }
+
+    public boolean autoAlignArticulation() {
+        Mat mat = towerHeightPipelineProcess();
+        if(mat == null)
+            return false;
+
+        switch(autoAlignStage) {
+            case 0:
+                alignPID.setSetpoint(mat.width() / 2.0);
+                alignPID.setOutputRange(-0.5, 0.5);
+                alignPID.setTolerance(0.05);
+                alignPID.enable();
+                autoAlignStage++;
+                break;
+            case 1:
+                if(!alignPID.onTarget()) {
+                    alignPID.setInput(towerHeightPipeline.x);
+                    driveMixerDiffSteer(-alignPID.performPID(), 0);
+                    break;
+                } else {
+                    driveMixerDiffSteer(0, 0);
+                    return true;
+                }
+        }
         return false;
     }
 

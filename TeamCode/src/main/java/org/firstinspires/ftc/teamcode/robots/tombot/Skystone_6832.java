@@ -560,6 +560,7 @@ public class Skystone_6832 extends LinearOpMode {
         }
         if (toggleAllowed(gamepad1.a, a, 1)) {
             // robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
+            Mat mat = robot.towerHeightPipeline.process();
 
         }
         if (toggleAllowed(gamepad1.dpad_right, dpad_right, 1)) {
@@ -639,8 +640,7 @@ public class Skystone_6832 extends LinearOpMode {
 
         if (toggleAllowed(gamepad1.a, a, 1)) {
 //            robot.articulate(PoseSkystone.Articulation.autoExtendToTowerHeightArticulation);
-            robot.articulate(PoseSkystone.Articulation.autoAlign
-            );
+            robot.articulate(PoseSkystone.Articulation.autoAlignArticulation);
 
         }
 
