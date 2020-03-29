@@ -424,7 +424,7 @@ public class Crane {
 
 
         double stoneDistMax = .8; //beyond this distance we should assume we are not trying to do anything
-        double stoneTriggerDist = .13; //what is the typical trigger distance to yoink the stone
+        double stoneTriggerDist = .22; //what is the typical trigger distance to yoink the stone - previously .13
 
         if (gripLeftDist > stoneDistMax || gripRightDist > stoneDistMax)
             return false; // we are too far away on one sensor or the other
