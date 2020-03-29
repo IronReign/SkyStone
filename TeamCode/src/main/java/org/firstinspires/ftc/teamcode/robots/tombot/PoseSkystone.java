@@ -114,15 +114,14 @@ public class PoseSkystone {
                                   // minimech will be different
     private double poseX;
     private double poseY;
-    private static double poseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading
-                                       // when strafing
+    private static double poseHeading; // current heading in degrees. Might be rotated by 90 degrees from imu's heading when strafing
     private double poseHeadingRad; // current heading converted to radians
     private double poseSpeed;
     private double posePitch;
     private double poseRoll;
     private long timeStamp; // timestamp of last update
     private static boolean initialized = false;
-    public double offsetHeading;
+    public  double offsetHeading;
     private double offsetPitch;
     private double offsetRoll;
 
@@ -159,13 +158,27 @@ public class PoseSkystone {
 
     protected MoveMode moveMode;
 
-    public enum Articulation { // serves as a desired robot articulation which may include related complex
-                               // movements of the elbow, lift and supermanLeft
-        calibratePartOne, calibratePartTwo, calibrateBasic, inprogress, // currently in progress to a final articulation
+    public enum Articulation { // serves as a desired robot articulation which may include related complex movements of the elbow, lift and supermanLeft
+        calibratePartOne,
+        calibratePartTwo,
+        calibrateBasic,
+        inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
-        yoinkStone, bridgeTransit, extendToTowerHeightArticulation, autoExtendToTowerHeight, autoAlign,
-        retractFromTower, retrieveStone, cardinalBaseRight, cardinalBaseLeft, shootOut, shootOutII, recockGripper,
-        alignGripperForwardFacing, alignGripperDownFacing;
+        yoinkStone,
+        autoGrab,
+        bridgeTransit,
+        extendToTowerHeightArticulation,
+        autoExtendToTowerHeight,
+        autoAlign,
+        retractFromTower,
+        retrieveStone,
+        cardinalBaseRight,
+        cardinalBaseLeft,
+        shootOut,
+        shootOutII,
+        recockGripper,
+        alignGripperForwardFacing,
+        alignGripperDownFacing;
     }
 
     public enum RobotType {
@@ -261,9 +274,9 @@ public class PoseSkystone {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    //// ////
-    //// Init/Update ////
-    //// ////
+    ////                                                                                  ////
+    ////                                   Init/Update                                    ////
+    ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -332,8 +345,7 @@ public class PoseSkystone {
          * driveRight.setDirection(DcMotorSimple.Direction.FORWARD); }
          */
         // setup subsystems
-        crane = new Crane(elbow, extender, hook, intakeServoFront, intakeServoBack, gripperSwivel, gripperLeft,
-                gripperRight);
+        crane = new Crane(elbow, extender, hook, intakeServoFront, intakeServoBack, gripperSwivel,gripperLeft,gripperRight);
         turretIMU = hwMap.get(BNO055IMU.class, "turretIMU");
         turret = new Turret(turretMotor, turretIMU);
         ledSystem = new LEDSystem(blinkin);
@@ -511,15 +523,14 @@ public class PoseSkystone {
         if (!driveIMUDistanceInitialzed) {
             resetMotors(false);
         }
-        return driveIMUDistance(pwr, targetAngle, forward, targetMeters);
+        return driveIMUDistance(pwr,  targetAngle,  forward,  targetMeters);
     }
 
-    public boolean driveIMUUntilDistanceWithReset(double pwr, double targetAngle, boolean forward,
-            double targetMeters) {
+    public boolean driveIMUUntilDistanceWithReset(double pwr, double targetAngle, boolean forward, double targetMeters) {
         if (!driveIMUDistanceInitialzed) {
             resetMotors(false);
         }
-        return driveIMUUntilDistance(pwr, targetAngle, forward, targetMeters);
+        return driveIMUUntilDistance(pwr,  targetAngle,  forward,  targetMeters);
     }
 
     /**
@@ -692,6 +703,12 @@ public class PoseSkystone {
                     articulation = Articulation.manual;
                 }
                 break;
+            case autoGrab: // todo: fixup comments for deploy actions - moved stuff around
+                // auton initial hang at the beginning of a match
+                if (autoPickStone()) {
+                    articulation = Articulation.manual;
+                }
+                break;
             case extendToTowerHeightArticulation:
                 if (extendToTowerHeightArticulation()) {
                     articulation = Articulation.manual;
@@ -703,15 +720,20 @@ public class PoseSkystone {
                 }
                 break;
             case autoAlign:
-                if (autoAlignArticulation()) {
+                if(autoAlignArticulation()) {
                     articulation = Articulation.manual;
                 }
                 break;
-            case autoRotateToFaceStone:
-                if (RotateToFaceStone()) {
+            case alignGripperDownFacing:
+                if(crane.alignGripperDownFacing()) {
                     articulation = Articulation.manual;
                 }
                 break;
+            case alignGripperForwardFacing:
+                if(crane.alignGripperForwardFacing()) {
+                    articulation = Articulation.manual;
+                }
+                 break;
             case shootOut:
                 if (shootOut()) {
                     articulation = Articulation.manual;
@@ -766,55 +788,45 @@ public class PoseSkystone {
                 break;
             case 1:
                 calibrateStage = 0;
-                return true;// no break needed -- it would be unreachable
+                return true;//no break needed -- it would be unreachable
         }
         return false;
     }
 
-    int calibrateOtherStage = 0;
+    int cailibrateOtherStage = 0;
 
     public boolean calibratePartTwo() {
-        switch (calibrateOtherStage) {
+        switch (cailibrateOtherStage) {
             case 0:
                 setZeroHeading();
                 miniTimer = futureTime(0.2f);
-                calibrateOtherStage++;
+                cailibrateOtherStage++;
                 break;
             case 1:
                 if (System.nanoTime() >= miniTimer) {
                     if (!isBlue) {
                         if (turret.rotateIMUTurret(270.0, 2))
-                            calibrateOtherStage++;
+                            cailibrateOtherStage++;
                     } else {
                         if (turret.rotateIMUTurret(90.0, 2))
-                            calibrateOtherStage++;
+                            cailibrateOtherStage++;
                     }
                 }
                 break;
             case 2:
-                if (!isBlue) {
-                    if (rotateIMU(270, 2.0)) {
-                        if (crane.setElbowTargetPos(460, 1.0)) {
-                            calibrateOtherStage++;
-                        }
+                if(!isBlue) {
+                    if (rotateIMU(270, 6.0)) {
+                        cailibrateOtherStage = 0;
+                        return true;
                     }
-                } else {
-                    if (rotateIMU(90, 2.0)) {
-                        if (crane.setElbowTargetPos(460, 1.0)) {
-                            calibrateOtherStage++;
-                        }
+                }
+                else{
+                    if (rotateIMU(90, 6.0)) {
+                        cailibrateOtherStage = 0;
+                        return true;
                     }
                 }
                 break;
-            case 3:
-                /// todo: DANGER - we are temporarily overriding extendMin so the robat can
-                /// fully retract to a start-legal position Onece the opmode goes active it is
-                /// very important that extendMin gets reset to 320
-                if (crane.extendToPositionUnsafe(0, 1)) {
-                    crane.toggleGripper();
-                    calibrateOtherStage = 0;
-                    return true;
-                }
         }
         return false;
     }
@@ -843,6 +855,7 @@ public class PoseSkystone {
 
     }
 
+
     public boolean calibrateBasic() {
         setZeroHeading();
         return true;
@@ -868,6 +881,7 @@ public class PoseSkystone {
         return false;
     }
 
+
     // todo these need to be tested - those that are used in articulate() have
     // probably been fixed up by now
     double retrieveTimer;
@@ -876,30 +890,28 @@ public class PoseSkystone {
         switch (craneArticulation) {
             case 0:
                 if (crane.getElbowCurrentPos() < crane.elbowMid)
-                    crane.setElbowTargetPos(crane.elbowMid, 1); // make sure were not dragging the stone across the
-                                                                // floor
+                    crane.setElbowTargetPos(crane.elbowMid, 1); //make sure were not dragging the stone across the floor
                 crane.setGripperSwivelRotation(crane.swivel_Front);
-                crane.extendToPosition(crane.extensionBridgeTransit, 1.0); // gets it in very close so we don't strain
-                                                                           // the arm
+                crane.extendToPosition(crane.extendMin, 1.0); //gets it in very close so we don't strain the arm
                 retrieveTimer = futureTime(1);
                 craneArticulation++;
                 break;
             case 1:
                 if (System.nanoTime() >= retrieveTimer) {
-                    turret.setPower(.2); // this is so that the turret doesn't yeet the block while turning
-                    if (endsAtNorth)
-                        turret.setTurntableAngle(0.0); // faces the north
+                    turret.setPower(.4); //this is so that the turret doesn't yeet the block while turning
+                    if(endsAtNorth)
+                        turret.setTurntableAngle(0.0); //faces the north
                     else
-                        turret.setTurntableAngle(180.0); // faces the south
+                        turret.setTurntableAngle(180.0); //faces the south
                     craneArticulation++;
                     retrieveTimer = futureTime(1);
-                    turret.setPower(1); // sets the turret power back
+                    turret.setPower(1); //sets the turret power back
 
                 }
                 break;
             case 2:
                 if (System.nanoTime() >= retrieveTimer) {
-                    crane.setElbowTargetPos(crane.elbowBrigeTransit, 1); // sets it down for transition to base
+                    crane.setElbowTargetPos(10, 1); //sets it down for transition to base
                     craneArticulation = 0;
                     return true;
                 }
@@ -915,7 +927,7 @@ public class PoseSkystone {
                                   // already
         switch (yoinkStage) {
             case 0:
-                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, .5)) {
+                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, 1)) {
                     yoinkStage++;
                 }
 
@@ -932,78 +944,109 @@ public class PoseSkystone {
         return false;
     }
 
+    private int autoPickUpStage = 0;
+    private double voltageBefore = 0.0; // todo- check that the farther you get out makes it larger, if not then I need
+                                        // to relace this with a larger number and subtract one a bit lower when
+                                        // checking for height difference
+    private boolean rightWasFirst = false;
+    private int lastRotationSet = 1500;
+
+    public boolean autoPickStone() { // this goes down and grabs the block
+        switch (autoPickUpStage) {
+            case 0:
+                if (crane.setElbowTargetPos(ticksTheElbowShouldGoBasedOnVoltageReading, .6)) { // put the elbow in the
+                                                                                               // correct place
+                    autoPickUpStage++;
+                }
+                break;
+            case 1:
+                if (crane.getExtendABobCurrentPos() == crane.extendMax)
+                    return false;
+                if (crane.extendToPosition(crane.getExtendABobCurrentPos() + 10, 1)) { // extends out the arm just a
+                                                                                          // bit
+
+                }
+                if (gripperLeft.getVoltage() > voltageBefore + 1.0) { // checks if the left sensor has detected anything
+                    rightWasFirst = false; // so we know later
+                    voltageBefore = 0.0;
+                    autoPickUpStage++;
+                }
+                if (gripperRight.getVoltage() > voltageBefore + 1.0) { // checks if the right sensor has detected
+                                                                       // anything
+                    rightWasFirst = true; // so we know later
+                    voltageBefore = 0.0;
+                    autoPickUpStage++;
+                }
+                break;
+            case 3:
+                if (rightWasFirst) {
+                    gripperSwivel.setPosition(lastRotationSet + 10);// swivels it right
+                    if (gripperLeft.getVoltage() > voltageBefore + 1.0) { // checks for a jump in the reading
+                        gripperSwivel.setPosition(lastRotationSet - 10);// counteracts the overturn a bit
+                        autoPickUpStage++;
+                    }
+                }
+                if (!rightWasFirst) {
+                    gripperSwivel.setPosition(lastRotationSet - 10);// swivels it right
+                    if (gripperRight.getVoltage() > voltageBefore + 1.0) { // checks for a jump in the reading
+                        gripperSwivel.setPosition(lastRotationSet + 10);// counteracts the overturn a bit
+                        autoPickUpStage++;
+                    }
+                }
+            case 4:
+                articulate(Articulation.yoinkStone); // grabs the stone
+                autoPickUpStage = 0;
+                return true;
+        }
+        return false;
+    }
+
+
+
     public boolean extendToTowerHeightArticulation() {
         crane.extendToTowerHeight();
         return true;
     }
 
     public boolean autoExtendToTowerHeightArticulation() {
-        // Mat mat = towerHeightPipeline.process();
-        // if(mat != null) {
-        // Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(),
-        // Bitmap.Config.RGB_565);
-        // Utils.matToBitmap(mat, bm);
-        // dashboard.sendImage(bm);
-        //
-        // TelemetryPacket packet = new TelemetryPacket();
-        // packet.put("stack height", towerHeightPipeline.blocks);
-        // packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
-        // dashboard.sendTelemetryPacket(packet);
-        // }
-        // crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
+//        Mat mat = towerHeightPipeline.process();
+//        if(mat != null) {
+//            Bitmap bm = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.RGB_565);
+//            Utils.matToBitmap(mat, bm);
+//            dashboard.sendImage(bm);
+//
+//            TelemetryPacket packet = new TelemetryPacket();
+//            packet.put("stack height", towerHeightPipeline.blocks);
+//            packet.put("aspect ratio", towerHeightPipeline.aspectRatio);
+//            dashboard.sendTelemetryPacket(packet);
+//        }
+//        crane.extendToTowerHeight(getDistForwardDist(), towerHeightPipeline.blocks);
         return true;
     }
 
     public boolean autoAlignArticulation() {
-        // Mat mat = towerHeightPipelineProcess();
-        // if(mat == null)
-        // return false;
-        //
-        // switch(autoAlignStage) {
-        // case 0:
-        // alignPID.setSetpoint(mat.width() / 2.0);
-        // alignPID.setOutputRange(-0.5, 0.5);
-        // alignPID.setTolerance(0.05);
-        // alignPID.enable();
-        // autoAlignStage++;
-        // break;
-        // case 1:
-        // if(!alignPID.onTarget()) {
-        // alignPID.setInput(towerHeightPipeline.x);
-        // driveMixerDiffSteer(-alignPID.performPID(), 0);
-        // break;
-        // } else {
-        // driveMixerDiffSteer(0, 0);
-        // return true;
-        // }
-        // }
-        return false;
-    }
-
-    int RotateToFaceStoneStage = 0;
-
-    public boolean RotateToFaceStone() {
-        switch (RotateToFaceStoneStage) {
-            case 0:
-                crane.setElbowTargetPos(250, .5);
-                crane.extendToPosition(1100, .5);
-                RotateToFaceStoneStage++;
-                break;
-            case 1:
-                if (turret.rotateUntil(!isBlue, crane.alignGripperForwardFacing())) {
-                    miniTimer = futureTime(2);
-                    RotateToFaceStoneStage++;
-                }
-                break;
-            case 2:
-                crane.setElbowTargetPos(50, .5);
-                if (System.nanoTime() >= miniTimer) {
-                    crane.setElbowTargetPos(250, .5);
-                    RotateToFaceStoneStage = 0;
-                    return true;
-                }
-                break;
-        }
+//        Mat mat = towerHeightPipelineProcess();
+//        if(mat == null)
+//            return false;
+//
+//        switch(autoAlignStage) {
+//            case 0:
+//                alignPID.setSetpoint(mat.width() / 2.0);
+//                alignPID.setOutputRange(-0.5, 0.5);
+//                alignPID.setTolerance(0.05);
+//                alignPID.enable();
+//                autoAlignStage++;
+//                break;
+//            case 1:
+//                if(!alignPID.onTarget()) {
+//                    alignPID.setInput(towerHeightPipeline.x);
+//                    driveMixerDiffSteer(-alignPID.performPID(), 0);
+//                    break;
+//                } else {
+//                    driveMixerDiffSteer(0, 0);
+//                    return true;
+//                }
+//        }
         return false;
     }
 
@@ -1075,14 +1118,14 @@ public class PoseSkystone {
             case (2):
 
                 if (System.nanoTime() >= retractTimer) {
-                    if (retrieveStone(false)) {
+                    if(retrieveStone(false)) {
                         miniStateRetTow++;
                     }
                 }
 
                 break;
             case (3):
-                // articulate(Articulation.cardinalBaseLeft);
+                //articulate(Articulation.cardinalBaseLeft);
                 miniStateRetTow = 0;
                 return true;
         }
@@ -1186,9 +1229,9 @@ public class PoseSkystone {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    //// ////
-    //// Platform Movements ////
-    //// ////
+    ////                                                                                  ////
+    ////                                Platform Movements                                ////
+    ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1228,9 +1271,9 @@ public class PoseSkystone {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    //// ////
-    //// Drive Platform Mixing Methods ////
-    //// ////
+    ////                                                                                  ////
+    ////                           Drive Platform Mixing Methods                          ////
+    ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1349,9 +1392,9 @@ public class PoseSkystone {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    //// ////
-    //// Drive Platform Differential Mixing Methods ////
-    //// ////
+    ////                                                                                  ////
+    ////                   Drive Platform Differential Mixing Methods                     ////
+    ////                                                                                  ////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1745,10 +1788,12 @@ public class PoseSkystone {
      * assign the current heading of the robot to alliance setup values
      */
     public void setHeadingAlliance() {
-        if (isBlue) {
+        if(isBlue){
             setHeading(90);
             turret.setHeading(90);
-        } else {
+        }
+        else
+        {
             setHeading(270);
             turret.setHeading(270);
         }

@@ -128,19 +128,10 @@ public class Turret{
         setTurntableAngle(getHeading(), 7.0 * speed);
     }
 
-    public void rotateRight(double speed) {
-        setTurntableAngle(getHeading(), angleIncrement * speed);
-    }
+    public void rotateRight(double speed){
 
-    public boolean rotateUntil(boolean right, boolean otherActionToDoIsDone){
-        if(right && !otherActionToDoIsDone){
-            rotateRight(.5);
-            return false; }
-        else if (!right && !otherActionToDoIsDone){
-            rotateLeft(.5);
-            return false; }
-        else{
-            return true;}
+        setTurntableAngle(getHeading(), angleIncrement * speed);
+
     }
 
     public void rotateLeft(double speed){

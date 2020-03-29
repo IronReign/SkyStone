@@ -85,10 +85,10 @@ public class Crane {
     public int pos_reverseSafeDrive;
     public int pos_PartialDeposit;
     public int pos_SafeDrive;
-    public  int swivel_Right90;
+    public int swivel_Right90;
     public int swivel_Calibrate;
     public int swivel_Front;
-    public  int swivel_Left90;
+    public int swivel_Left90;
     public int swivel_left_Block;
     public int swivel_Right_Block;
     private boolean gripperState;
@@ -121,8 +121,6 @@ public class Crane {
     public  int extendMid;
     public  int extendLow; //clears hook and good for retracting prior to deposit without tipping robot
     public  int extendMin;  //prevent crunching collector tray
-    public  int elbowBrigeTransit;
-    public  int extensionBridgeTransit;
 
     //foundation hook servo values
     public int foundation_hook_up = 1665;
@@ -210,7 +208,7 @@ public class Crane {
 
         swivel_Calibrate = 1200;
         swivel_Right90 = 900;
-        swivel_Front = 1600;
+        swivel_Front = 1500;
         swivel_Left90 = 2100;
         swivel_left_Block = 800;
         swivel_Right_Block= 1000;
@@ -221,8 +219,6 @@ public class Crane {
         extendMid= 980;
         extendLow = 600; //clears foundation grabber at all times
         extendMin = 300;  //prevent crunching foundation grabber
-        elbowBrigeTransit = 230;
-        extensionBridgeTransit = 500;
         gripperState = false;
 
         //PID
@@ -656,11 +652,8 @@ public class Crane {
     private void setExtendABobTargetPos(int pos){
         extendABobPos = Math.min(Math.max(pos, extendMin),extendMax);
     }
-    private void setExtendABobTargetPosUnsafe(int pos){
-        extendABobPos = Math.min(Math.max(pos, 0),extendMax);
-    }
 
-    public void setExtendABobTargetPosUnsafeReally(int pos){
+    public void setExtendABobTargetPosNoCap(int pos){
         extendABobPos = pos;
     }
 
@@ -778,14 +771,6 @@ public class Crane {
         }
         return false;
     }
-    public boolean extendToPositionUnsafe(int position, double speed){
-        setExtendABobPwr(speed);
-        setExtendABobTargetPosUnsafeReally(position);
-        if((Math.abs(getExtendABobCurrentPos()-getExtendABobTargetPos()))<15){
-            return true;
-        }
-        return false;
-    }
     public boolean extendToMax(){
         return extendToMax(extendABobPwr, 15);
     }
@@ -832,7 +817,7 @@ public class Crane {
             speed *= .8;
         if(extendABob.getCurrentPosition() > 1000 && speed < 0 && elbow.getCurrentPosition() > 290)
             speed *= .5;
-        setElbowTargetPos(getElbowCurrentPos() + (int)(150 * speed));
+        setElbowTargetPos(getElbowCurrentPos() + (int)(200 * speed));
 
 
     }
@@ -853,11 +838,11 @@ public class Crane {
     }
 
     public void adjustBelt(double speed){
-        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(200 * speed));
+        setExtendABobTargetPos(getExtendABobCurrentPos() + (int)(250 * speed));
     }
 
     public void adjustBeltNoCap(double speed){
-        setExtendABobTargetPosUnsafeReally(getExtendABobCurrentPos() + (int)(250 * speed));
+        setExtendABobTargetPosNoCap(getExtendABobCurrentPos() + (int)(250 * speed));
     }
 
     public void runToAngle(double angle){
