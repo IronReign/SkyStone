@@ -163,7 +163,7 @@ public class PoseSkystone {
                                // movements of the elbow, lift and supermanLeft
         calibratePartOne, calibratePartTwo, calibrateBasic, inprogress, // currently in progress to a final articulation
         manual, // target positions are all being manually overridden
-        yoinkStone, bridgeTransit, extendToTowerHeightArticulation, autoExtendToTowerHeight, autoAlign, autoRotateToFaceStone,
+        yoinkStone, bridgeTransit, extendToTowerHeightArticulation, autoExtendToTowerHeight, autoAlign,
         retractFromTower, retrieveStone, cardinalBaseRight, cardinalBaseLeft, shootOut, shootOutII, recockGripper,
         alignGripperForwardFacing, alignGripperDownFacing;
     }
@@ -985,7 +985,7 @@ public class PoseSkystone {
     public boolean RotateToFaceStone() {
         switch (RotateToFaceStoneStage) {
             case 0:
-                crane.setElbowTargetPos(280, .5);
+                crane.setElbowTargetPos(250, .5);
                 crane.extendToPosition(1100, .5);
                 RotateToFaceStoneStage++;
                 break;

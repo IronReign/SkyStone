@@ -193,11 +193,21 @@ public class TowerHeightPipeline implements SkystoneVisionProvider {
                 target.height = largestBlob.height;
                 target.aspectRatio = (double) largestBlob.height / largestBlob.width;
 
-                for(int i = 0; i < 7; i++) {
-                    if(isStackingFat ? aspectRatio < ASPECT_RATIOS[i] : aspectRatio < (ASPECT_RATIOS[i] * 2))
-                        target.setStackHeight(i);
-                }
-                if(isStackingFat ? aspectRatio >= ASPECT_RATIOS[6] : aspectRatio >= (ASPECT_RATIOS[6] * 2))
+                if(isStackingFat ? aspectRatio < ASPECT_RATIOS[0] : aspectRatio < (ASPECT_RATIOS[0] * 2))
+                    target.setStackHeight(0);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[1] : aspectRatio < (ASPECT_RATIOS[1] * 2))
+                    target.setStackHeight(1);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[2] : aspectRatio < (ASPECT_RATIOS[2] * 2))
+                    target.setStackHeight(2);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[3] : aspectRatio < (ASPECT_RATIOS[3] * 2))
+                    target.setStackHeight(3);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[4] : aspectRatio < (ASPECT_RATIOS[4] * 2))
+                    target.setStackHeight(4);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[5] : aspectRatio < (ASPECT_RATIOS[5] * 2))
+                    target.setStackHeight(5);
+                else if(isStackingFat ? aspectRatio < ASPECT_RATIOS[6] : aspectRatio < (ASPECT_RATIOS[6] * 2))
+                    target.setStackHeight(6);
+                else
                     target.setStackHeight(7);
 
                 target.confidence = 1;
