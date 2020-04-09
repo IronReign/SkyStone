@@ -817,4 +817,9 @@ public class FtcRobotControllerActivity extends Activity
       wifiMuteStateMachine.consumeEvent(WifiMuteEvent.USER_ACTIVITY);
     }
   }
+    
+    public RobotConfigFileManager getConfigFileManager() {
+    	return cfgFileMgr;
+    }
+    
 }
